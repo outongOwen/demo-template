@@ -10,12 +10,5 @@
   </div>
   <HelloWorld msg="Vite + Vue" />
 </template>
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue';
-const a = document.createElement('div');
-const b = '12323';
-a.innerHTML = '123123123';
-document.body.appendChild(a);
-console.log(a);
-</script>
+<script setup lang="ts"></script>
 <style scoped></style>
