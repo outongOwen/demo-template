@@ -127,6 +127,9 @@ module.exports = {
         ],
         pathGroupsExcludedImportTypes: ['vue', 'vue-router', 'pinia', 'naive-ui']
       }
-    ]
+    ],
+    'no-unused-expressions': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    'class-methods-use-this': 'off'
   }
 };

@@ -1,14 +1,21 @@
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      <div>123213213</div>
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <n-config-provider
+    :theme="theme.naiveTheme"
+    :theme-overrides="theme.naiveThemeOverrides"
+    :locale="zhCN"
+    :date-locale="dateZhCN"
+    class="h-full"
+  >
+    <naive-provider>
+      <router-view />
+    </naive-provider>
+  </n-config-provider>
 </template>
-<script setup lang="ts"></script>
-<style scoped></style>
+
+<script setup lang="ts">
+import { dateZhCN, zhCN } from 'naive-ui';
+import { useThemeStore, subscribeStore } from '@/store';
+
+const theme = useThemeStore();
+subscribeStore();
+</script>

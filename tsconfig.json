@@ -12,9 +12,20 @@
     "resolveJsonModule": true,
     "noUnusedLocals": true,
     "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["./node_modules/@types/", "./types"],
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./src/*"],
+      "#/*": ["./types/*"]
+    },
+    "types": [
+      "vite/client",
+      "node",
+      "unplugin-icons/types/vue",
+      "naive-ui/volar",
+      "unplugin-vue-define-options/macros-global"
+    ]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "exclude": ["node_modules", "dist", "**/*.js", "src/typings/auto-import.d.ts"]
-  // "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["node_modules", "dist"]
 }
