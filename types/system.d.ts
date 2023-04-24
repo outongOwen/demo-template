@@ -14,6 +14,20 @@ declare namespace Theme {
     otherColor: OtherColor;
     /** 是否自定义info的颜色(默认取比主题色深一级的颜色) */
     isCustomizeInfoColor: boolean;
+    /** 布局最小宽度 */
+    layoutMinWidth: number;
+    /** 布局最小高度 */
+    layoutMinHeight: number;
+    /** 头部 */
+    header: {
+      height: number;
+      minWidth: number;
+    };
+    /** 侧边导航 */
+    sliderMenu: {
+      width: number;
+      viewMinWidth: number;
+    };
   }
 
   /** 其他主题颜色 */

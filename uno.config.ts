@@ -40,7 +40,8 @@ export default defineConfig({
     'fixed-center': 'fixed-lt flex-center wh-full',
     'nowrap-hidden': 'whitespace-nowrap overflow-hidden',
     'ellipsis-text': 'nowrap-hidden text-ellipsis',
-    'transition-base': 'transition-all duration-300 ease-in-out'
+    'transition-base': 'transition-all duration-300 ease-in-out',
+    'layout-divider': 'bg-[rgb(90,90,90)] dark:bg-[rgb(25,25,25)] min-h-5px min-w-5px'
   },
   theme: {
     colors: {
@@ -73,7 +74,7 @@ export default defineConfig({
       error_hover: 'rgb(var(--error-color-hover))',
       error_pressed: 'rgb(var(--error-color-pressed))',
       error_active: 'rgb(var(--error-color-active),0.1)',
-      dark: '#18181c'
+      dark: '#282828'
     }
   }
 });

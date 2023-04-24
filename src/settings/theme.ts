@@ -11,7 +11,17 @@ const defaultThemeSetting: Theme.Setting = {
     warning: '#faad14',
     error: '#f5222d'
   },
-  isCustomizeInfoColor: false
+  isCustomizeInfoColor: false,
+  layoutMinWidth: 1200,
+  layoutMinHeight: 540,
+  header: {
+    height: 50,
+    minWidth: 1200
+  },
+  sliderMenu: {
+    width: 100,
+    viewMinWidth: 1200
+  }
 };
 
 export const themeSetting = defaultThemeSetting;

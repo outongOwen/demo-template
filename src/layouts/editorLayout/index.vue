@@ -1,27 +1,37 @@
 <template>
-  <n-space>
-    <n-button @click="switchTheme('light')"> 亮色主题 </n-button>
-    <n-button @click="switchTheme('dark')"> 黑色主题 </n-button>
-  </n-space>
-  <splitpanes class="wh-full" horizontal>
-    <pane>
-      <splitpanes>
-        <pane min-size="30" max-size="70">2</pane>
-        <pane>3</pane>
-      </splitpanes>
-    </pane>
-    <pane max-size="65" min-size="30">5</pane>
-  </splitpanes>
+  <main-layout>
+    <template #headerArea>
+      <Header />
+    </template>
+    <template #centerLeftArea>
+      <materials :first-menu-option="currentMenuOption" />
+    </template>
+    <template #sliderMenu>
+      <SliderMenu
+        :menu-options="sliderMenuOptions"
+        :default-menu-key="defaultMenuKey"
+        @select-menu-option="handleSelectMenuOption"
+      />
+    </template>
+    <template #centerRightArea>画布</template>
+    <template #trackArea>轨道</template>
+  </main-layout>
 </template>
 
 <script setup lang="ts">
-import { Splitpanes, Pane } from 'splitpanes';
-import { useThemeStore } from '@/store';
+import { sliderMenuOptions } from '@/settings';
+import Header from '@/views/header/index.vue';
+import materials from '@/views/materials/index.vue';
+import MainLayout from './mainLayout.vue';
+import type { ExtendMenuOptions } from '#/packages.d';
 defineOptions({ name: 'EditorLayout' });
-const themeStore = useThemeStore();
-const switchTheme = (theme: string) => {
-  themeStore.setDarkMode(theme === 'dark');
+const defaultMenuKey = ref<string | number | null>(null);
+const currentMenuOption = ref<ExtendMenuOptions | null>(null);
+const handleSelectMenuOption = (_key: string | number | null, item: ExtendMenuOptions | null) => {
+  currentMenuOption.value = item;
 };
+watchEffect(() => {
+  defaultMenuKey.value = sliderMenuOptions[0]?.key ? sliderMenuOptions[0]?.key : null;
+  currentMenuOption.value = sliderMenuOptions?.length ? sliderMenuOptions[0] : null;
+});
 </script>
-
-<style lang="scss"></style>
