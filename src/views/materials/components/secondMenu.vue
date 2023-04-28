@@ -5,7 +5,7 @@
  * secondMenu.vue
 -->
 <template>
-  <radio-button :options="buttonOptions" :default-key="radioButtonKey" />
+  <radio-button-group :options="buttonOptions" :default-key="defaultRadioButtonKey" @checked="handleChecked" />
 </template>
 
 <script setup lang="ts">
@@ -18,9 +18,12 @@ const { firstMenuOption } = toRefs(props);
 const buttonOptions = computed((): SecondMenuOptions[] | [] => {
   return firstMenuOption.value?.secondMenuOptions ? firstMenuOption.value.secondMenuOptions : [];
 });
-const radioButtonKey = computed((): string => {
+const defaultRadioButtonKey = computed((): string => {
   return buttonOptions.value.length ? buttonOptions.value[0].key : '';
 });
+const handleChecked = (data: SecondMenuOptions): void => {
+  console.log(data, 'SecondMenuOptions');
+};
 </script>
 
 <style scoped></style>

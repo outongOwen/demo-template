@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import { NScrollbar } from 'naive-ui';
 import { useScroll, useEventListener } from '@vueuse/core';
+defineOptions({ name: 'BetterScrollBar' });
 interface ExposAPI {
   scrollToBottom: () => void;
   scrollTo: (options: { left?: number; top?: number; behavior?: ScrollBehavior }) => void;
@@ -58,7 +59,7 @@ interface Props {
 }
 const emit = defineEmits<Emits>();
 const props = withDefaults(defineProps<Props>(), {
-  trigger: 'hover',
+  trigger: 'none',
   xScrollable: false,
   isShowScrollBar: true
 });
@@ -108,14 +109,10 @@ defineExpose<ExposAPI>({
 
 <style scoped lang="scss">
 :deep(.n-scrollbar-rail) {
-  right: 0 !important;
-  bottom: 0 !important;
-  top: 0 !important;
   display: v-bind("isShowScrollBar?'block':'none'");
-  @apply dark:bg-[rgba(50,50,50)];
-  border-radius: 0;
+  @apply : rounded-0 important-right-0 important-bottom-0 important-top-0;
   .n-scrollbar-rail__scrollbar {
-    border-radius: 0 !important;
+    @apply important-rounded-0 z999;
   }
 }
 </style>

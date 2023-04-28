@@ -7,7 +7,7 @@
       <materials :first-menu-option="currentMenuOption" />
     </template>
     <template #sliderMenu>
-      <SliderMenu
+      <layout-slider-menu
         :menu-options="sliderMenuOptions"
         :default-menu-key="defaultMenuKey"
         @select-menu-option="handleSelectMenuOption"
@@ -22,7 +22,7 @@
 import { sliderMenuOptions } from '@/settings';
 import Header from '@/views/header/index.vue';
 import materials from '@/views/materials/index.vue';
-import MainLayout from './mainLayout.vue';
+import MainLayout from './layoutSlot.vue';
 import type { ExtendMenuOptions } from '#/packages.d';
 defineOptions({ name: 'EditorLayout' });
 const defaultMenuKey = ref<string | number | null>(null);

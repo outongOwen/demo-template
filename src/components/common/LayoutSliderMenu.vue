@@ -18,7 +18,7 @@
     >
       <icon-ph:caret-circle-up-fill v-show="!isMouseEnter" class="text-35px" />
     </div>
-    <custom-scroll-bar ref="scrollRef" trigger="none" :is-show-scroll-bar="false" @scroll="handleScroll">
+    <better-scroll-bar ref="scrollRef" trigger="none" :is-show-scroll-bar="false" @scroll="handleScroll">
       <n-menu
         v-model:value="activeKey"
         :options="menuOptions"
@@ -27,7 +27,7 @@
         :root-indent="0"
         @update:value="handleUpdateValue"
       />
-    </custom-scroll-bar>
+    </better-scroll-bar>
     <div
       v-show="!isShowBackBottomBtn && isShowScroll"
       class="absolute w100% h65px bottom-0 flex-center z9 cursor-pointer bg-gradient-to-t from-[rgba(40,40,40)] from-0% to-100%"
@@ -40,9 +40,10 @@
 
 <script lang="ts" setup>
 import { useMouseInElement } from '@vueuse/core';
-import type { ScrollReturnOption } from '@/components/common/CustomScrollBar.vue';
-import CustomScrollBar from '@/components/common/CustomScrollBar.vue';
+import type { ScrollReturnOption } from '@/components/custom/BetterScrollBar.vue';
+import BetterScrollBar from '@/components/custom/BetterScrollBar.vue';
 import type { ExtendMenuOptions } from '#/packages.d';
+defineOptions({ name: 'LayoutSliderMenu' });
 interface Props {
   menuOptions: ExtendMenuOptions[];
   defaultMenuKey?: string | number | null;
@@ -57,23 +58,23 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 const { menuOptions } = toRefs(props);
 const activeKey = ref<string | number | null>(props.defaultMenuKey);
-const scrollRef = ref<InstanceType<typeof CustomScrollBar> | null>(null);
+const scrollRef = ref<InstanceType<typeof BetterScrollBar> | null>(null);
 const sliderMenuContainerRef = ref<HTMLElement | null>(null);
 const isShowBackTopBtn = ref(false);
 const isShowBackBottomBtn = ref(false);
 const isShowScroll = ref(false);
 const { isOutside: isMouseEnter } = useMouseInElement(sliderMenuContainerRef);
-const handleScroll = (_e: Event, option: ScrollReturnOption) => {
+const handleScroll = (_e: Event, option: ScrollReturnOption): void => {
   isShowBackTopBtn.value = option.arrivedState.top;
   isShowBackBottomBtn.value = option.arrivedState.bottom;
 };
-const handleBackTop = () => {
+const handleBackTop = (): void => {
   scrollRef.value?.scrollTo({ top: 0, behavior: 'smooth' });
 };
-const handleBackBottom = () => {
+const handleBackBottom = (): void => {
   scrollRef.value?.scrollToBottom();
 };
-const handleUpdateValue = (key: string | number, item: ExtendMenuOptions) => {
+const handleUpdateValue = (key: string, item: any): void => {
   emit('selectMenuOption', key, item);
 };
 onMounted(() => {
@@ -84,22 +85,14 @@ onMounted(() => {
 </script>
 <style scoped lang="scss">
 :deep(.n-menu-item) {
-  height: 55px;
-  padding: 0 10px !important;
+  @apply h55px important-px10px;
   .n-menu-item-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-right: 0;
-    line-height: unset;
+    @apply flex-center flex-col pr-0 line-height-unset;
     .n-menu-item-content__icon {
-      margin-right: 0 !important;
+      @apply important-mr-0;
     }
     .n-menu-item-content-header {
-      width: 80%;
-      text-align: center;
-      padding: 0 5px;
+      @apply w80% text-center px-5px;
     }
   }
 }

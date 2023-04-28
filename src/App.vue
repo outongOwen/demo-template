@@ -19,12 +19,3 @@ import { useThemeStore, subscribeStore } from '@/store';
 const theme = useThemeStore();
 subscribeStore();
 </script>
-<style lang="scss">
-#__SCROLL_EL_ID__ {
-  @include scrollbar(8px, #942c2c);
-}
-
-.dark #__SCROLL_EL_ID__ {
-  @include scrollbar(8px, #555);
-}
-</style>

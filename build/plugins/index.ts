@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import unocss from '@unocss/vite';
 import progress from 'vite-plugin-progress';
+import presetIcons from '@unocss/preset-icons';
 import html from './html';
 import unplugin from './unplugin';
 // import mock from './mock';
@@ -14,7 +15,16 @@ import pwa from './pwa';
  * @param viteEnv - 环境变量配置
  */
 export function setupVitePlugins(viteEnv: ImportMetaEnv): (PluginOption | PluginOption[])[] {
-  const plugins = [vue(), vueJsx(), html(viteEnv), ...unplugin(viteEnv), unocss(), progress()];
+  const plugins = [
+    vue(),
+    vueJsx(),
+    html(viteEnv),
+    ...unplugin(viteEnv),
+    unocss({
+      presets: [presetIcons()]
+    }),
+    progress()
+  ];
 
   if (viteEnv.VITE_VISUALIZER === 'Y') {
     plugins.push(visualizer as PluginOption);

@@ -2,7 +2,7 @@ const themeColorList = ['#1890FF'];
 
 const defaultThemeSetting: Theme.Setting = {
   darkMode: true,
-  followSystemTheme: true,
+  followSystemTheme: false,
   themeColor: themeColorList[0],
   themeColorList,
   otherColor: {
@@ -11,7 +11,7 @@ const defaultThemeSetting: Theme.Setting = {
     warning: '#faad14',
     error: '#f5222d'
   },
-  isCustomizeInfoColor: false,
+  isCustomizeInfoColor: true,
   layoutMinWidth: 1200,
   layoutMinHeight: 540,
   header: {

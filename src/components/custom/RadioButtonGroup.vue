@@ -5,19 +5,22 @@
  * RadioButton.vue
 -->
 <template>
-  <div class="w100% relative">
+  <div ref="radioButtonContainerRef" class="mr25px relative">
     <n-space
-      ref="radioButtonContainerRef"
-      :style="{ height: isShowOrHideTabList && hasTabWrap ? `${tabLineHeight}px` : 'auto' }"
+      :style="{
+        height: isShowOrHideTabList && hasTabWrap ? `${tabLineHeight}px` : `auto`
+      }"
       class="radio-button-container of-hidden"
-      :wrap-item="true"
-      :size="20"
+      :space-size="spaceSize"
+      :wrap-item="false"
     >
       <n-tag
-        v-for="item in showOptions"
+        v-for="item in options"
         :key="item.key"
-        :checked="checkedKey === item.key"
+        :checked="item.key === (checkedKey ? checkedKey : defaultKey)"
         checkable
+        :size="size"
+        :strong="strong"
         :color="{ color: '#fff' }"
         @click="handleChecked(item)"
       >
@@ -30,7 +33,7 @@
     <Icon
       v-if="hasTabWrap"
       icon="material-symbols:keyboard-arrow-up"
-      class="absolute-rt right--10px text-30px cursor-pointer transition-base"
+      class="absolute-rt right--30px text-30px cursor-pointer transition-base select-none"
       :class="{ 'rotate--180': isShowOrHideTabList }"
       @click="handleShowOrHideTabs"
     />
@@ -39,28 +42,43 @@
 
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue';
-import { useElementSize } from '@vueuse/core';
+import { useElementSize, useTimeoutFn } from '@vueuse/core';
 import type { SecondMenuOptions } from '#/packages.d';
+defineOptions({ name: 'RadioButtonGroup' });
 interface Props {
   options: SecondMenuOptions[] | [];
   size?: 'small' | 'medium' | 'large';
   strong?: boolean;
   defaultKey?: string;
+  spaceSize?: number;
 }
+interface Emits {
+  (e: 'checked', tItem: SecondMenuOptions): void;
+}
+const emits = defineEmits<Emits>();
 const props = withDefaults(defineProps<Props>(), {
   size: 'medium',
   strong: false,
-  defaultKey: ''
+  defaultKey: '',
+  spaceSize: 10
 });
 const { options, defaultKey } = toRefs(props);
 const radioButtonContainerRef = ref<HTMLElement | null>(null);
-const checkedKey = ref(defaultKey.value);
+const checkedKey = ref('');
 const hasTabWrap = ref<boolean>(false); // 换行状态
 const isShowOrHideTabList = ref<boolean>(false); // 是否显示或隐藏tab列表
-const { width } = useElementSize(radioButtonContainerRef);
+const { width: containerWidth } = useElementSize(radioButtonContainerRef, undefined, {
+  box: 'border-box'
+});
 const tabLineHeight = ref<number>(0);
 const handleChecked = (item: SecondMenuOptions) => {
-  checkedKey.value = item.key;
+  if (checkedKey.value !== item.key) {
+    checkedKey.value = item.key;
+    emits('checked', item);
+  }
+};
+const handleShowOrHideTabs = () => {
+  isShowOrHideTabList.value = !isShowOrHideTabList.value;
 };
 /**
  * 检查标签是否换行
@@ -70,7 +88,7 @@ const checkTagWrap = (): void => {
   const containerEl = document.querySelector('.radio-button-container');
   const nTagElements = document.querySelectorAll('.radio-button-container>div');
   const containerTop = containerEl?.getBoundingClientRect().top;
-  for (let i = 0; i < nTagElements.length; i += 1) {
+  for (let i = 0; i < Array.from(nTagElements).length; i += 1) {
     const top = nTagElements[i].getBoundingClientRect().top;
     const height = nTagElements[i].getBoundingClientRect().height;
     if (top > containerTop!) {
@@ -80,18 +98,17 @@ const checkTagWrap = (): void => {
     }
   }
   hasTabWrap.value = false;
-  isShowOrHideTabList.value = true;
 };
-const handleShowOrHideTabs = () => {
-  isShowOrHideTabList.value = !isShowOrHideTabList.value;
-};
-const showOptions = ref<SecondMenuOptions[] | []>(options.value);
 watch(
-  () => width.value,
+  () => containerWidth.value,
   () => {
-    nextTick(() => {
-      checkTagWrap();
-    });
+    useTimeoutFn(() => {
+      options.value.length && checkTagWrap();
+    }, 30);
+  },
+  {
+    immediate: true,
+    flush: 'post'
   }
 );
 </script>

@@ -27,5 +27,5 @@
       "unplugin-vue-define-options/macros-global"
     ]
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "src/typings/auto-import.d.ts"]
 }

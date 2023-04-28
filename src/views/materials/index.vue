@@ -5,17 +5,22 @@
  * index.vue
 -->
 <template>
-  <global-material :key="firstMenuOption?.key">
-    <template v-if="firstMenuOption?.areaConfig?.secondMenu" #second-menu>
-      <second-menu :first-menu-option="firstMenuOption" />
-    </template>
-    <template v-if="firstMenuOption?.areaConfig?.searchForm" #search-form>
-      <search-form />
-    </template>
-    <template v-if="firstMenuOption?.areaConfig?.materialBody" #material-body>
-      <material-body />
-    </template>
-  </global-material>
+  <Transition>
+    <global-material
+      :key="firstMenuOption?.key"
+      :show-header="firstMenuOption?.areaConfig?.secondMenu && firstMenuOption?.areaConfig?.searchForm"
+    >
+      <template v-if="firstMenuOption?.areaConfig?.secondMenu" #second-menu>
+        <second-menu :first-menu-option="firstMenuOption" />
+      </template>
+      <template v-if="firstMenuOption?.areaConfig?.searchForm" #search-form>
+        <search-form />
+      </template>
+      <template v-if="firstMenuOption?.areaConfig?.materialBody" #material-body="{ materialBodySize }">
+        <material-body :material-body-size="materialBodySize" />
+      </template>
+    </global-material>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -32,5 +37,3 @@ interface Props {
 const props = defineProps<Props>();
 const { firstMenuOption } = toRefs(props);
 </script>
-
-<style scoped></style>

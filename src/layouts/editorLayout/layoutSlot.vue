@@ -16,7 +16,7 @@
         <splitpanes horizontal>
           <pane>
             <splitpanes>
-              <pane min-size="30" max-size="70">
+              <pane min-size="25" max-size="70">
                 <slot name="centerLeftArea"></slot>
               </pane>
               <pane>
@@ -24,7 +24,7 @@
               </pane>
             </splitpanes>
           </pane>
-          <pane max-size="65" min-size="30">
+          <pane max-size="75" min-size="30">
             <slot name="trackArea"></slot>
           </pane>
         </splitpanes>

@@ -1,6 +1,7 @@
 import { NEllipsis } from 'naive-ui';
 import { useIconRender } from '@/hooks';
 import type { ExtendMenuOptions } from '#/packages.d';
+const { iconRender } = useIconRender();
 const createDefaultAreaConfig = (secondMenu = true, searchForm = true, materialBody = true) => {
   return {
     secondMenu,
@@ -12,7 +13,7 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
   {
     label: '视频',
     key: 'Video',
-    icon: useIconRender('material-symbols:video-camera-back-sharp'),
+    icon: iconRender({ icon: 'material-symbols:video-camera-back-sharp' }),
     keepAlive: true,
     areaConfig: createDefaultAreaConfig(),
     secondMenuOptions: [
@@ -53,7 +54,7 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
   {
     label: '图片',
     key: 'Image',
-    icon: useIconRender('material-symbols:photo-camera-back-sharp'),
+    icon: iconRender({ icon: 'material-symbols:photo-camera-back-sharp' }),
     areaConfig: createDefaultAreaConfig(),
     keepAlive: false,
     secondMenuOptions: [
@@ -87,55 +88,79 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
   {
     label: '音频',
     key: 'Audio',
-    icon: useIconRender('material-symbols:mic-sharp'),
+    icon: iconRender({ icon: 'material-symbols:mic-sharp' }),
     areaConfig: createDefaultAreaConfig()
   },
   {
     label: '字幕',
     key: 'Subtitle',
-    icon: useIconRender('material-symbols:subtitles-sharp'),
+    icon: iconRender({ icon: 'material-symbols:subtitles-sharp' }),
     areaConfig: createDefaultAreaConfig()
   },
   {
     label: '字体',
     key: 'Font',
-    icon: useIconRender('material-symbols:font-download-sharp'),
+    icon: iconRender({ icon: 'material-symbols:font-download-sharp' }),
     areaConfig: createDefaultAreaConfig()
   },
   {
     label: '特效',
     key: 'Effect',
-    icon: useIconRender('material-symbols:filter-vintage-sharp'),
+    icon: iconRender({ icon: 'material-symbols:filter-vintage-sharp' }),
     areaConfig: createDefaultAreaConfig()
   },
   {
     label: '转场',
     key: 'Transition',
-    icon: useIconRender('material-symbols:swap-horizontal-circle-sharp'),
+    icon: iconRender({ icon: 'material-symbols:swap-horizontal-circle-sharp' }),
     areaConfig: createDefaultAreaConfig(true, false, true)
   },
   {
     label: '模板',
     key: 'Template',
-    icon: useIconRender('pajamas:template'),
+    icon: iconRender({ icon: 'pajamas:template' }),
     areaConfig: createDefaultAreaConfig(true, false, true)
   },
   {
     label: '素材',
     key: 'Material',
-    icon: useIconRender('material-symbols:layers-sharp'),
+    icon: iconRender({ icon: 'material-symbols:layers-sharp' }),
     areaConfig: createDefaultAreaConfig(true, false, true)
   },
   {
     label: '动画',
     key: 'Animation',
-    icon: useIconRender('material-symbols:animation-sharp'),
+    icon: iconRender({ icon: 'material-symbols:animation-sharp' }),
     areaConfig: createDefaultAreaConfig(false, false, true)
   },
   {
     label: () => h(NEllipsis, null, { default: () => '动态壁纸壁纸' }),
     key: 'DynamicSticker',
-    icon: useIconRender('fluent-mdl2:picture'),
+    icon: iconRender({ icon: 'fluent-mdl2:picture' }),
+    areaConfig: createDefaultAreaConfig(false, false, true)
+  },
+  {
+    label: '模板',
+    key: 'Template',
+    icon: iconRender({ icon: 'pajamas:template' }),
+    areaConfig: createDefaultAreaConfig(true, false, true)
+  },
+  {
+    label: '素材',
+    key: 'Material',
+    icon: iconRender({ icon: 'material-symbols:layers-sharp' }),
+    areaConfig: createDefaultAreaConfig(true, false, true)
+  },
+  {
+    label: '动画',
+    key: 'Animation',
+    icon: iconRender({ icon: 'material-symbols:animation-sharp' }),
+    areaConfig: createDefaultAreaConfig(false, false, true)
+  },
+  {
+    label: () => h(NEllipsis, null, { default: () => '动态壁纸壁纸' }),
+    key: 'DynamicSticker',
+    icon: iconRender({ icon: 'fluent-mdl2:picture' }),
     areaConfig: createDefaultAreaConfig(false, false, true)
   }
 ];
