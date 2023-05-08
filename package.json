@@ -41,6 +41,7 @@
     "uuid": "^9.0.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
+    "vue-virtual-grid": "^2.5.0",
     "vue-virtual-scroll-grid": "^1.10.2"
   },
   "devDependencies": {
@@ -106,7 +107,7 @@
   },
   "packageManager": "pnpm@8.1.0",
   "engines": {
-    "node": ">=16.15.1",
+    "node": ">=16.20.0",
     "pnpm": ">=8.1.0"
   }
 }

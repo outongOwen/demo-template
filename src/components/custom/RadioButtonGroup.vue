@@ -16,13 +16,13 @@
     >
       <n-tag
         v-for="item in options"
-        :key="item.key"
-        :checked="item.key === (checkedKey ? checkedKey : defaultKey)"
+        :key="(item[keyField] as string | number | null)!"
+        :checked="item[keyField] === (valueVModel ? valueVModel : defaultKey)"
         checkable
         :size="size"
         :strong="strong"
         :color="{ color: '#fff' }"
-        @click="handleChecked(item)"
+        @click="handleChecked(item[keyField] as string | number | null, item)"
       >
         {{ item.label }}
         <template v-if="item.icon" #avatar>
@@ -41,40 +41,45 @@
 </template>
 
 <script lang="ts" setup>
+import { useVModel, useElementSize, useTimeoutFn } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
-import { useElementSize, useTimeoutFn } from '@vueuse/core';
 import type { SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'RadioButtonGroup' });
 interface Props {
   options: SecondMenuOptions[] | [];
+  value: string | number | null;
   size?: 'small' | 'medium' | 'large';
   strong?: boolean;
-  defaultKey?: string;
+  defaultKey?: string | number | null;
   spaceSize?: number;
+  keyField?: string;
 }
 interface Emits {
-  (e: 'checked', tItem: SecondMenuOptions): void;
+  (e: 'change', key: string | number | null, option: SecondMenuOptions): void;
+  (e: 'update:value', key: string | number | null): void;
 }
-const emits = defineEmits<Emits>();
+const emit = defineEmits<Emits>();
 const props = withDefaults(defineProps<Props>(), {
   size: 'medium',
   strong: false,
   defaultKey: '',
-  spaceSize: 10
+  spaceSize: 10,
+  keyField: 'key',
+  value: null
 });
-const { options, defaultKey } = toRefs(props);
+const { options, defaultKey, keyField } = toRefs(props);
+const valueVModel = useVModel(props, 'value', emit);
 const radioButtonContainerRef = ref<HTMLElement | null>(null);
-const checkedKey = ref('');
 const hasTabWrap = ref<boolean>(false); // 换行状态
 const isShowOrHideTabList = ref<boolean>(false); // 是否显示或隐藏tab列表
 const { width: containerWidth } = useElementSize(radioButtonContainerRef, undefined, {
   box: 'border-box'
 });
 const tabLineHeight = ref<number>(0);
-const handleChecked = (item: SecondMenuOptions) => {
-  if (checkedKey.value !== item.key) {
-    checkedKey.value = item.key;
-    emits('checked', item);
+const handleChecked = (key: string | number | null, option: SecondMenuOptions) => {
+  if (valueVModel.value !== key && option) {
+    valueVModel.value = key;
+    emit('change', key, option);
   }
 };
 const handleShowOrHideTabs = () => {

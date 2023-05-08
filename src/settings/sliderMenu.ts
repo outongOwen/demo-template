@@ -16,6 +16,7 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     icon: iconRender({ icon: 'material-symbols:video-camera-back-sharp' }),
     keepAlive: true,
     areaConfig: createDefaultAreaConfig(),
+    isNetworkSecondMenu: false,
     secondMenuOptions: [
       {
         label: '上传视频',
@@ -49,7 +50,15 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
         label: '视频合并',
         key: 'VideoMerge'
       }
-    ]
+    ],
+
+    searchModel: {
+      keyword: '',
+      onlyMe: '',
+      firstLevel: '',
+      secondLevel: '',
+      thirdLevel: ''
+    }
   },
   {
     label: '图片',
@@ -83,13 +92,26 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
         key: 'ImageWatermark',
         icon: 'material-symbols:photo-camera-back-sharp'
       }
-    ]
+    ],
+    searchModel: {
+      keyword: '',
+      onlyMe: '',
+      firstLevel: '',
+      secondLevel: '',
+      thirdLevel: ''
+    }
   },
   {
     label: '音频',
     key: 'Audio',
     icon: iconRender({ icon: 'material-symbols:mic-sharp' }),
-    areaConfig: createDefaultAreaConfig()
+    areaConfig: createDefaultAreaConfig(),
+    listSchema: {
+      width: 100,
+      height: 50,
+      gutter: 10,
+      pageSize: 100
+    }
   },
   {
     label: '字幕',
@@ -113,7 +135,7 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     label: '转场',
     key: 'Transition',
     icon: iconRender({ icon: 'material-symbols:swap-horizontal-circle-sharp' }),
-    areaConfig: createDefaultAreaConfig(true, false, true)
+    areaConfig: createDefaultAreaConfig(false, false, true)
   },
   {
     label: '模板',

@@ -5,10 +5,10 @@
  * VirtualListGrid.vue
 -->
 <template>
-  <BetterScrollBar class="pr5px">
+  <div class="wh-full relative of-auto">
     <Grid
       :length="total"
-      :page-size="20"
+      :page-size="pageSize"
       :scroll-behavior="scrollBehavior"
       :page-provider="pageProvider"
       :respect-scroll-to-on-resize="respectScrollToOnResize"
@@ -19,18 +19,19 @@
         'grid-template-columns': `repeat(auto-fill,minmax(${width}px,1fr))`
       }"
     >
-      <template #probe>
-        <div :style="{ 'aspect-ratio': `${width / height}` }" />
+      <!-- <template #probe>
+        <div :style="{ width: `${width}px`, height: `${height}px` }" />
       </template>
-      <template #placeholder="{ index, style }">
-        <div :style="[`aspect-ratio: ${width / height}`, { ...style }]" class="bg-black">Placeholder {{ index }}</div>
-        <!-- <slot :item="null" :aspect-ratio="width / height"></slot> -->
-      </template>
+      <template #placeholder="{ style }">
+        <!~~ <n-skeleton :style="[{ ...style }]" class="h100%" /> ~~>
+        <div :style="[{ ...style }]"></div>
+      </template>-->
       <template #default="mItem">
         <slot :item="mItem" :aspect-ratio="width / height"></slot>
       </template>
     </Grid>
-  </BetterScrollBar>
+    <n-spin v-show="loading" description="加载中" class="absolute-center dark:bg-dark bg-#fff z999" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -45,16 +46,18 @@ interface Props {
   spaceSize?: number;
   respectScrollToOnResize?: boolean;
   scrollBehavior?: 'auto' | 'smooth';
+  loading?: boolean;
 }
 const props = withDefaults(defineProps<Props>(), {
-  width: 192,
-  height: 108,
-  spaceSize: 20,
+  width: 169,
+  height: 95,
+  spaceSize: 10,
   respectScrollToOnResize: false,
   scrollBehavior: 'auto',
-  pageSize: 20
+  pageSize: 100,
+  loading: false
 });
-const { pageProvider, total, width, height } = toRefs(props);
+const { pageProvider, total, width, height, loading } = toRefs(props);
 </script>
 
 <style scoped></style>

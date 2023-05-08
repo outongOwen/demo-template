@@ -5,24 +5,32 @@
  * secondMenu.vue
 -->
 <template>
-  <radio-button-group :options="buttonOptions" :default-key="defaultRadioButtonKey" @checked="handleChecked" />
+  <div class="mb-10px">
+    <radio-button-group v-model:value="valueVModel" :options="options" :key-field="keyField" @change="handleChecked" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';
+import { useVModel } from '@vueuse/core';
+import type { SecondMenuOptions } from '#/packages.d';
 interface Props {
-  firstMenuOption: ExtendMenuOptions | null;
+  options: SecondMenuOptions[] | [];
+  value: string | number | null;
+  keyField?: string;
 }
-const props = defineProps<Props>();
-const { firstMenuOption } = toRefs(props);
-const buttonOptions = computed((): SecondMenuOptions[] | [] => {
-  return firstMenuOption.value?.secondMenuOptions ? firstMenuOption.value.secondMenuOptions : [];
+interface Emits {
+  (event: 'change', key: string | number | null, option: SecondMenuOptions): void;
+  (event: 'update:value', key: string | number | null): void;
+}
+const props = withDefaults(defineProps<Props>(), {
+  keyField: 'key'
 });
-const defaultRadioButtonKey = computed((): string => {
-  return buttonOptions.value.length ? buttonOptions.value[0].key : '';
-});
-const handleChecked = (data: SecondMenuOptions): void => {
-  console.log(data, 'SecondMenuOptions');
+const emit = defineEmits<Emits>();
+const valueVModel = useVModel(props, 'value', emit);
+const { options, keyField } = toRefs(props);
+const handleChecked = (key: string | number | null, option: SecondMenuOptions): void => {
+  valueVModel.value = key;
+  emit('change', key, option);
 };
 </script>
 

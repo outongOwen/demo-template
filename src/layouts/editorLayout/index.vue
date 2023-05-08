@@ -4,7 +4,7 @@
       <Header />
     </template>
     <template #centerLeftArea>
-      <materials :first-menu-option="currentMenuOption" />
+      <materials v-if="currentMenuOption" :menu-options="currentMenuOption" />
     </template>
     <template #sliderMenu>
       <layout-slider-menu
@@ -19,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+import { cloneDeep } from 'lodash-es';
 import { sliderMenuOptions } from '@/settings';
 import Header from '@/views/header/index.vue';
 import materials from '@/views/materials/index.vue';
@@ -26,12 +27,12 @@ import MainLayout from './layoutSlot.vue';
 import type { ExtendMenuOptions } from '#/packages.d';
 defineOptions({ name: 'EditorLayout' });
 const defaultMenuKey = ref<string | number | null>(null);
-const currentMenuOption = ref<ExtendMenuOptions | null>(null);
-const handleSelectMenuOption = (_key: string | number | null, item: ExtendMenuOptions | null) => {
+const currentMenuOption = ref<ExtendMenuOptions | null>();
+const handleSelectMenuOption = (_key: string | number | null, item: ExtendMenuOptions) => {
   currentMenuOption.value = item;
 };
 watchEffect(() => {
   defaultMenuKey.value = sliderMenuOptions[0]?.key ? sliderMenuOptions[0]?.key : null;
-  currentMenuOption.value = sliderMenuOptions?.length ? sliderMenuOptions[0] : null;
+  currentMenuOption.value = sliderMenuOptions?.length ? cloneDeep(sliderMenuOptions[0]) : null;
 });
 </script>

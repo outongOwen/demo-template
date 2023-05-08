@@ -9,11 +9,9 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AudioForm: typeof import('./../src/components/module/searchForm/AudioForm.vue')['default']
     BetterScrollBar: typeof import('./../src/components/custom/BetterScrollBar.vue')['default']
     ExceptionBase: typeof import('./../src/components/common/ExceptionBase.vue')['default']
-    IconLocalNoPermission: typeof import('~icons/local/no-permission')['default']
-    IconLocalNotFound: typeof import('~icons/local/not-found')['default']
-    IconLocalServiceError: typeof import('~icons/local/service-error')['default']
     IconMdiMoonWaningCrescent: typeof import('~icons/mdi/moon-waning-crescent')['default']
     IconMdiWhiteBalanceSunny: typeof import('~icons/mdi/white-balance-sunny')['default']
     'IconPh:caretCircleDownFill': typeof import('~icons/ph/caret-circle-down-fill')['default']
@@ -23,6 +21,7 @@ declare module '@vue/runtime-core' {
     NButton: typeof import('naive-ui')['NButton']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
+    NDivider: typeof import('naive-ui')['NDivider']
     NEl: typeof import('naive-ui')['NEl']
     NForm: typeof import('naive-ui')['NForm']
     NFormItemGi: typeof import('naive-ui')['NFormItemGi']
@@ -36,13 +35,15 @@ declare module '@vue/runtime-core' {
     NSelect: typeof import('naive-ui')['NSelect']
     NSkeleton: typeof import('naive-ui')['NSkeleton']
     NSpace: typeof import('naive-ui')['NSpace']
+    NSpin: typeof import('naive-ui')['NSpin']
     NTag: typeof import('naive-ui')['NTag']
     NText: typeof import('naive-ui')['NText']
     RadioButtonGroup: typeof import('./../src/components/custom/RadioButtonGroup.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    SliderMenu: typeof import('./../src/components/common/SliderMenu.vue')['default']
     SvgIcon: typeof import('./../src/components/custom/SvgIcon.vue')['default']
+    VideoForm: typeof import('./../src/components/module/searchForm/VideoForm.vue')['default']
+    VirtualGrid: typeof import('./../src/components/custom/VirtualGrid.vue')['default']
     VirtualListGrid: typeof import('./../src/components/custom/VirtualListGrid.vue')['default']
   }
 }

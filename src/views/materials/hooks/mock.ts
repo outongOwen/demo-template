@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-
+import { random } from 'lodash-es';
 interface Item {
   id: number | string;
   name: string;
@@ -36,6 +36,15 @@ function generatePage(total: number, pageSize: number, currentPage: number): Pag
 export function getPage(currentPage: number, pageSize = 10): Promise<Page> {
   const total = 1000;
   return new Promise(resolve => {
-    resolve(generatePage(total, pageSize, currentPage));
+    // if (currentPage > 3) {
+    //   setTimeout(() => {
+    //     resolve(generatePage(total, pageSize, currentPage));
+    //   }, random(3) * 500);
+    // } else {
+    //   resolve(generatePage(total, pageSize, currentPage));
+    // }
+    setTimeout(() => {
+      resolve(generatePage(total, pageSize, currentPage));
+    }, random(3) * 500);
   });
 }

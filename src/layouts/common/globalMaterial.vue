@@ -1,14 +1,10 @@
 <template>
-  <div ref="materialContainerRef" class="flex-col wh-full">
+  <div ref="materialContainerRef" class="flex-col wh-full py-10px">
     <header v-if="showHeader" ref="materialHeaderRef" class="flex-col px10px">
-      <div class="pb10px">
-        <slot name="second-menu"></slot>
-      </div>
-      <div class="pb5px">
-        <slot name="search-form"></slot>
-      </div>
+      <slot name="second-menu"></slot>
+      <slot name="search-form"></slot>
     </header>
-    <div class="pl10px py10px">
+    <div class="pl10px" :style="{ height: `${materialBodyHeight}px` }">
       <slot
         name="material-body"
         :material-body-size="{
@@ -33,9 +29,9 @@ const { height: materialContainerHeight } = useElementSize(materialContainerRef)
 const { height: materialHeaderHeight, width: materialContainerWidth } = useElementSize(materialHeaderRef);
 const materialBodyHeight = computed(() => {
   if (materialHeaderHeight.value) {
-    return materialContainerHeight.value - materialHeaderHeight.value - 20;
+    return materialContainerHeight.value - materialHeaderHeight.value;
   }
-  return materialContainerHeight.value - 20;
+  return materialContainerHeight.value;
 });
 </script>
 

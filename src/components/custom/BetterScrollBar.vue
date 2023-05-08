@@ -112,7 +112,7 @@ defineExpose<ExposAPI>({
   display: v-bind("isShowScrollBar?'block':'none'");
   @apply : rounded-0 important-right-0 important-bottom-0 important-top-0;
   .n-scrollbar-rail__scrollbar {
-    @apply important-rounded-0 z999;
+    @apply important-rounded-0 z9;
   }
 }
 </style>
