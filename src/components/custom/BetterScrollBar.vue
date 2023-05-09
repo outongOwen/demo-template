@@ -67,8 +67,6 @@ const { isShowScrollBar } = toRefs(props);
 const scrollbarRef = ref<InstanceType<typeof NScrollbar> | null>(null);
 const scrollbarContainerRef = ref<HTMLElement | null>();
 const scrollOptions = useScroll(scrollbarContainerRef);
-const isScrollbarX = ref<boolean>(false);
-const isScrollbarY = ref<boolean>(false);
 nextTick(() => {
   scrollbarContainerRef.value = unref(scrollbarRef)!.scrollbarInstRef!.containerRef;
 });
@@ -89,10 +87,13 @@ const cleanup = useEventListener(
   },
   { passive: true }
 );
-onMounted(() => {
-  const { scrollHeight, clientHeight, scrollWidth, clientWidth } = unref(scrollbarRef)!.scrollbarInstRef!.containerRef!;
-  isScrollbarY.value = scrollHeight > clientHeight;
-  isScrollbarX.value = scrollWidth > clientWidth;
+const isScrollbarY = computed(() => {
+  const { scrollHeight, clientHeight } = unref(scrollbarRef)!.scrollbarInstRef!.containerRef!;
+  return scrollHeight > clientHeight;
+});
+const isScrollbarX = computed(() => {
+  const { scrollWidth, clientWidth } = unref(scrollbarRef)!.scrollbarInstRef!.containerRef!;
+  return scrollWidth > clientWidth;
 });
 onBeforeUnmount(() => {
   cleanup();

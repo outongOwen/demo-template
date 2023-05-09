@@ -6,7 +6,7 @@ import progress from 'vite-plugin-progress';
 import presetIcons from '@unocss/preset-icons';
 import html from './html';
 import unplugin from './unplugin';
-// import mock from './mock';
+import mock from './mock';
 import visualizer from './visualizer';
 import compress from './compress';
 import pwa from './pwa';
@@ -35,6 +35,8 @@ export function setupVitePlugins(viteEnv: ImportMetaEnv): (PluginOption | Plugin
   if (viteEnv.VITE_PWA === 'Y' || viteEnv.VITE_VERCEL === 'Y') {
     plugins.push(pwa());
   }
-
+  if (viteEnv.VITE_USE_MOCK === 'Y') {
+    plugins.push(mock());
+  }
   return plugins;
 }

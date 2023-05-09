@@ -2,13 +2,11 @@ import type { AxiosRequestConfig, InternalAxiosRequestConfig, AxiosInstance, Axi
 import axios from 'axios';
 import qs from 'qs';
 import { isFunction, cloneDeep } from 'lodash-es';
-import { ContentTypeEnum, RequestEnum } from '@/config';
+import { ContentTypeEnum, RequestEnum } from '@/enums';
 import { AxiosCanceler } from './axiosCancel';
 import type { CreateAxiosOptions } from './axiosTransform';
-import type { RequestOptions, Result, UploadFileParams } from '#/axios';
 
 export * from './axiosTransform';
-
 /**
  * @description:  axios 模块
  */
@@ -115,7 +113,7 @@ export class VAxios {
   /**
    * @description:  文件上传
    */
-  uploadFile<T = any>(config: AxiosRequestConfig, params: UploadFileParams) {
+  uploadFile<T = any>(config: AxiosRequestConfig, params: Service.UploadFileParams) {
     const formData = new window.FormData();
     const customFilename = params.name || 'file';
 
@@ -170,29 +168,29 @@ export class VAxios {
     };
   }
 
-  get<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+  get<T = any>(config: AxiosRequestConfig, options?: Service.RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'GET' }, options);
   }
 
-  post<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+  post<T = any>(config: AxiosRequestConfig, options?: Service.RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'POST' }, options);
   }
 
-  put<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+  put<T = any>(config: AxiosRequestConfig, options?: Service.RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'PUT' }, options);
   }
 
-  delete<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+  delete<T = any>(config: AxiosRequestConfig, options?: Service.RequestOptions): Promise<T> {
     return this.request({ ...config, method: 'DELETE' }, options);
   }
 
-  request<T = any>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+  request<T = any>(config: AxiosRequestConfig, options?: Service.RequestOptions): Promise<T> {
     let conf: CreateAxiosOptions = cloneDeep(config);
     const transform = this.getTransform();
 
     const { requestOptions } = this.options;
 
-    const opt: RequestOptions = { ...requestOptions, ...options };
+    const opt: Service.RequestOptions = { ...requestOptions, ...options };
 
     const { beforeRequestHook, requestCatchHook, transformRequestHook } = transform || {};
     if (beforeRequestHook && isFunction(beforeRequestHook)) {
@@ -204,8 +202,8 @@ export class VAxios {
 
     return new Promise((resolve, reject) => {
       this.axiosInstance
-        .request<any, AxiosResponse<Result>>(conf)
-        .then((res: AxiosResponse<Result>) => {
+        .request<any, AxiosResponse<Service.Result>>(conf)
+        .then((res: AxiosResponse<Service.Result>) => {
           if (transformRequestHook && isFunction(transformRequestHook)) {
             try {
               const ret = transformRequestHook(res, opt);

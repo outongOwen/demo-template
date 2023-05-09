@@ -2,29 +2,28 @@
  * 数据处理类，可以根据工程配置
  */
 import type { AxiosRequestConfig, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import type { RequestOptions, Result } from '#/axios';
 
 export interface CreateAxiosOptions extends AxiosRequestConfig {
   authenticationScheme?: string;
   transform?: AxiosTransform;
-  requestOptions?: RequestOptions;
+  requestOptions?: Service.RequestOptions;
 }
 
 export abstract class AxiosTransform {
   /**
    * @description: 请求前的流程配置
    */
-  beforeRequestHook?: (config: AxiosRequestConfig, options: RequestOptions) => AxiosRequestConfig;
+  beforeRequestHook?: (config: AxiosRequestConfig, options: Service.RequestOptions) => AxiosRequestConfig;
 
   /**
    * @description: 请求已成功处理
    */
-  transformRequestHook?: (res: AxiosResponse<Result>, options: RequestOptions) => any;
+  transformRequestHook?: (res: AxiosResponse<Service.Result>, options: Service.RequestOptions) => any;
 
   /**
    * @description: 请求失败处理
    */
-  requestCatchHook?: (e: Error, options: RequestOptions) => Promise<any>;
+  requestCatchHook?: (e: Error, options: Service.RequestOptions) => Promise<any>;
 
   /**
    * @description: 请求之前的拦截器

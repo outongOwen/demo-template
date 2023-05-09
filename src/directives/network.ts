@@ -1,11 +1,11 @@
 import type { App, Directive } from 'vue';
-import { NETWORK_ERROR_MSG } from '@/config';
+import { ErrorMessageEnum } from '@/enums';
 
 export default function setupNetworkDirective(app: App) {
   function listenerHandler(event: MouseEvent) {
     const hasNetwork = window.navigator.onLine;
     if (!hasNetwork) {
-      window.$message?.error(NETWORK_ERROR_MSG);
+      window.$message?.error(ErrorMessageEnum.ERR_MSG404);
       event.stopPropagation();
     }
   }

@@ -6,7 +6,7 @@ const httpsRE = /^https:\/\//;
  * @param isOpenProxy - 是否开启代理
  * @param envConfig - env环境配置
  */
-export function createViteProxy(isOpenProxy: boolean, envConfig: ServiceEnvConfig[]) {
+export function createViteProxy(isOpenProxy: boolean, envConfig: ServiceEnvConfig[]): ProxyTargetList | undefined {
   if (!isOpenProxy) return undefined;
   const proxy: ProxyTargetList = {};
   for (const { url, urlPrefix } of envConfig) {
@@ -15,7 +15,6 @@ export function createViteProxy(isOpenProxy: boolean, envConfig: ServiceEnvConfi
     proxy[urlPrefix] = {
       target: url,
       changeOrigin: true,
-      ws: true,
       rewrite: (path: string) => path.replace(new RegExp(`^${urlPrefix}`), ''),
       // https is require secure=false
       ...(isHttps ? { secure: false } : {})

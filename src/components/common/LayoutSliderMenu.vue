@@ -5,18 +5,13 @@
  * SliderMenu.vue
 -->
 <template>
-  <div
-    ref="sliderMenuContainerRef"
-    class="relative h100% py-10px"
-    @mouseenter="isMouseEnter = true"
-    @mouseleave="isMouseEnter = false"
-  >
+  <div ref="sliderMenuContainerRef" class="relative wh-full py-10px">
     <div
       v-show="!isShowBackTopBtn && isShowScroll"
       class="absolute w100% h65px top-0 cursor-pointer flex-center bg-gradient-to-b from-[rgba(40,40,40)] from-0% to-100% z9 transition-all duration-300"
       @click="handleBackTop"
     >
-      <icon-ph:caret-circle-up-fill v-show="!isMouseEnter" class="text-35px" />
+      <icon-ph:caret-circle-up-fill v-if="!isMouseEnter" class="text-35px" />
     </div>
     <better-scroll-bar ref="scrollRef" trigger="none" :is-show-scroll-bar="false" @scroll="handleScroll">
       <n-menu
@@ -33,13 +28,13 @@
       class="absolute w100% h65px bottom-0 flex-center z9 cursor-pointer bg-gradient-to-t from-[rgba(40,40,40)] from-0% to-100%"
       @click="handleBackBottom"
     >
-      <icon-ph:caret-circle-down-fill v-show="!isMouseEnter" class="text-35px transition-all" />
+      <icon-ph:caret-circle-down-fill v-if="!isMouseEnter" class="text-35px transition-all" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useMouseInElement } from '@vueuse/core';
+import { useMouseInElement, watchOnce } from '@vueuse/core';
 import type { ScrollReturnOption } from '@/components/custom/BetterScrollBar.vue';
 import BetterScrollBar from '@/components/custom/BetterScrollBar.vue';
 import type { ExtendMenuOptions } from '#/packages.d';
@@ -56,8 +51,8 @@ const props = withDefaults(defineProps<Props>(), {
   defaultMenuKey: null
 });
 const emit = defineEmits<Emits>();
-const { menuOptions } = toRefs(props);
-const activeKey = ref<string | number | null>(props.defaultMenuKey);
+const { menuOptions, defaultMenuKey } = toRefs(props);
+const activeKey = ref<string | number | null>();
 const scrollRef = ref<InstanceType<typeof BetterScrollBar> | null>(null);
 const sliderMenuContainerRef = ref<HTMLElement | null>(null);
 const isShowBackTopBtn = ref(false);
@@ -77,10 +72,15 @@ const handleBackBottom = (): void => {
 const handleUpdateValue = (key: string, item: any): void => {
   emit('selectMenuOption', key, item);
 };
-onMounted(() => {
-  isShowBackTopBtn.value = (scrollRef.value?.scrollOptions as ScrollReturnOption).arrivedState.top;
-  isShowBackBottomBtn.value = (scrollRef.value?.scrollOptions as ScrollReturnOption).arrivedState.bottom;
-  isShowScroll.value = unref(scrollRef.value?.isScrollbarY)!;
+watchOnce(defaultMenuKey, key => {
+  if (key) {
+    activeKey.value = key;
+    nextTick(() => {
+      isShowBackTopBtn.value = (scrollRef.value?.scrollOptions as ScrollReturnOption).arrivedState.top;
+      isShowBackBottomBtn.value = (scrollRef.value?.scrollOptions as ScrollReturnOption).arrivedState.bottom;
+      isShowScroll.value = scrollRef.value!.isScrollbarY;
+    });
+  }
 });
 </script>
 <style scoped lang="scss">

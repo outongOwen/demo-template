@@ -10,12 +10,15 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AudioForm: typeof import('./../src/components/module/searchForm/AudioForm.vue')['default']
+    AudioItem: typeof import('./../src/components/module/materialItem/AudioItem.vue')['default']
     BetterScrollBar: typeof import('./../src/components/custom/BetterScrollBar.vue')['default']
     ExceptionBase: typeof import('./../src/components/common/ExceptionBase.vue')['default']
     IconMdiMoonWaningCrescent: typeof import('~icons/mdi/moon-waning-crescent')['default']
     IconMdiWhiteBalanceSunny: typeof import('~icons/mdi/white-balance-sunny')['default']
     'IconPh:caretCircleDownFill': typeof import('~icons/ph/caret-circle-down-fill')['default']
     'IconPh:caretCircleUpFill': typeof import('~icons/ph/caret-circle-up-fill')['default']
+    ImageForm: typeof import('./../src/components/module/searchForm/ImageForm.vue')['default']
+    ImageItem: typeof import('./../src/components/module/materialItem/ImageItem.vue')['default']
     LayoutSliderMenu: typeof import('./../src/components/common/LayoutSliderMenu.vue')['default']
     NaiveProvider: typeof import('./../src/components/common/NaiveProvider.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
@@ -43,6 +46,7 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./../src/components/custom/SvgIcon.vue')['default']
     VideoForm: typeof import('./../src/components/module/searchForm/VideoForm.vue')['default']
+    VideoItem: typeof import('./../src/components/module/materialItem/VideoItem.vue')['default']
     VirtualGrid: typeof import('./../src/components/custom/VirtualGrid.vue')['default']
     VirtualListGrid: typeof import('./../src/components/custom/VirtualListGrid.vue')['default']
   }

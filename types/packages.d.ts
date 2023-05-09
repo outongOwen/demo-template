@@ -39,6 +39,8 @@ declare type ExtendMenuOptions = {
   searchModel?: Record<string, unknown>;
   /** 列表配置 */
   listSchema?: ListSchema;
+  /** 是否为本地配置 */
+  isLocal?: boolean;
   /** 列表查询规则 */
   // formSchema?: FormSchema[];
 } & MenuOption;

@@ -2,14 +2,13 @@
 
 import type { AxiosResponse, AxiosInstance } from 'axios';
 import { isString, merge } from 'lodash-es';
-import { RequestEnum, ResultEnum, ContentTypeEnum, ErrorMessageEnum } from '@/config';
+import { RequestEnum, ResultEnum, ContentTypeEnum, ErrorMessageEnum } from '@/enums';
 import { setObjToUrlParams } from '@/utils';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { VAxios } from './vAxios';
 import { checkStatus } from './checkStatus';
 import { joinTimestamp, formatRequestDate } from './helper';
 import { AxiosRetry } from './axiosRetry';
-import type { RequestOptions, Result } from '#/axios';
 // const urlPrefix = import.meta.env.VITE_GLOB_API_URL_PREFIX
 //   ? import.meta.env.VITE_GLOB_API_URL_PREFIX
 //   : '';
@@ -21,7 +20,7 @@ const transform: AxiosTransform = {
   /**
    * @description: 处理请求数据。如果数据不是预期格式，可直接抛出错误
    */
-  transformRequestHook: (res: AxiosResponse<Result>, options: RequestOptions) => {
+  transformRequestHook: (res: AxiosResponse<Service.Result>, options: Service.RequestOptions) => {
     const { isTransformResponse, isReturnNativeResponse } = options;
     // 是否返回原生响应头 比如：需要获取响应头时使用该属性
     if (isReturnNativeResponse) {
@@ -226,7 +225,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
   );
 }
 export const defineHttp = createAxios();
-
+export const mockRequest = createAxios({ baseURL: '/mock' });
 // other api url
 // export const otherHttp = createAxios({
 //   requestOptions: {

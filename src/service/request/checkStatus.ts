@@ -1,6 +1,5 @@
-import { ErrorMessageEnum } from '@/config';
-import type { ErrorMessageMode } from '#/axios';
-export function checkStatus(status: number, msg: string, errorMessageMode: ErrorMessageMode = 'message'): void {
+import { ErrorMessageEnum } from '@/enums';
+export function checkStatus(status: number, msg: string, errorMessageMode: Service.ErrorMessageMode = 'message'): void {
   let errMessage = '';
   switch (status) {
     case 400:

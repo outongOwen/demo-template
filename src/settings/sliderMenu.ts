@@ -51,7 +51,6 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
         key: 'VideoMerge'
       }
     ],
-
     searchModel: {
       keyword: '',
       onlyMe: '',
@@ -109,7 +108,7 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     listSchema: {
       width: 100,
       height: 50,
-      gutter: 10,
+      gutter: 15,
       pageSize: 100
     }
   },
@@ -117,7 +116,8 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     label: '字幕',
     key: 'Subtitle',
     icon: iconRender({ icon: 'material-symbols:subtitles-sharp' }),
-    areaConfig: createDefaultAreaConfig()
+    areaConfig: createDefaultAreaConfig(),
+    isLocal: true
   },
   {
     label: '字体',
@@ -129,7 +129,8 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     label: '特效',
     key: 'Effect',
     icon: iconRender({ icon: 'material-symbols:filter-vintage-sharp' }),
-    areaConfig: createDefaultAreaConfig()
+    areaConfig: createDefaultAreaConfig(),
+    isLocal: true
   },
   {
     label: '转场',
@@ -142,6 +143,48 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     key: 'Template',
     icon: iconRender({ icon: 'pajamas:template' }),
     areaConfig: createDefaultAreaConfig(true, false, true)
+  },
+  {
+    label: '素材',
+    key: 'Material',
+    icon: iconRender({ icon: 'material-symbols:layers-sharp' }),
+    areaConfig: createDefaultAreaConfig(true, false, true)
+  },
+  {
+    label: '动画',
+    key: 'Animation',
+    icon: iconRender({ icon: 'material-symbols:animation-sharp' }),
+    areaConfig: createDefaultAreaConfig(false, false, true)
+  },
+  {
+    label: () => h(NEllipsis, null, { default: () => '动态壁纸壁纸' }),
+    key: 'DynamicSticker',
+    icon: iconRender({ icon: 'fluent-mdl2:picture' }),
+    areaConfig: createDefaultAreaConfig(false, false, true)
+  },
+  {
+    label: '模板',
+    key: 'Template',
+    icon: iconRender({ icon: 'pajamas:template' }),
+    areaConfig: createDefaultAreaConfig(true, false, true)
+  },
+  {
+    label: '素材',
+    key: 'Material',
+    icon: iconRender({ icon: 'material-symbols:layers-sharp' }),
+    areaConfig: createDefaultAreaConfig(true, false, true)
+  },
+  {
+    label: '动画',
+    key: 'Animation',
+    icon: iconRender({ icon: 'material-symbols:animation-sharp' }),
+    areaConfig: createDefaultAreaConfig(false, false, true)
+  },
+  {
+    label: () => h(NEllipsis, null, { default: () => '动态壁纸壁纸' }),
+    key: 'DynamicSticker',
+    icon: iconRender({ icon: 'fluent-mdl2:picture' }),
+    areaConfig: createDefaultAreaConfig(false, false, true)
   },
   {
     label: '素材',

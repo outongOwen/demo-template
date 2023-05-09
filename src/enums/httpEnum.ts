@@ -50,20 +50,3 @@ export enum ErrorMessageEnum {
   ERR_MSG504 = '网络超时!',
   ERR_MSG505 = 'http版本不支持该请求!'
 }
-/** 默认的请求错误code */
-export const DEFAULT_REQUEST_ERROR_CODE = 'DEFAULT';
-
-/** 默认的请求错误文本 */
-export const DEFAULT_REQUEST_ERROR_MSG = '请求错误~';
-
-/** 请求超时的错误code(为固定值：ECONNABORTED) */
-export const REQUEST_TIMEOUT_CODE = 'ECONNABORTED';
-
-/** 请求超时的错误文本 */
-export const REQUEST_TIMEOUT_MSG = '请求超时~';
-
-/** 网络不可用的code */
-export const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
-
-/** 网络不可用的错误文本 */
-export const NETWORK_ERROR_MSG = '网络不可用~';

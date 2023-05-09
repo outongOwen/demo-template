@@ -100,8 +100,7 @@ const pullData = (): Promise<boolean> => {
       columnSpan: 1,
       renderComponent: markRaw(ImageItem),
       injected: {
-        alt: `Image ${id}`,
-        url: `https://picsum.photos/id/${id + 1}/${width * 10}/${height * 10}.jpg`
+        url: `https://picsum.photos/id/${id + 1}/${width * 3}/${height * 3}.jpg`
       }
     };
   });
@@ -121,14 +120,13 @@ const pullDataWithDelay = (): Promise<boolean> => {
     }, 1000)
   );
 };
-
 const initializeList = () => {
   // errored.value = true;
   // throw new Error('Method not implemented.');
   pullData()
     .then(() => {
       loaded.value = true;
-      virtualGridRef.value!.resetGrid();
+      virtualGridRef.value?.resetGrid();
     })
     .catch(error => {
       if (error) {
@@ -137,7 +135,9 @@ const initializeList = () => {
     });
 };
 onMounted(() => {
-  initializeList();
+  nextTick(() => {
+    initializeList();
+  });
 });
 
 defineExpose<ExposeAPI>({

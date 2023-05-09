@@ -7,14 +7,13 @@
 <template>
   <div
     :style="{ height: item.height + 'px' }"
-    class="flex-center! w100% bg-[rgba(0,0,0,0.2)] dark:bg-[rgba(255,255,255,0.3)] relative"
+    class="flex-center! wh-full bg-[rgba(0,0,0,0.2)] dark:bg-[rgba(255,255,255,0.3)] relative"
   >
     <n-image
       :src="(item.injected.url as string) || '' "
       :lazy="lazy"
       fallback-src="https://raw.githubusercontent.com/outongOwen/picture_bed/main/image/202305040943089.png"
       object-fit="contain"
-      class="wh-full"
       :intersection-observer-options="intersectionObserverOptions"
     >
       <template #placeholder>

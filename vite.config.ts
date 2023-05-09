@@ -35,7 +35,7 @@ export default defineConfig(configEnv => {
       proxy: createViteProxy(isOpenProxy, envConfig)
     },
     optimizeDeps: {
-      include: ['vue-virtual-scroll-grid', 'splitpanes']
+      include: ['splitpanes']
     },
     build: {
       reportCompressedSize: false,
