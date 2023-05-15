@@ -33,8 +33,6 @@ declare type ExtendMenuOptions = {
   areaConfig: AeaConfig;
   /** 是否缓存 */
   keepAlive?: boolean;
-  /** 二级菜单是否开启网络请求 */
-  isNetworkSecondMenu?: boolean;
   /** 查询条件 */
   searchModel?: Record<string, unknown>;
   /** 列表配置 */

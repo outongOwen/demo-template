@@ -1,13 +1,13 @@
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
 
 import type { AxiosResponse, AxiosInstance } from 'axios';
-import { isString, merge } from 'lodash-es';
+import { isString, clone } from 'lodash-es';
 import { RequestEnum, ResultEnum, ContentTypeEnum, ErrorMessageEnum } from '@/enums';
 import { setObjToUrlParams } from '@/utils';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { VAxios } from './vAxios';
 import { checkStatus } from './checkStatus';
-import { joinTimestamp, formatRequestDate } from './helper';
+import { joinTimestamp, formatRequestDate, deepMerge } from './helper';
 import { AxiosRetry } from './axiosRetry';
 // const urlPrefix = import.meta.env.VITE_GLOB_API_URL_PREFIX
 //   ? import.meta.env.VITE_GLOB_API_URL_PREFIX
@@ -20,7 +20,7 @@ const transform: AxiosTransform = {
   /**
    * @description: 处理请求数据。如果数据不是预期格式，可直接抛出错误
    */
-  transformRequestHook: (res: AxiosResponse<Service.Result>, options: Service.RequestOptions) => {
+  transformResponseHook: (res: AxiosResponse<Service.Result>, options: Service.RequestOptions) => {
     const { isTransformResponse, isReturnNativeResponse } = options;
     // 是否返回原生响应头 比如：需要获取响应头时使用该属性
     if (isReturnNativeResponse) {
@@ -173,7 +173,7 @@ const transform: AxiosTransform = {
 
 function createAxios(opt?: Partial<CreateAxiosOptions>) {
   return new VAxios(
-    merge(
+    deepMerge(
       {
         // See https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Authentication#authentication_schemes
         // authentication schemes，e.g: Bearer
@@ -187,7 +187,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
         // 如果是form-data格式
         // headers: { 'Content-Type': ContentTypeEnum.FORM_URLENCODED },
         // 数据处理方式
-        transform,
+        transform: clone(transform),
         // 配置项，下面的选项都可以在独立的接口请求中覆盖
         requestOptions: {
           // 默认将prefix 添加到url

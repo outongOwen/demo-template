@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 const { options, defaultKey, keyField } = toRefs(props);
 const valueVModel = useVModel(props, 'value', emit);
-const radioButtonContainerRef = ref<HTMLElement | null>(null);
+const radioButtonContainerRef = ref<HTMLElement | null>();
 const hasTabWrap = ref<boolean>(false); // 换行状态
 const isShowOrHideTabList = ref<boolean>(false); // 是否显示或隐藏tab列表
 const { width: containerWidth } = useElementSize(radioButtonContainerRef, undefined, {

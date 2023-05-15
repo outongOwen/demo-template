@@ -2,10 +2,8 @@ import { defineStore } from 'pinia';
 import { darkTheme } from 'naive-ui';
 import { getNaiveThemeOverrides, initThemeSettings } from './helpers';
 
-type ThemeState = Theme.Setting;
-
 export const useThemeStore = defineStore('ThemeStore', {
-  state: (): ThemeState => initThemeSettings(),
+  state: (): Theme.Setting => initThemeSettings(),
   getters: {
     /** naiveUI的主题配置 */
     naiveThemeOverrides(state) {

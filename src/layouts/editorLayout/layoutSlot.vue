@@ -7,28 +7,28 @@
       <slot name="headerArea"></slot>
     </div>
     <div class="layout-divider w100%"></div>
-    <div :style="`height: calc(100% - (${theme.header.height + 5}px))`" class="flex">
-      <div :style="{ width: ` ${theme.sliderMenu.width}px` }" class="h100%">
+    <div :style="`height: calc(100% - (${theme.header.height + 5}px))`" class="flex w100%">
+      <div :style="{ width: ` ${theme.sliderMenu.width}px` }">
         <slot name="sliderMenu"></slot>
       </div>
       <div class="layout-divider h100%"></div>
-      <div :style="`width: calc(100% - (${theme.sliderMenu.width + 5}px))`">
-        <splitpanes horizontal>
-          <pane>
-            <splitpanes>
-              <pane min-size="25" max-size="70">
+      <splitpanes horizontal :style="`width: calc(100% - (${theme.sliderMenu.width + 5}px));`">
+        <pane>
+          <splitpanes>
+            <pane min-size="25" max-size="70">
+              <div class="wh-full relative">
                 <slot name="centerLeftArea"></slot>
-              </pane>
-              <pane>
-                <slot name="centerRightArea"></slot>
-              </pane>
-            </splitpanes>
-          </pane>
-          <pane max-size="75" min-size="30">
-            <slot name="trackArea"></slot>
-          </pane>
-        </splitpanes>
-      </div>
+              </div>
+            </pane>
+            <pane>
+              <slot name="centerRightArea"></slot>
+            </pane>
+          </splitpanes>
+        </pane>
+        <pane max-size="75" min-size="30">
+          <slot name="trackArea"></slot>
+        </pane>
+      </splitpanes>
     </div>
   </div>
 </template>

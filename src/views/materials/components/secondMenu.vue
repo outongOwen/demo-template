@@ -5,7 +5,7 @@
  * secondMenu.vue
 -->
 <template>
-  <div class="mb-10px">
+  <div class="mb-10px px10px">
     <radio-button-group v-model:value="valueVModel" :options="options" :key-field="keyField" @change="handleChecked" />
   </div>
 </template>

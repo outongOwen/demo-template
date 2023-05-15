@@ -38,8 +38,27 @@ export default defineConfig(configEnv => {
       include: ['splitpanes']
     },
     build: {
+      outDir: viteEnv.VITE_APP_NAME,
       reportCompressedSize: false,
       sourcemap: false,
+      chunkSizeWarningLimit: 2000,
+      rollupOptions: {
+        output: {
+          chunkFileNames: 'static/js/[name]-[hash].js',
+          entryFileNames: 'static/js/[name]-[hash].js',
+          assetFileNames: 'static/[ext]/[name]-[hash].[ext]'
+          // manualChunks(id) {
+          //   // 根据模块的路径或名称，将需要放在同一个块中的模块归为一类
+          //   if (id.includes('src/packages/publicSettingConfig/')) {
+          //     return 'publicSettingConfig';
+          //   }
+          //   if (id.includes('node_modules')) {
+          //     return 'vendor';
+          //   }
+          //   return [];
+          // }
+        }
+      },
       commonjsOptions: {
         ignoreTryCatch: false
       }

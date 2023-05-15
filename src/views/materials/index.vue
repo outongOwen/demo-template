@@ -33,17 +33,18 @@
 </template>
 
 <script setup lang="ts">
-import GlobalMaterial from '~/src/layouts/common/globalMaterial.vue';
+import GlobalMaterial from '@/layouts/common/globalMaterial.vue';
 import SearchForm from './components/searchForm.vue';
 import SecondMenu from './components/secondMenu.vue';
 import MaterialBody from './components/materialBody.vue';
-import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';
+import type { ExtendMenuOptions, SecondMenuOptions, ListSchema } from '#/packages.d';
 defineOptions({ name: 'Materials' });
 interface Props {
   menuOptions: ExtendMenuOptions;
 }
 const props = defineProps<Props>();
 const { menuOptions } = toRefs(props);
+
 const searchFormModel = reactive<Record<string, any>>({});
 const keyField = ref<string>('key');
 const curSecondMenuKey = ref<string>('');
@@ -56,10 +57,10 @@ const menuType = computed((): string | number => {
 const comKey = computed((): string | number => {
   return String(menuOptions.value.key!) + curSecondMenuKey.value;
 });
-const listSchema = computed(() => {
-  return menuOptions.value?.listSchema;
+const listSchema = computed((): ListSchema => {
+  return menuOptions.value.listSchema!;
 });
-const queryCondition = computed(() => {
+const queryCondition = computed((): Record<string, unknown> => {
   searchFormModel.key = curSecondMenuKey.value;
   return searchFormModel;
 });

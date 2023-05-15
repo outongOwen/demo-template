@@ -50,12 +50,4 @@ declare namespace Service {
     filename?: string;
     [key: string]: any;
   }
-  /** mock示例接口类型：后端接口返回的数据的类型 */
-  /** mock的响应option */
-  interface MockOption {
-    url: Record<string, any>;
-    body: Record<string, any>;
-    query: Record<string, any>;
-    headers: Record<string, any>;
-  }
 }

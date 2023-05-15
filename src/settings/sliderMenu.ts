@@ -16,7 +16,6 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     icon: iconRender({ icon: 'material-symbols:video-camera-back-sharp' }),
     keepAlive: true,
     areaConfig: createDefaultAreaConfig(),
-    isNetworkSecondMenu: false,
     secondMenuOptions: [
       {
         label: '上传视频',
@@ -92,6 +91,7 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
         icon: 'material-symbols:photo-camera-back-sharp'
       }
     ],
+    isLocal: true,
     searchModel: {
       keyword: '',
       onlyMe: '',
@@ -123,7 +123,8 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     label: '字体',
     key: 'Font',
     icon: iconRender({ icon: 'material-symbols:font-download-sharp' }),
-    areaConfig: createDefaultAreaConfig()
+    areaConfig: createDefaultAreaConfig(),
+    isLocal: true
   },
   {
     label: '特效',
@@ -136,7 +137,8 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     label: '转场',
     key: 'Transition',
     icon: iconRender({ icon: 'material-symbols:swap-horizontal-circle-sharp' }),
-    areaConfig: createDefaultAreaConfig(false, false, true)
+    areaConfig: createDefaultAreaConfig(false, false, false),
+    isLocal: true
   },
   {
     label: '模板',

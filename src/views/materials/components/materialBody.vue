@@ -7,7 +7,7 @@
 <template>
   <div id="__MATERIAL_LIST_SCROLL_EL_ID__" ref="virtualGridContainerRef" class="wh-full relative of-auto pr5px">
     <virtual-grid
-      v-if="loaded"
+      v-if="listData.length"
       ref="virtualGridRef"
       :scroll-element="virtualGridContainerRef"
       :items="listData"
@@ -23,94 +23,98 @@
     />
     <div v-if="errored" class="absolute-center wh-full flex">
       <n-text>加载失败，请</n-text>
-      <n-button text type="primary">重试</n-button>
+      <n-button text type="primary" @click="initializeList">重试</n-button>
     </div>
-    <n-spin v-if="!loaded && !errored" class="absolute-center wh-full" description="加载中..."></n-spin>
+    <n-spin v-if="loaded && !errored" class="absolute-center wh-full" description="加载中..."></n-spin>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
+import type { Item as GridItem } from '@/components/custom/VirtualGrid.vue';
 import VirtualGrid from '@/components/custom/VirtualGrid.vue';
 // import { useMaterialList } from '../hooks';
 // import MaterialItem from './materialItem.vue';
-import ImageItem from './imageItem.vue';
+import { getCatalogMediumList } from '@/service/api';
+import ImageItem from '@/components/module/materials/materialItem/ImageItem.vue';
+// import VideoItem from '@/components/module/materials/materialItem/VideoItem.vue';
+// import AudioItem from '@/components/module/materials/materialItem/AudioItem.vue';
 import type { ListSchema } from '#/packages.d.ts';
 defineOptions({ name: 'MaterialBody' });
-interface Props {
-  queryCondition: Record<string, unknown>;
-  menuType: string | number;
-  listConfig?: ListSchema;
-}
 interface ExposeAPI {
   updateList: () => void;
 }
+interface Props {
+  queryCondition: Record<string, any>;
+  menuType: string | number;
+  listConfig?: ListSchema;
+}
 
 const props = withDefaults(defineProps<Props>(), {
-  listConfig: () => ({ width: 170, height: 95, gutter: 10, pageSize: 50 })
+  listConfig: () => ({ width: 160, height: 90, gutter: 10, pageSize: 50 })
 });
-const { listConfig } = toRefs(props);
+const { listConfig, menuType } = toRefs(props);
 // const { pageProvider, total, isFirstTimeLoading } = useMaterialList();
-const virtualGridContainerRef = ref<HTMLElement | null>(null);
+const virtualGridContainerRef = ref<HTMLElement | null>();
 const virtualGridRef = ref<InstanceType<typeof VirtualGrid> | null>(null);
-const offset = ref<number>(0);
+const offset = ref<number>(1);
+const totalPages = ref<number>(0);
+const listData = ref<any[]>([]);
 const loaded = ref<boolean>(false);
 const errored = ref<boolean>(false);
-const mockError = ref<boolean>(false);
-const listData = ref<any[]>([]);
+
+const loadGridItemComponent = computed((): Component => {
+  const menuTypeValue = menuType.value || '';
+  const menuTypeLowerCase = String(menuTypeValue).toLowerCase();
+  const componentMap: Record<string, Component> = {
+    image: ImageItem,
+    video: ImageItem,
+    audio: ImageItem
+  };
+  const component = componentMap[menuTypeLowerCase] || ImageItem;
+  return markRaw(component);
+});
 const getListConfig = () => {
-  const config = { width: 170, height: 95, gutter: 10, pageSize: 50, ...listConfig };
+  const config = { width: 160, height: 90, gutter: 10, pageSize: 50, ...listConfig };
   return { ...config, ...listConfig.value };
 };
+
 const updateList = () => {
   console.log('updateList');
 };
-
 useResizeObserver(virtualGridContainerRef, () => {
-  virtualGridRef.value!.resetGrid();
+  virtualGridRef.value?.resetGrid();
 });
-// onMounted(async () => {
-//   try {
-//     const list = await pageProvider(1, 100);
-//     listData.value = list;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
-const pullData = (): Promise<boolean> => {
-  // This is to try when we reach end of infinite scroll (only 5 loads)
-  if (offset.value > 15) {
-    return Promise.resolve(true);
-  }
-  // 返回错误
-  if (offset.value === 1 && !mockError.value) {
-    mockError.value = true;
-    return Promise.reject(new Error('error'));
-  }
-
-  // Populate random images (for the demo)
-  const randomImages = Array.from({ length: getListConfig().pageSize }, (_, index) => {
-    const width = getListConfig().width;
-    const height = getListConfig().height;
-    const id = index + offset.value * 100;
-    return {
-      id: `img-${id}`,
-      width,
-      height,
+const transformToGridList = (list: any): GridItem[] => {
+  const gridList = list.reduce((pre: GridItem[], cur: any) => {
+    const gridItem: GridItem = {
+      id: cur.id,
+      width: getListConfig().width,
+      height: getListConfig().height,
       columnSpan: 1,
-      renderComponent: markRaw(ImageItem),
+      renderComponent: loadGridItemComponent.value,
       injected: {
-        url: `https://picsum.photos/id/${id + 1}/${width * 3}/${height * 3}.jpg`
+        ...cur
       }
     };
+    pre.push(gridItem);
+    return pre;
+  }, []);
+  return gridList;
+};
+
+const pullData = async (): Promise<boolean> => {
+  if (!totalPages.value || (totalPages.value && offset.value > totalPages.value)) {
+    return true;
+  }
+  const listRes = await getCatalogMediumList({
+    page: offset.value,
+    pageSize: getListConfig().pageSize
   });
-
+  const randomImages = transformToGridList(listRes.content);
   listData.value = [...listData.value, ...randomImages];
-
   offset.value += 1;
-
-  // 在每个响应之间等待，只是为了看看加载器
-  return Promise.resolve(false);
+  return false;
 };
 const pullDataWithDelay = (): Promise<boolean> => {
   return new Promise(resolve =>
@@ -120,24 +124,25 @@ const pullDataWithDelay = (): Promise<boolean> => {
     }, 1000)
   );
 };
-const initializeList = () => {
-  // errored.value = true;
-  // throw new Error('Method not implemented.');
-  pullData()
-    .then(() => {
-      loaded.value = true;
-      virtualGridRef.value?.resetGrid();
-    })
-    .catch(error => {
-      if (error) {
-        console.error('Failed to load initial data', error);
-      }
+const initializeList = async () => {
+  try {
+    loaded.value = true;
+    errored.value = false;
+    const listRes = await getCatalogMediumList({
+      page: offset.value,
+      pageSize: getListConfig().pageSize
     });
+    totalPages.value = listRes.totalPages;
+    listData.value = transformToGridList(listRes.content);
+    offset.value += 1;
+  } catch (error) {
+    errored.value = true;
+  } finally {
+    loaded.value = false;
+  }
 };
 onMounted(() => {
-  nextTick(() => {
-    initializeList();
-  });
+  initializeList();
 });
 
 defineExpose<ExposeAPI>({

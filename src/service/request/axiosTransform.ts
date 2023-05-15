@@ -1,7 +1,7 @@
 /**
  * 数据处理类，可以根据工程配置
  */
-import type { AxiosRequestConfig, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, InternalAxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
 
 export interface CreateAxiosOptions extends AxiosRequestConfig {
   authenticationScheme?: string;
@@ -11,14 +11,15 @@ export interface CreateAxiosOptions extends AxiosRequestConfig {
 
 export abstract class AxiosTransform {
   /**
-   * @description: 请求前的流程配置
+   * A function that is called before a request is sent. It can modify the request configuration as needed.
+   * 在发送请求之前调用的函数。它可以根据需要修改请求配置。
    */
   beforeRequestHook?: (config: AxiosRequestConfig, options: Service.RequestOptions) => AxiosRequestConfig;
 
   /**
-   * @description: 请求已成功处理
+   * @description: 处理响应数据
    */
-  transformRequestHook?: (res: AxiosResponse<Service.Result>, options: Service.RequestOptions) => any;
+  transformResponseHook?: (res: AxiosResponse<Service.Result>, options: Service.RequestOptions) => any;
 
   /**
    * @description: 请求失败处理
@@ -43,5 +44,5 @@ export abstract class AxiosTransform {
   /**
    * @description: 请求之后的拦截器错误处理
    */
-  responseInterceptorsCatch?: (error: Error) => void;
+  responseInterceptorsCatch?: (axiosInstance: AxiosInstance, error: Error) => void;
 }
