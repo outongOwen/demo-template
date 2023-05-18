@@ -62,17 +62,16 @@ const totalPages = ref<number>(0);
 const listData = ref<any[]>([]);
 const loaded = ref<boolean>(false);
 const errored = ref<boolean>(false);
-
+const componentMap: Record<string, Component> = {
+  image: ImageItem,
+  video: ImageItem,
+  audio: ImageItem
+};
 const loadGridItemComponent = computed((): Component => {
   const menuTypeValue = menuType.value || '';
   const menuTypeLowerCase = String(menuTypeValue).toLowerCase();
-  const componentMap: Record<string, Component> = {
-    image: ImageItem,
-    video: ImageItem,
-    audio: ImageItem
-  };
   const component = componentMap[menuTypeLowerCase] || ImageItem;
-  return markRaw(component);
+  return component;
 });
 const getListConfig = () => {
   const config = { width: 160, height: 90, gutter: 10, pageSize: 50, ...listConfig };
@@ -92,7 +91,7 @@ const transformToGridList = (list: any): GridItem[] => {
       width: getListConfig().width,
       height: getListConfig().height,
       columnSpan: 1,
-      renderComponent: loadGridItemComponent.value,
+      renderComponent: markRaw(loadGridItemComponent),
       injected: {
         ...cur
       }

@@ -31,8 +31,8 @@ module.exports = {
       },
       {
         type: 'add',
-        path: `${process.cwd()}/src/store/modules/${dataName}Store/types.ts`, // 这里的name就是上面定义的键
-        templateFile: './store-template/types.hbs',
+        path: `${process.cwd()}/src/store/modules/${dataName}Store/index.type.ts`, // 这里的name就是上面定义的键
+        templateFile: './store-template/index.type.hbs',
         data: {
           name: data.name,
           upperDataName

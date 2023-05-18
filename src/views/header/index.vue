@@ -1,5 +1,5 @@
 <template>
-  <header-layout>
+  <global-header>
     <template #left>
       <n-switch v-model:value="testSelectState" />
     </template>
@@ -10,13 +10,13 @@
         <icon-mdi-white-balance-sunny v-else />
       </div>
     </template>
-  </header-layout>
+  </global-header>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { GlobalHeader } from '@/layouts';
 import { useThemeStore, useGlobalStore } from '@/store';
-import HeaderLayout from '@/layouts/common/globalHeader.vue';
 defineOptions({
   name: 'Header'
 });

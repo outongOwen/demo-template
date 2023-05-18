@@ -8,9 +8,12 @@
   <div ref="radioButtonContainerRef" class="mr25px relative">
     <n-space
       :style="{
-        height: isShowOrHideTabList && hasTabWrap ? `${tabLineHeight}px` : `auto`
+        height: isShowOrHideTabList && hasTabWrap ? `${lineHeight}px` : `auto`
       }"
       class="radio-button-container of-hidden"
+      :class="{
+        'radio-button--dark': theme === 'dark'
+      }"
       :space-size="spaceSize"
       :wrap-item="false"
     >
@@ -31,31 +34,37 @@
       </n-tag>
     </n-space>
     <Icon
-      v-if="hasTabWrap"
+      v-if="options.length && hasTabWrap"
       icon="material-symbols:keyboard-arrow-up"
       class="absolute-rt right--30px text-30px cursor-pointer transition-base select-none"
       :class="{ 'rotate--180': isShowOrHideTabList }"
       @click="handleShowOrHideTabs"
     />
   </div>
+  <n-divider v-if="bottomDivider" class="my10px!" />
 </template>
 
 <script lang="ts" setup>
-import { useVModel, useElementSize, useTimeoutFn } from '@vueuse/core';
+import { useVModel, useResizeObserver } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
 import type { SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'RadioButtonGroup' });
+export interface RadioButtonGroupOption extends SecondMenuOptions {
+  renderComponent?: Component | VNode | null | undefined;
+}
 interface Props {
-  options: SecondMenuOptions[] | [];
+  options: RadioButtonGroupOption[] | [];
   value: string | number | null;
   size?: 'small' | 'medium' | 'large';
   strong?: boolean;
   defaultKey?: string | number | null;
   spaceSize?: number;
   keyField?: string;
+  theme?: 'default' | 'dark';
+  bottomDivider?: boolean;
 }
 interface Emits {
-  (e: 'change', key: string | number | null, option: SecondMenuOptions): void;
+  (e: 'change', key: string | number | null, option: RadioButtonGroupOption): void;
   (e: 'update:value', key: string | number | null): void;
 }
 const emit = defineEmits<Emits>();
@@ -65,18 +74,17 @@ const props = withDefaults(defineProps<Props>(), {
   defaultKey: '',
   spaceSize: 10,
   keyField: 'key',
-  value: null
+  value: null,
+  theme: 'default',
+  bottomDivider: false
 });
 const { options, defaultKey, keyField } = toRefs(props);
 const valueVModel = useVModel(props, 'value', emit);
 const radioButtonContainerRef = ref<HTMLElement | null>();
 const hasTabWrap = ref<boolean>(false); // 换行状态
 const isShowOrHideTabList = ref<boolean>(false); // 是否显示或隐藏tab列表
-const { width: containerWidth } = useElementSize(radioButtonContainerRef, undefined, {
-  box: 'border-box'
-});
-const tabLineHeight = ref<number>(0);
-const handleChecked = (key: string | number | null, option: SecondMenuOptions) => {
+const lineHeight = ref<number>(0);
+const handleChecked = (key: string | number | null, option: RadioButtonGroupOption) => {
   if (valueVModel.value !== key && option) {
     valueVModel.value = key;
     emit('change', key, option);
@@ -90,30 +98,25 @@ const handleShowOrHideTabs = () => {
  * @return {number[]} 换行index
  */
 const checkTagWrap = (): void => {
-  const containerEl = document.querySelector('.radio-button-container');
-  const nTagElements = document.querySelectorAll('.radio-button-container>div');
-  const containerTop = containerEl?.getBoundingClientRect().top;
-  for (let i = 0; i < Array.from(nTagElements).length; i += 1) {
-    const top = nTagElements[i].getBoundingClientRect().top;
-    const height = nTagElements[i].getBoundingClientRect().height;
-    if (top > containerTop!) {
-      hasTabWrap.value = true;
-      !tabLineHeight.value && height && (tabLineHeight.value = height);
-      return;
-    }
-  }
-  hasTabWrap.value = false;
+  const tagNodeList = radioButtonContainerRef.value!.querySelectorAll('.radio-button-container>.n-tag');
+  const tagList = Array.from(tagNodeList) as HTMLElement[];
+  const tagLineHeight = tagList[0]?.clientHeight;
+  const isWrapped = tagList.some(li => {
+    return li.offsetTop !== tagList[0].offsetTop;
+  });
+  hasTabWrap.value = isWrapped;
+  !lineHeight.value && tagLineHeight && (lineHeight.value = tagLineHeight);
 };
-watch(
-  () => containerWidth.value,
-  () => {
-    useTimeoutFn(() => {
-      options.value.length && checkTagWrap();
-    }, 30);
-  },
-  {
-    immediate: true,
-    flush: 'post'
-  }
-);
+useResizeObserver(radioButtonContainerRef, () => {
+  nextTick(() => {
+    options.value.length && checkTagWrap();
+  });
+});
 </script>
+<style scoped lang="scss">
+:deep(.radio-button--dark) {
+  .n-tag--checked {
+    @apply dark:important-bg-[rgba(25,25,25)] important-text-#fff important-bg-primary;
+  }
+}
+</style>

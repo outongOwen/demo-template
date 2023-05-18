@@ -13,7 +13,6 @@ export class AxiosCanceler {
    * @param config 请求配置
    */
   public addPending(config: AxiosRequestConfig): void {
-    console.log(pendingMap, 'pendingMappendingMappendingMap');
     this.removePending(config);
     const url = getPendingUrl(config);
     const controller = new AbortController();

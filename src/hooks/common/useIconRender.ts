@@ -6,7 +6,7 @@ import SvgIcon from '@/components/custom/SvgIcon.vue';
  * 图标渲染
  * - 用于vue的render函数
  */
-export const useIconRender = () => {
+export default function useIconRender() {
   interface IconConfig {
     /**
      * 图标名称(iconify图标的名称)
@@ -58,4 +58,4 @@ export const useIconRender = () => {
   return {
     iconRender
   };
-};
+}

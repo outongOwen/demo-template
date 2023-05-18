@@ -9,9 +9,9 @@
     <global-material :show-header="menuOptions?.areaConfig?.secondMenu && menuOptions?.areaConfig?.searchForm">
       <template v-if="menuOptions?.areaConfig?.secondMenu" #second-menu>
         <second-menu
+          :key="comKey"
           v-model:value="curSecondMenuKey"
           :options="secondMenuOptions"
-          :key-field="keyField"
           @change="handleSecondChecked"
         />
       </template>
@@ -33,10 +33,10 @@
 </template>
 
 <script setup lang="ts">
-import GlobalMaterial from '@/layouts/common/globalMaterial.vue';
-import SearchForm from './components/searchForm.vue';
-import SecondMenu from './components/secondMenu.vue';
-import MaterialBody from './components/materialBody.vue';
+import { GlobalMaterial } from '@/layouts';
+import SearchForm from './components/SearchForm.vue';
+import SecondMenu from './components/SecondMenu.vue';
+import MaterialBody from './components/MaterialBody.vue';
 import type { ExtendMenuOptions, SecondMenuOptions, ListSchema } from '#/packages.d';
 defineOptions({ name: 'Materials' });
 interface Props {

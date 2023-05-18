@@ -1,34 +1,34 @@
 <template>
-  <main-layout>
+  <global-layout>
     <template #headerArea>
       <Header />
     </template>
     <template #sliderMenu>
-      <layout-slider-menu
+      <slider-menu-nav
         :menu-options="sliderMenuOptionsAuthList"
         :default-menu-key="defaultMenuKey"
         @select-menu-option="handleSelectMenuOption"
       />
     </template>
     <template #centerLeftArea>
-      <materials v-if="currentMenuOption && !getTestSelect" :menu-options="currentMenuOption" />
-      <Configuration v-if="getTestSelect" />
+      <materials v-if="currentMenuOption" :menu-options="currentMenuOption" />
+      <Configuration v-show="getTestSelect" />
     </template>
     <template #centerRightArea>画布</template>
     <template #trackArea>轨道</template>
-  </main-layout>
+  </global-layout>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { cloneDeep } from 'lodash-es';
 import { sliderMenuOptions } from '@/settings';
+import { useGlobalStore } from '@/store';
 import Header from '@/views/header/index.vue';
 import Materials from '@/views/materials/index.vue';
 import Configuration from '@/views/configuration/index.vue';
 import { getMenuList } from '@/service/api';
-import { useGlobalStore } from '~/src/store';
-import MainLayout from './layoutSlot.vue';
+import { GlobalLayout, SliderMenuNav } from '@/layouts/components';
 import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'EditorLayout' });
 const globalStore = useGlobalStore();

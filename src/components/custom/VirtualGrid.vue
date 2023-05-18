@@ -375,7 +375,10 @@ const loadMoreDataAsync = async (): Promise<void> => {
     computeContainerData();
     const windowTop = containerData.windowScroll.y;
     const windowBottom = windowTop + containerData.windowSize.height;
-    const bottomTrigger = Math.max(0, containerData.elementWindowOffset + containerData.elementSize.height);
+    const bottomTrigger = Math.max(
+      0,
+      containerData.elementWindowOffset + containerData.elementSize.height - updateTriggerMargin.value
+    );
     if (!bottomReached.value && windowBottom >= bottomTrigger && !updateLock.value) {
       updateLock.value = true;
       errorLock.value = false;

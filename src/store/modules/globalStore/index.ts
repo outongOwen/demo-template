@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
-import type { GlobalStateType } from './types';
+import type { GlobalStateType } from './index.type';
 
 export const useGlobalStore = defineStore('useGlobalStore', {
   state: (): GlobalStateType => ({
-    testSelect: true
+    testSelect: false
   }),
   getters: {
     getTestSelect(state) {

@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import GlobalConfiguration from '@/layouts/common/globalConfiguration.vue';
+import { GlobalConfiguration } from '@/layouts';
 import ConfigurationBody from './components/configurationBody.vue';
 defineOptions({ name: 'Configuration' });
 </script>

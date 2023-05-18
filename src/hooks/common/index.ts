@@ -1,1 +1,2 @@
-export * from './useIconRender';
+import useIconRender from './useIconRender';
+export { useIconRender };

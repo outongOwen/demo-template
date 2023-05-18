@@ -14,8 +14,11 @@
 
 <script setup lang="ts">
 import { dateZhCN, zhCN } from 'naive-ui';
+import { consola } from 'consola';
 import { useThemeStore, subscribeStore } from '@/store';
 
 const theme = useThemeStore();
 subscribeStore();
+consola.info(import.meta.glob('/src/packages/views/!(_*)/config/index.vue', { eager: true }));
+consola.info(import.meta.glob('/src/packages/views/!(_*)/view/index.vue', { eager: true }));
 </script>
