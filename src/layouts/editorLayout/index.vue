@@ -4,7 +4,7 @@
       <Header />
     </template>
     <template #sliderMenu>
-      <slider-menu-nav
+      <global-slider-menu
         :menu-options="sliderMenuOptionsAuthList"
         :default-menu-key="defaultMenuKey"
         @select-menu-option="handleSelectMenuOption"
@@ -12,7 +12,7 @@
     </template>
     <template #centerLeftArea>
       <materials v-if="currentMenuOption" :menu-options="currentMenuOption" />
-      <Configuration v-show="getTestSelect" />
+      <Configuration v-if="getTestSelect" />
     </template>
     <template #centerRightArea>画布</template>
     <template #trackArea>轨道</template>
@@ -28,7 +28,7 @@ import Header from '@/views/header/index.vue';
 import Materials from '@/views/materials/index.vue';
 import Configuration from '@/views/configuration/index.vue';
 import { getMenuList } from '@/service/api';
-import { GlobalLayout, SliderMenuNav } from '@/layouts/components';
+import { GlobalLayout, GlobalSliderMenu } from '@/layouts/components';
 import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'EditorLayout' });
 const globalStore = useGlobalStore();

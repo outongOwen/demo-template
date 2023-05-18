@@ -34,11 +34,9 @@
 
 <script setup lang="ts">
 import { GlobalMaterial } from '@/layouts';
-import SearchForm from './components/SearchForm.vue';
-import SecondMenu from './components/SecondMenu.vue';
-import MaterialBody from './components/MaterialBody.vue';
+import { SearchForm, MaterialBody, SecondMenu } from './components';
 import type { ExtendMenuOptions, SecondMenuOptions, ListSchema } from '#/packages.d';
-defineOptions({ name: 'Materials' });
+defineOptions({ name: 'MaterialsModules' });
 interface Props {
   menuOptions: ExtendMenuOptions;
 }

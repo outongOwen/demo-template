@@ -38,7 +38,7 @@ import { useMouseInElement, watchOnce } from '@vueuse/core';
 import type { ScrollReturnOption } from '@/components/custom/BetterScrollBar.vue';
 import BetterScrollBar from '@/components/custom/BetterScrollBar.vue';
 import type { ExtendMenuOptions } from '#/packages.d';
-defineOptions({ name: 'LayoutSliderMenu' });
+defineOptions({ name: 'SliderMenuLayout' });
 interface Props {
   menuOptions: ExtendMenuOptions[];
   defaultMenuKey?: string | number | null;

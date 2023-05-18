@@ -1,21 +1,7 @@
-import { AudioSettings, TextSettings } from '@/packages/components';
+import { TextSettings } from '@/packages/components';
 import type { ConfigTabOptions } from '@/components/module/packages/configurationContent/index.vue';
 const text = ref<string>('hello world');
-const materialData = reactive({
-  volume: 50,
-  enterTime: 0,
-  leaveTime: 0,
-  speed: 1
-});
-export const baseConfigOptions: ConfigTabOptions[] = [
-  {
-    key: 'AudioSettings',
-    label: '音频',
-    renderComponent: () =>
-      h(AudioSettings, {
-        materialData
-      })
-  },
+export const effectConfigOptions: ConfigTabOptions[] = [
   {
     key: 'TextSettings',
     label: '文本',

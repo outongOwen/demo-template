@@ -22,7 +22,7 @@ export default function useContext<T>(contextName = 'context', options: CreateCo
     const { readonly = true, native = false } = options;
     const state = ref(context);
     const provideData = readonly ? defineReadonly(state) : context;
-    provide(injectKey, native ? context : provideData);
+    provide(injectKey, native ? context : (provideData as T | Readonly<T>));
     return { state };
   }
   function useInject() {

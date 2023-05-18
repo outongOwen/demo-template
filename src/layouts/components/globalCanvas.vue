@@ -8,6 +8,8 @@
   <div class="container"></div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+defineOptions({ name: 'CanvasLayout' });
+</script>
 
 <style scoped></style>

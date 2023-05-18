@@ -12,8 +12,8 @@
 
 <script setup lang="ts">
 import { GlobalConfiguration } from '@/layouts';
-import ConfigurationBody from './components/configurationBody.vue';
-defineOptions({ name: 'Configuration' });
+import { ConfigurationBody } from './components';
+defineOptions({ name: 'ConfigurationModules' });
 </script>
 
 <style scoped></style>

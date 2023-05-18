@@ -8,6 +8,8 @@
   <div class="container"></div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+defineOptions({ name: 'TrackLayout' });
+</script>
 
 <style scoped></style>

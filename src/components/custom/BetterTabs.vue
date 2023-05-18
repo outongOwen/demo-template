@@ -16,13 +16,12 @@
     >
       <n-tab-pane v-for="item in tabsOptions" :key="item.name" :name="item.name" :tab="item.label">
         <div :style="{ height: `${tabPaneHeight}px` }">
-          <better-scroll-bar>
-            <component :is="item.renderComponent" v-if="item?.renderComponent" :item="item" />
-          </better-scroll-bar>
+          <component :is="item.renderComponent" v-if="item?.renderComponent" :item="item" />
         </div>
       </n-tab-pane>
-      <template v-if="!arrivedState.left" #prefix>
+      <template #prefix>
         <div
+          v-show="!arrivedState.left"
           class="wh-full flex-center cursor-pointer hover:text-primary px-5px select-unset"
           :native-focus-behavior="true"
           @click="handlePrevious"
@@ -30,8 +29,9 @@
           <icon-ooui:previous-ltr />
         </div>
       </template>
-      <template v-if="!arrivedState.right" #suffix>
+      <template #suffix>
         <div
+          v-show="!arrivedState.right"
           :native-focus-behavior="true"
           text
           class="wh-full flex-center cursor-pointer hover:text-primary px-5px select-unset"
@@ -47,9 +47,8 @@
 <script setup lang="ts">
 import type { TabsInst } from 'naive-ui';
 import { useElementSize, useIntersectionObserver, useResizeObserver, useDebounceFn, useVModel } from '@vueuse/core';
-import { useBetterTabsContext } from '@/context';
 defineOptions({ name: 'BetterTabs' });
-export interface TabsOptions {
+export interface BetterTabsOptions {
   name: string | number;
   label: string;
   renderComponent: Component | null;
@@ -59,14 +58,14 @@ interface ArrivedState {
   right: boolean;
 }
 interface Props {
-  tabsOptions: TabsOptions[];
+  tabsOptions: BetterTabsOptions[];
   value: string | number;
   type?: 'line' | 'card';
   animated?: boolean;
 }
 interface Emits {
   (event: 'update:value', value: number | string): void;
-  (event: 'change', item: TabsOptions, name: string | number): void;
+  (event: 'change', item: BetterTabsOptions, name: string | number): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -84,7 +83,6 @@ const arrivedState = reactive<ArrivedState>({
   left: true,
   right: true
 });
-const { provideBetterTabsContext } = useBetterTabsContext();
 
 const selectedTabIndex = computed((): number => {
   return tabsOptions.value.findIndex(item => item.name === selectedTab.value);
@@ -121,6 +119,7 @@ useResizeObserver(tabContainerRef, () => {
 useIntersectionObserver(
   firstTabEl,
   entries => {
+    console.log(entries[0]);
     nextTick(() => {
       arrivedState.left = entries[0]?.isIntersecting;
     });
@@ -194,11 +193,6 @@ onMounted(() => {
       `.n-tabs-tab-wrapper:nth-child(${tabsOptions.value.length + 1}) >.n-tabs-tab`
     ) as unknown as HTMLElement;
   });
-});
-
-// 注入上下文
-provideBetterTabsContext({
-  contentHeight: tabPaneHeight
 });
 </script>
 

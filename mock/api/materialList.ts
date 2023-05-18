@@ -22,16 +22,16 @@ const demoList = (() => {
     ]
   });
   data.list.forEach((item: any) => {
-    item.preUrl = faker.image.imageUrl(
-      faker.datatype.number({ min: 90, max: 192 }),
-      faker.datatype.number({ min: 70, max: 108 }),
-      'NorthernEurope'
-    );
-    item.path = faker.image.imageUrl(
-      faker.datatype.number({ min: 900, max: 1920 }),
-      faker.datatype.number({ min: 700, max: 1080 }),
-      'NorthernEurope'
-    );
+    item.preUrl = faker.image.urlLoremFlickr({
+      width: faker.number.int({ min: 90, max: 192 }),
+      height: faker.number.int({ min: 70, max: 108 }),
+      category: 'model'
+    });
+    item.path = faker.image.urlLoremFlickr({
+      width: faker.number.int({ min: 900, max: 1920 }),
+      height: faker.number.int({ min: 700, max: 1080 }),
+      category: 'model'
+    });
   });
   return data.list;
 })();

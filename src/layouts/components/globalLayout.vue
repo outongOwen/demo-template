@@ -37,5 +37,5 @@
 import { Splitpanes, Pane } from 'splitpanes';
 import { useThemeStore } from '@/store';
 const theme = useThemeStore();
-defineOptions({ name: 'MainLayout' });
+defineOptions({ name: 'GlobalLayout' });
 </script>

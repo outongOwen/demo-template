@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core';
-defineOptions({ name: 'GlobalMaterial' });
+defineOptions({ name: 'MaterialLayout' });
 interface Props {
   showHeader: boolean | undefined;
 }

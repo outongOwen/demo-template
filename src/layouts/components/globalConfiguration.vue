@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-defineOptions({ name: 'GlobalConfiguration' });
+defineOptions({ name: 'ConfigurationLayout' });
 </script>
 
 <style scoped></style>

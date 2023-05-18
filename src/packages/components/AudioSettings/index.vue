@@ -5,17 +5,17 @@
  * soundEffectSetting.vue
 -->
 <template>
-  <n-form ::model="searchModel" size="small" inline>
+  <n-form ::model="materialData" size="small" inline>
     <n-grid cols="1">
       <n-form-item-gi path="scaleX" label="音量">
-        <NumberInputSlider v-model:value="searchModel.volume" :step="1" :max="100" :min="0" :number-input-width="105">
+        <NumberInputSlider v-model:value="materialData.volume" :step="1" :max="100" :min="0" :number-input-width="105">
           <!-- :slider-update-callback="(value)=>handleUpdateValue(value,'scaleX')!" -->
           <template #suffix> % </template>
         </NumberInputSlider>
       </n-form-item-gi>
       <n-form-item-gi path="inputValue" label="淡入时间">
         <NumberInputSlider
-          v-model:value="searchModel.enterTime"
+          v-model:value="materialData.enterTime"
           :step="0.1"
           :max="10"
           :min="0"
@@ -26,7 +26,7 @@
       </n-form-item-gi>
       <n-form-item-gi path="scaleX" label="淡出时间">
         <NumberInputSlider
-          v-model:value="searchModel.leaveTime"
+          v-model:value="materialData.leaveTime"
           :step="0.1"
           :max="10"
           :min="0"
@@ -36,7 +36,7 @@
         </NumberInputSlider>
       </n-form-item-gi>
       <n-form-item-gi path="inputValue" label="淡入时间">
-        <NumberInputSlider v-model:value="searchModel.speed" :step="0.2" :max="8" :min="0.1" />
+        <NumberInputSlider v-model:value="materialData.speed" :step="0.2" :max="8" :min="0.1" />
       </n-form-item-gi>
     </n-grid>
   </n-form>
@@ -44,12 +44,16 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'AudioSettings' });
-const searchModel = reactive({
-  volume: 50,
-  enterTime: 0,
-  leaveTime: 0,
-  speed: 1
-});
+interface Props {
+  materialData: {
+    volume: number;
+    enterTime: number;
+    leaveTime: number;
+    speed: number;
+  };
+}
+const props = defineProps<Props>();
+const { materialData } = toRefs(props);
 // const formatCenter = (value: string): string => {
 //   return `${parseFloat(value).toFixed(0)}`;
 // };

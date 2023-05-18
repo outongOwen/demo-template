@@ -4,15 +4,5 @@ import GlobalConfiguration from './globalConfiguration.vue';
 import GlobalHeader from './globalHeader.vue';
 import GlobalMaterial from './globalMaterial.vue';
 import GlobalTrack from './globalTrack.vue';
-import ConfigurationContent from './configurationContent.vue';
-import SliderMenuNav from './sliderMenuNav.vue';
-export {
-  ConfigurationContent,
-  GlobalCanvas,
-  GlobalConfiguration,
-  GlobalHeader,
-  GlobalMaterial,
-  GlobalTrack,
-  GlobalLayout,
-  SliderMenuNav
-};
+import GlobalSliderMenu from './globalSliderMenu.vue';
+export { GlobalCanvas, GlobalConfiguration, GlobalHeader, GlobalMaterial, GlobalTrack, GlobalLayout, GlobalSliderMenu };
