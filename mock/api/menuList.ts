@@ -13,7 +13,7 @@ const apis: MockMethod[] = [
             id: '@id',
             name: '@cname',
             extend: null,
-            'type|1': ['Video', 'Image', 'Audio'],
+            'type|1': ['Video', 'Image', 'Audio', 'Transparent'],
             children: sampleSize(range(1, 11), random(1, 11)).map(() => {
               return {
                 id: '@id',

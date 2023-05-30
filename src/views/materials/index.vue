@@ -5,69 +5,51 @@
  * index.vue
 -->
 <template>
-  <Transition>
-    <global-material :show-header="menuOptions?.areaConfig?.secondMenu && menuOptions?.areaConfig?.searchForm">
-      <template v-if="menuOptions?.areaConfig?.secondMenu" #second-menu>
-        <second-menu
-          :key="comKey"
-          v-model:value="curSecondMenuKey"
-          :options="secondMenuOptions"
-          @change="handleSecondChecked"
-        />
-      </template>
-      <template v-if="menuOptions?.areaConfig?.searchForm" #search-form>
-        <search-form v-model:value="searchFormModel" @search="handleSearch" />
-      </template>
-      <template v-if="menuOptions?.areaConfig?.materialBody" #material-body>
-        <material-body
-          ref="materialBodyRef"
-          :key="comKey"
-          :query-condition="queryCondition"
-          :list-config="listSchema"
-          :menu-type="menuType"
-        />
-        <!-- :query-condition="queryCondition" @refresh="handleRefresh" -->
-      </template>
-    </global-material>
-  </Transition>
+  <keep-alive :include="keepAliveIncludes">
+    <component :is="renderComponent" :options="menuOptions" />
+  </keep-alive>
 </template>
 
 <script setup lang="ts">
-import { GlobalMaterial } from '@/layouts';
-import { SearchForm, MaterialBody, SecondMenu } from './components';
-import type { ExtendMenuOptions, SecondMenuOptions, ListSchema } from '#/packages.d';
+import {
+  VideoMaterial,
+  AudioMaterial,
+  ImageMaterial,
+  TransparentMaterial,
+  DecorationMaterial,
+  TextMaterial,
+  SubtitleMaterial
+} from './components';
+import type { ExtendMenuOptions } from '#/packages.d';
 defineOptions({ name: 'MaterialsModules' });
 interface Props {
   menuOptions: ExtendMenuOptions;
 }
 const props = defineProps<Props>();
 const { menuOptions } = toRefs(props);
-
-const searchFormModel = reactive<Record<string, any>>({});
-const keyField = ref<string>('key');
-const curSecondMenuKey = ref<string>('');
-const secondMenuOptions = computed((): SecondMenuOptions[] => {
-  return menuOptions.value?.secondMenuOptions ? menuOptions.value?.secondMenuOptions : [];
-});
+const componentMap: Record<string, Component> = {
+  image: ImageMaterial,
+  video: VideoMaterial,
+  audio: AudioMaterial,
+  text: TextMaterial,
+  subtitle: SubtitleMaterial,
+  decoration: DecorationMaterial,
+  transparent: TransparentMaterial
+};
+const keepAliveIncludes = ref<(string | RegExp)[]>([]);
 const menuType = computed((): string | number => {
   return menuOptions.value.key!;
 });
-const comKey = computed((): string | number => {
-  return String(menuOptions.value.key!) + curSecondMenuKey.value;
-});
-const listSchema = computed((): ListSchema => {
-  return menuOptions.value.listSchema!;
-});
-const queryCondition = computed((): Record<string, unknown> => {
-  searchFormModel.key = curSecondMenuKey.value;
-  return searchFormModel;
+const renderComponent = computed((): Component => {
+  const menuTypeLowerCase = String(menuType.value).toLowerCase();
+  const component = componentMap[menuTypeLowerCase];
+  return component;
 });
 watchEffect(() => {
-  curSecondMenuKey.value = secondMenuOptions.value.length ? (secondMenuOptions.value[0][keyField.value] as string) : '';
+  const { key } = menuOptions.value;
+  const isExist = keepAliveIncludes.value.some(item => {
+    return item === `${key}Material`;
+  });
+  key && !isExist && menuOptions.value.isKeepAlive && keepAliveIncludes.value.push(`${key}Material`);
 });
-const handleSecondChecked = (key: string | number | null, option: SecondMenuOptions) => {
-  console.log(curSecondMenuKey.value, 'curSecondMenuKeycurSecondMenuKey');
-  console.log(key, option, 'radioItemradioItem');
-};
-const handleSearch = () => {};
 </script>

@@ -1,7 +1,10 @@
 <template>
   <div ref="materialContainerRef" class="flex-col wh-full py-10px">
     <header v-if="showHeader" ref="materialHeaderRef" class="flex-col">
-      <slot name="second-menu"></slot>
+      <div class="mb-10px px10px">
+        <slot name="second-menu"></slot>
+      </div>
+
       <slot name="search-form"></slot>
     </header>
     <div class="pl10px" :style="{ height: `${materialBodyHeight}px` }">

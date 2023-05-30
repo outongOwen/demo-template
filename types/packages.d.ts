@@ -32,7 +32,7 @@ declare type ExtendMenuOptions = {
   /** 区域配置 */
   areaConfig: AeaConfig;
   /** 是否缓存 */
-  keepAlive?: boolean;
+  isKeepAlive?: boolean;
   /** 查询条件 */
   searchModel?: Record<string, unknown>;
   /** 列表配置 */

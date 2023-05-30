@@ -35,12 +35,15 @@
           'grid-row-start': getGridRowStart(item, renderData)
         }"
       >
-        <component
-          :is="item.renderComponent"
-          :item="item"
-          :intersection-observer-options="intersectionObserverOptions"
-          lazy
-        />
+        <slot :item="item">
+          <component
+            :is="item.renderComponent"
+            v-if="item.renderComponent"
+            :item="item"
+            :intersection-observer-options="intersectionObserverOptions"
+            lazy
+          />
+        </slot>
       </div>
     </div>
     <div v-if="updateLock && !bottomReached" :style="{ height: `${updateTriggerMargin}px` }" class="wh-full">
@@ -68,7 +71,7 @@ export interface Item {
   width?: number;
   columnSpan: number;
   newRow?: boolean;
-  renderComponent: Component;
+  renderComponent?: Component;
 }
 interface ContainerData {
   windowSize: ElementSize;

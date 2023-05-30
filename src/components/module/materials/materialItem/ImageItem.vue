@@ -1,5 +1,5 @@
 <!--
- * new page
+ * @abstract:图片素材列表项
  * @author: owenTong
  * @since: 2023-05-06
  * imageItem.vue

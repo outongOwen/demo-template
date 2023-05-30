@@ -9,7 +9,7 @@ export const getMenuList = () => {
     url: Api.GET_MENU_LIST
   });
 };
-export const getCatalogMediumList = (params: { page: number; pageSize: number }) => {
+export const getCatalogMediumList = (params: any) => {
   return mockRequest.get<Record<string, any>>(
     {
       url: Api.GET_CATALOG_MEDIUM_LIST,
