@@ -27,7 +27,7 @@
       <div
         v-for="item in renderData.cellsToRender"
         :key="item.id"
-        class="bg-black"
+        class="select-none"
         :style="{
           height: `${item.height}px`,
           'grid-column-start': item.columnNumber,
@@ -52,12 +52,12 @@
         <n-text> 加载中...</n-text>
       </div>
       <div v-if="updateLock && errorLock" class="flex-center wh-full">
-        <n-text class="color-[rgba(255,255,255,0.2)]">加载失败，请</n-text>
+        <n-text class="dark:color-[rgba(255,255,255,0.2)]">加载失败，请</n-text>
         <n-button text type="primary" @click="resetLoad">重试</n-button>
       </div>
     </div>
     <div v-if="bottomReached" :style="{ height: `${updateTriggerMargin}px` }" class="box-border wh-full flex-center">
-      <n-text class="color-[rgba(255,255,255,0.2)]">- 已加载全部内容 -</n-text>
+      <n-text class="dark:color-[rgba(255,255,255,0.2)]">- 已加载全部内容 -</n-text>
     </div>
   </div>
 </template>
@@ -156,12 +156,10 @@ const containerData = reactive<ContainerData>({
   elementWindowOffset: 0,
   elementSize: { height: 0, width: 0 }
 });
-
 const getColumnWidth = (columnCount: number | null, gridGap: number | null, elementWidth: number | null) => {
   if (columnCount === null || gridGap === null || elementWidth === null) {
     return 0;
   }
-
   const totalGapSpace = (columnCount - 1) * gridGap;
   const columnWidth = Math.round((elementWidth - totalGapSpace) / columnCount);
 

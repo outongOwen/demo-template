@@ -5,27 +5,32 @@
  * imageItem.vue
 -->
 <template>
-  <div
-    :style="{ height: item.height + 'px' }"
-    class="flex-center! h-full bg-[rgba(0,0,0,0.2)] dark:bg-[rgba(255,255,255,0.3)] relative"
-  >
-    <n-image
-      :src="item.injected.preUrl"
-      :preview-src="item.injected.path"
-      :lazy="lazy"
-      fallback-src=""
-      object-fit="contain"
-      :intersection-observer-options="intersectionObserverOptions"
+  <div :style="{ height: item.height + 'px', width: item.width + 'px' }">
+    <div
+      class="w-full bg-[rgba(0,0,0,0.2)] dark:bg-[rgba(255,255,255,0.3)] h-[calc(100%-20px)] flex-center"
+      @click="emits('preview', item)"
     >
-      <template #placeholder>
-        <n-skeleton class="wh-full" />
-      </template>
-    </n-image>
-    <div class="absolute-bl left-0 right-0 bg-[rgba(255,255,255,.1)] text-center">
-      <n-text class="w100% px10px break-words line-clamp-1">
-        {{ item.injected.duration }}
-      </n-text>
+      <n-image
+        :height="item.height - 20"
+        :width="item.width"
+        :src="item.injected.preUrl"
+        :preview-src="item.injected.path"
+        :lazy="lazy"
+        fallback-src=""
+        object-fit="contain"
+        preview-disabled
+        :intersection-observer-options="intersectionObserverOptions"
+      >
+        <template #placeholder>
+          <n-skeleton class="w-full h-[calc(100%-20px)]" />
+        </template>
+      </n-image>
     </div>
+    <n-text>
+      <n-ellipsis class="w100% h20px">
+        {{ item.injected.name }}
+      </n-ellipsis>
+    </n-text>
   </div>
 </template>
 
@@ -46,15 +51,11 @@ interface Props {
   intersectionObserverOptions?: IntersectionObserverOptions;
   lazy?: boolean;
 }
+interface Emits {
+  (event: 'preview', material: any): void;
+}
+defineOptions({ name: 'ImageItem' });
 const props = defineProps<Props>();
+const emits = defineEmits<Emits>();
 const { item, intersectionObserverOptions } = toRefs(props);
 </script>
-
-<style scoped lang="scss">
-:deep(.n-image) {
-  @apply wh-full;
-  > img {
-    @apply wh-full;
-  }
-}
-</style>

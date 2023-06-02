@@ -24,8 +24,8 @@
           <n-form-item-gi span="2" path="multipleSelectValue">
             <n-space justify="end" :wrap-item="false" class="w100%">
               <n-button @click="resetForm"> 重置 </n-button>
-              <n-button type="primary" secondary @click="() => handleSearch()"> 搜索 </n-button>
-              <n-button type="primary" @click="() => handleSearch('onlyMe')"> 只看我 </n-button>
+              <n-button type="primary" secondary @click="() => handleSearch()"> 只看我 </n-button>
+              <n-button type="primary" @click="() => handleSearch('onlyMe')"> 搜索 </n-button>
             </n-space>
           </n-form-item-gi>
         </n-grid>

@@ -26,6 +26,7 @@
             root: virtualGridContainerRef
           }"
           lazy
+          @preview="handlePreview"
         />
       </template>
     </virtual-grid>
@@ -35,15 +36,19 @@
     </div>
     <n-spin v-if="loaded && !errored" class="absolute-center wh-full" description="加载中..."></n-spin>
   </div>
+  <material-preview-modal
+    v-model:showModal="showModal"
+    :material-data="previewMaterial"
+    :material-type="(options.key as  PlayerType)"
+  />
 </template>
 
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
 import type { Item as GridItem } from '@/components/custom/VirtualGrid.vue';
 import VirtualGrid from '@/components/custom/VirtualGrid.vue';
-// import { useMaterialList } from '../hooks';
-// import MaterialItem from './materialItem.vue';
-import { getCatalogMediumList } from '@/service/api';
+import MaterialPreviewModal from '@/components/module/materials/materialPreviewModal/index.vue';
+import type { PlayerType } from '@/components/module/materials/materialPreviewModal/index.vue';
 import type { ListSchema, ExtendMenuOptions } from '#/packages.d.ts';
 defineOptions({ name: 'MaterialList' });
 interface ExposeAPI {
@@ -51,16 +56,13 @@ interface ExposeAPI {
 }
 interface Props {
   options: ExtendMenuOptions;
-  queryCondition?: Record<string, any>;
   renderComponent?: Component;
+  request: (offset: number, pageSize: number) => Promise<any>;
 }
-
 const props = withDefaults(defineProps<Props>(), {
-  // listConfig: () => ({ width: 160, height: 90, gutter: 10, pageSize: 50 }),
-  queryCondition: () => ({}),
   renderComponent: () => null
 });
-const { options, queryCondition } = toRefs(props);
+const { options } = toRefs(props);
 // const { pageProvider, total, isFirstTimeLoading } = useMaterialList();
 const virtualGridContainerRef = ref<HTMLElement | null>();
 const virtualGridRef = ref<InstanceType<typeof VirtualGrid> | null>(null);
@@ -71,7 +73,7 @@ const materialList = ref<any[]>([]);
 const loaded = ref<boolean>(false);
 const errored = ref<boolean>(false);
 const listConfig = computed((): ListSchema => {
-  const config = { width: 160, height: 90, gutter: 10, pageSize: 50 };
+  const config = { width: 160, height: 110, gutter: 10, pageSize: 50 };
   const listSchema = options.value.listSchema || {};
   return { ...config, ...listSchema };
 });
@@ -98,11 +100,7 @@ const pullData = async (): Promise<boolean> => {
   if (!totalPages.value || (totalPages.value && offset.value > totalPages.value)) {
     return true;
   }
-  const listRes = await getCatalogMediumList({
-    page: offset.value,
-    pageSize: listConfig.value.pageSize!,
-    ...queryCondition.value
-  });
+  const listRes = await props.request(offset.value, listConfig.value.pageSize!);
   const randomImages = transformToGridList(listRes.content);
   materialList.value = [...materialList.value, ...randomImages];
   offset.value += 1;
@@ -120,11 +118,7 @@ const initializeList = async () => {
   try {
     loaded.value = true;
     errored.value = false;
-    const listRes = await getCatalogMediumList({
-      page: offset.value,
-      pageSize: listConfig.value.pageSize!,
-      ...queryCondition.value
-    });
+    const listRes = await props.request(offset.value, listConfig.value.pageSize!);
     totalPages.value = listRes.totalPages;
     materialList.value = transformToGridList(listRes.content);
     offset.value += 1;
@@ -140,6 +134,16 @@ const refreshList = () => {
   materialList.value = [];
   initializeList();
 };
+/**
+ * 预览
+ */
+const showModal = ref<boolean>(false);
+const previewMaterial = ref<any>({});
+const handlePreview = (material: any) => {
+  showModal.value = true;
+  previewMaterial.value = material.injected;
+};
+
 onMounted(() => {
   initializeList();
 });

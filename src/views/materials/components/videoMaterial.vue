@@ -21,10 +21,9 @@
       <material-gird-list
         ref="materialListRef"
         :options="options"
-        :query-condition="queryCondition"
         :render-component="VideoItem"
+        :request="requestList"
       />
-      <!-- :query-condition="queryCondition" @refresh="handleRefresh" -->
     </template>
   </global-material>
 </template>
@@ -35,6 +34,7 @@ import VideoItem from '@/components/module/materials/materialItem/VideoItem.vue'
 import VideoSearchForm from '@/components/module/materials/searchForm/VideoForm.vue';
 import SecondMenuRadioButton from '@/components/custom/RadioButtonGroup.vue';
 import type { FromModelInst } from '@/components/module/materials/searchForm/VideoForm.vue';
+import { getCatalogMediumList } from '@/service/api';
 import { MaterialGirdList } from './common';
 import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'VideoMaterial' });
@@ -50,7 +50,7 @@ const searchFormModel = ref<FromModelInst>({
   name: '',
   firstOrgId: null,
   secondOrgId: null,
-  userIdFromWeb: null
+  userIdFromWeb: new URLSearchParams(window.location.search).get('userId')
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('key');
@@ -73,15 +73,24 @@ const handleSecondChecked = () => {
   materialListRef.value?.refreshList();
 };
 const handleSearch = (_value: FromModelInst, type?: string) => {
-  type === 'onlyMe' && (searchFormModel.value.userIdFromWeb = '1');
+  type === 'onlyMe' &&
+    (searchFormModel.value.userIdFromWeb = new URLSearchParams(window.location.search).get('userId'));
   materialListRef.value?.refreshList();
 };
 const handleResetSearch = () => {
-  searchFormModel.value.userIdFromWeb = '1';
+  searchFormModel.value.userIdFromWeb = new URLSearchParams(window.location.search).get('userId');
   materialListRef.value?.refreshList();
 };
-onMounted(() => {
-  // 初始化用户ID，后期需要从其他地方获取
-  searchFormModel.value.userIdFromWeb = '1';
-});
+const requestList = async (offset: number, pageSize: number): Promise<any> => {
+  try {
+    const result = await getCatalogMediumList({
+      page: offset,
+      pageSize,
+      ...queryCondition.value
+    });
+    return Promise.resolve(result);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
 </script>

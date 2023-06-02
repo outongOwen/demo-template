@@ -19,7 +19,7 @@ const defaultThemeSetting: Theme.Setting = {
     minWidth: 1200
   },
   sliderMenu: {
-    width: 100,
+    width: 80,
     viewMinWidth: 1200
   }
 };

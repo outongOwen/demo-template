@@ -65,20 +65,21 @@ const defaultSliderMenuOptions: ExtendMenuOptions[] = [
     // }
   },
   {
+    label: '透明',
+    key: 'Transparent',
+    icon: iconRender({ icon: 'material-symbols:opacity-sharp' }),
+    areaConfig: createDefaultAreaConfig()
+  },
+  {
     label: '配乐',
     key: 'Audio',
     icon: iconRender({ icon: 'mdi:music' }),
     areaConfig: createDefaultAreaConfig(),
     listSchema: {
-      width: 100,
-      height: 50
+      width: 120,
+      height: 60,
+      pageSize: 100
     }
-  },
-  {
-    label: '透明',
-    key: 'Transparent',
-    icon: iconRender({ icon: 'material-symbols:opacity-sharp' }),
-    areaConfig: createDefaultAreaConfig()
   },
   {
     label: '装饰',

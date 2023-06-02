@@ -85,7 +85,7 @@ watchOnce(defaultMenuKey, key => {
 </script>
 <style scoped lang="scss">
 :deep(.n-menu-item) {
-  @apply h55px important-px10px;
+  @apply h55px  box-border;
   .n-menu-item-content {
     @apply flex-center flex-col pr-0 line-height-unset;
     .n-menu-item-content__icon {
@@ -94,6 +94,9 @@ watchOnce(defaultMenuKey, key => {
     .n-menu-item-content-header {
       @apply w80% text-center px-5px;
     }
+  }
+  .n-menu-item-content::before {
+    @apply left-10px right-10px;
   }
 }
 </style>

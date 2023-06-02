@@ -14,7 +14,9 @@
       <materials v-if="currentMenuOption" :menu-options="currentMenuOption" />
       <Configuration v-if="getTestSelect" />
     </template>
-    <template #centerRightArea>画布</template>
+    <template #centerRightArea>
+      <Player />
+    </template>
     <template #trackArea>轨道</template>
   </global-layout>
 </template>
@@ -26,6 +28,8 @@ import { sliderMenuOptions } from '@/settings';
 import { useGlobalStore } from '@/store';
 import Header from '@/views/header/index.vue';
 import Materials from '@/views/materials/index.vue';
+// import Canvas from '@/views/canvas/index.vue';
+import Player from '@/views/player/index.vue';
 import Configuration from '@/views/configuration/index.vue';
 import { getMenuList } from '@/service/api';
 import { GlobalLayout, GlobalSliderMenu } from '@/layouts/components';

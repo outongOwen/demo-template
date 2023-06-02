@@ -1,5 +1,5 @@
 <!--
- * @abstract:视频素材查询表单
+ * @abstract:透明素材查询表单
  * @author: owenTong
  * @since: 2023-04-23
  * AudioForm.vue
@@ -9,6 +9,9 @@
     <div class="px-10px">
       <n-form ref="formRef" :model="searchFormModel" size="small" label-placement="top" :show-label="false" inline>
         <n-grid cols="1 400:2 700:6" :x-gap="5">
+          <n-form-item-gi path="name">
+            <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
+          </n-form-item-gi>
           <n-form-item-gi path="firstOrgId">
             <n-select v-model:value="searchFormModel.firstOrgId" placeholder="一级" :options="generalOptions()" />
           </n-form-item-gi>
@@ -18,7 +21,7 @@
           <n-form-item-gi path="userIdFromWeb">
             <n-select v-model:value="searchFormModel.userIdFromWeb" placeholder="三级" :options="generalOptions()" />
           </n-form-item-gi>
-          <n-form-item-gi span="1 400:1 700:3" path="multipleSelectValue">
+          <n-form-item-gi span="2" path="multipleSelectValue">
             <n-space justify="end" :wrap-item="false" class="w100%">
               <n-button @click="resetForm"> 重置 </n-button>
               <n-button type="primary" secondary @click="() => handleSearch()"> 只看我 </n-button>
@@ -36,7 +39,7 @@
 import type { FormInst } from 'naive-ui';
 import { cloneDeep } from 'lodash-es';
 import { useVModel } from '@vueuse/core';
-defineOptions({ name: 'VideoSearchForm' });
+defineOptions({ name: 'TransparentSearchForm' });
 export interface FromModelInst {
   name: string | null;
   firstOrgId?: string | null;

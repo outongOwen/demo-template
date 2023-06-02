@@ -29,6 +29,7 @@ export default defineConfig({
     'absolute-bl': 'absolute-lb',
     'absolute-br': 'absolute-rb',
     'absolute-center': 'absolute-lt flex-center wh-full',
+    'absolute-transform-center': 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
     'fixed-lt': 'fixed left-0 top-0',
     'fixed-lb': 'fixed left-0 bottom-0',
     'fixed-rt': 'fixed right-0 top-0',

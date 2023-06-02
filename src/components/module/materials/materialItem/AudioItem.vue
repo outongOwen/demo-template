@@ -6,19 +6,30 @@
 -->
 <template>
   <div
-    :style="{ height: item.height + 'px' }"
-    class="flex-center! h-full bg-[rgba(0,0,0,0.2)] dark:bg-[rgba(255,255,255,0.3)] relative"
+    :style="{ height: item.height + 'px', width: item.width + 'px' }"
+    class="box-border of-hidden"
+    @click="emits('preview', item)"
   >
-    <video :src="item.injected.videoPath" class="wh-full" />
-    <div class="absolute-bl left-0 right-0 bg-[rgba(255,255,255,.1)] text-center">
-      <n-text class="w100% px10px break-words line-clamp-1">
-        {{ item.injected.duration }}
-      </n-text>
+    <div
+      class="w-full h-[calc(100%-20px)] bg-[rgba(0,0,0,0.1)] dark:bg-[rgba(255,255,255,0.3)] of-hidden px5px flex items-center !flex-nowrap"
+    >
+      <div class="w25px mr5px">
+        <icon-mdi:music class="text-25px" />
+      </div>
+      <n-ellipsis class="w-[calc(100%-25px)]" line-clamp="1">
+        {{ item.injected.name }}
+      </n-ellipsis>
     </div>
+    <n-text class="w100% h20px">
+      <n-ellipsis>
+        {{ formatFrameByTime(item.injected.duration) }}
+      </n-ellipsis>
+    </n-text>
   </div>
 </template>
 
 <script setup lang="ts">
+import { formatFrameByTime } from '@/utils';
 interface Props {
   item: {
     id: string;
@@ -28,7 +39,12 @@ interface Props {
     columnSpan: number;
   };
 }
+interface Emits {
+  (event: 'preview', material: any): void;
+}
+defineOptions({ name: 'AudioItem' });
 const props = defineProps<Props>();
+const emits = defineEmits<Emits>();
 const { item } = toRefs(props);
 </script>
 

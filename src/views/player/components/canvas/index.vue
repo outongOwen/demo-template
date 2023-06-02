@@ -5,7 +5,9 @@
  * index.vue
 -->
 <template>
-  <div class="container"></div>
+  <div class="wh-full flex-center">
+    <canvas width="1280" height="720" class="max-h100% max-w100% bg-black" />
+  </div>
 </template>
 
 <script setup lang="ts"></script>

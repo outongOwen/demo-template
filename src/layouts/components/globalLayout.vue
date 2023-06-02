@@ -12,20 +12,24 @@
         <slot name="sliderMenu"></slot>
       </div>
       <div class="layout-divider h100%"></div>
-      <splitpanes horizontal :style="`width: calc(100% - (${theme.sliderMenu.width + 5}px));`">
+      <splitpanes
+        horizontal
+        :style="`width: calc(100% - (${theme.sliderMenu.width + 5}px));`"
+        :dbl-click-splitter="false"
+      >
         <pane>
           <splitpanes>
-            <pane min-size="25" max-size="70">
+            <pane min-size="30" max-size="80">
               <div class="wh-full relative">
                 <slot name="centerLeftArea"></slot>
               </div>
             </pane>
-            <pane>
+            <pane class="min-w-550px">
               <slot name="centerRightArea"></slot>
             </pane>
           </splitpanes>
         </pane>
-        <pane max-size="75" min-size="30">
+        <pane max-size="70" min-size="20">
           <slot name="trackArea"></slot>
         </pane>
       </splitpanes>

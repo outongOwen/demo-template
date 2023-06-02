@@ -1,0 +1,118 @@
+<!--
+ * @abstract:播放器控件
+ * @author: owenTong
+ * @since: 2023-06-01
+ * index.vue
+-->
+<template>
+  <div class="w100% flex flex-col">
+    <div class="h50px w100%">
+      <player-progress-bar v-model:time="currentTime" :total-time="1000000" />
+    </div>
+    <div class="h28px w100%">
+      <player-controls-btn
+        v-model:speed="playerSpeed"
+        v-model:proportion="playerProportion"
+        :playing="playerPlaying"
+        :control-list-options="controlListOptions"
+        @speed-change="handleSpeedChange"
+        @proportion-change="handleProportionChange"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import PlayerControlsBtn from '@/components/module/player/PlayerControlsBtn.vue';
+import PlayerProgressBar from '@/components/module/player/PlayerProgressBar.vue';
+import type { ControlListOptions } from '@/components/module/player/PlayerControlsBtn.vue';
+const currentTime = ref<number>(0);
+const playerPlaying = ref<boolean>(false);
+const playerSpeed = ref<number>(1);
+const playerProportion = ref<string>('16:9');
+/**
+ * 播放
+ */
+const playerPlay = () => {
+  playerPlaying.value = !playerPlaying.value;
+};
+/**
+ * 暂停
+ */
+const playerPause = () => {
+  playerPlaying.value = !playerPlaying.value;
+};
+/**
+ * seek
+ */
+const playerSeek = (time?: number) => {
+  console.log(time);
+};
+/**
+ * 控制按钮列表
+ */
+const controlListOptions: ControlListOptions[] = [
+  {
+    title: '后退1帧',
+    icon: 'ic:outline-skip-previous',
+    type: 'seek',
+    time: -1,
+    event: playerSeek
+  },
+  {
+    title: '后退5帧',
+    icon: 'ic:baseline-skip-previous',
+    type: 'seek',
+    time: -5,
+    event: playerSeek
+  },
+  {
+    title: '后退1秒',
+    icon: 'dashicons:controls-skipback',
+    type: 'seek',
+    time: -25,
+    event: playerSeek
+  },
+  {
+    title: '暂停',
+    icon: 'mdi:pause',
+    type: 'pause',
+    event: playerPause
+  },
+  {
+    title: '播放',
+    icon: 'mdi:play',
+    type: 'play',
+    event: playerPlay
+  },
+  {
+    title: '前进1秒',
+    icon: 'dashicons:controls-skipforward',
+    type: 'seek',
+    time: 25,
+    event: playerSeek
+  },
+  {
+    title: '前进5帧',
+    icon: 'ic:baseline-skip-next',
+    type: 'seek',
+    time: 5,
+    event: playerSeek
+  },
+  {
+    title: '前进1帧',
+    icon: 'ic:outline-skip-next',
+    type: 'seek',
+    time: 1,
+    event: playerSeek
+  }
+];
+const handleSpeedChange = (key: number, option: any) => {
+  console.log(key, option);
+};
+const handleProportionChange = (key: string, option: any) => {
+  console.log(key, option);
+};
+</script>
+
+<style scoped></style>

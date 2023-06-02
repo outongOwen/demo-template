@@ -1,3 +1,3 @@
 import setupAssets from './assets';
-
-export { setupAssets };
+import { CustomExtPreset } from './xgCustomPreset';
+export { setupAssets, CustomExtPreset };

@@ -1,4 +1,5 @@
 import 'uno.css';
+import 'xgplayer/dist/index.min.css';
 import 'virtual:svg-icons-register';
 import 'splitpanes/dist/splitpanes.css';
 import '../styles/css/global.css';

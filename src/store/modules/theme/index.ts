@@ -13,6 +13,10 @@ export const useThemeStore = defineStore('ThemeStore', {
     /** naive-ui暗黑主题 */
     naiveTheme(state) {
       return state.darkMode ? darkTheme : undefined;
+    },
+    /** 获取主题色 */
+    getThemeColor(state) {
+      return state.themeColor;
     }
   },
   actions: {
