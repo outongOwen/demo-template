@@ -34,7 +34,7 @@ export default defineConfig(configEnv => {
       proxy: createViteProxy(isOpenProxy, envConfig)
     },
     optimizeDeps: {
-      include: ['splitpanes', '@vueuse/core', 'xgplayer']
+      include: ['splitpanes', '@vueuse/core', 'xgplayer', 'fabric']
     },
     build: {
       outDir: viteEnv.VITE_APP_NAME,

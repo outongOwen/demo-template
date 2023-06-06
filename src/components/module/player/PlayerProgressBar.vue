@@ -7,12 +7,12 @@
 <template>
   <div class="wh-full" :class="$attrs.class" :style="style">
     <div class="w-inherit h-auto flex justify-between items-center text-size-14px mb-3px">
-      <span class="box-border tabular-nums flex-center color-primary">
+      <n-text class="box-border tabular-nums flex-center color-primary">
         {{ playerCurrentTime }}
-      </span>
-      <span class="box-border tabular-nums flex-center">
+      </n-text>
+      <n-text class="box-border tabular-nums flex-center">
         {{ playerTotalTime }}
-      </span>
+      </n-text>
     </div>
     <div class="w100% relative z9">
       <n-slider
@@ -24,7 +24,7 @@
         style="padding: 0"
       >
         <template #thumb>
-          <div class="w18px h8px bg-primary"></div>
+          <div class="w18px h8px bg-primary" />
         </template>
       </n-slider>
     </div>

@@ -1,2 +1,3 @@
 import useIconRender from './useIconRender';
-export { useIconRender };
+import useCssFullscreen from './useCssFullscreen';
+export { useIconRender, useCssFullscreen };

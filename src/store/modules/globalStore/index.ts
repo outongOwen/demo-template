@@ -6,8 +6,8 @@ export const useGlobalStore = defineStore('useGlobalStore', {
     testSelect: false
   }),
   getters: {
-    getTestSelect(state) {
-      return state.testSelect;
+    getTestSelect(): boolean {
+      return this.testSelect;
     }
   },
   actions: {

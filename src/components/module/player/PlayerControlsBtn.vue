@@ -11,15 +11,17 @@
   >
     <n-space :size="10">
       <n-popselect
-        v-model:value="proportionModelValue"
+        :value="proportionModelValue"
         trigger="click"
         size="small"
         :options="proportionOptions"
+        display-directive="show"
+        placement="top"
         @update:value="handleProportionSelect"
       >
         <n-button secondary strong size="small" class="w-90px">
           <n-ellipsis>
-            {{ `比例 ${proportionModelValue}` }}
+            {{ `比例 ${proportionModelValue === 'free' ? '自由' : proportionModelValue}` }}
           </n-ellipsis>
         </n-button>
       </n-popselect>
@@ -28,6 +30,8 @@
         trigger="click"
         size="small"
         :options="speedOptions"
+        display-directive="show"
+        placement="top"
         @update:value="handleSpeedSelect"
       >
         <n-button secondary strong size="small" class="w-90px">
@@ -85,21 +89,63 @@
         </template>
       </slot>
     </n-space>
-    <n-button class="bg-transparent" size="small" strong secondary :focusable="false">
+    <n-button class="bg-transparent" size="small" strong secondary :focusable="false" @click="handleFullScreen">
       <template #icon>
         <n-icon size="23">
-          <icon-ri:fullscreen-fill v-show="!false" />
-          <icon-ri:fullscreen-exit-fill v-show="false" />
+          <icon-ri:fullscreen-fill v-show="!isCssFullscreen" />
+          <icon-ri:fullscreen-exit-fill v-show="isCssFullscreen" />
         </n-icon>
       </template>
     </n-button>
   </div>
+  <n-modal
+    v-model:show="showFreeProportionModal"
+    preset="dialog"
+    positive-text="确定"
+    negative-text="取消"
+    class="dark:bg-dark"
+    :show-icon="false"
+    :closable="false"
+    :auto-focus="false"
+    @positive-click="handleFreeProportionConfirm"
+    @negative-click="showFreeProportionModal = false"
+    @after-leave="handleFreeProportionLeave"
+  >
+    <template #header>
+      <n-el tag="div" class="w100% text-center">自由比例</n-el>
+    </template>
+    <n-el tag="div" class="border-y-1px border-color-[var(--border-color)] py-20px">
+      <n-space class="!flex-nowrap" align="center">
+        <n-input-number
+          v-model:value="freeProportion.width"
+          :max="maxResolution"
+          :min="minResolution"
+          @update:value="handleFreeProportionWidth"
+        >
+          <template #suffix> W </template>
+        </n-input-number>
+        <n-icon :size="25" class="flex-center cursor-pointer select-none" @click="handleProportionLockChange">
+          <svg-icon :icon="freeProportionLocked ? 'pixelarticons:link' : 'pixelarticons:unlink'" />
+        </n-icon>
+        <n-input-number
+          v-model:value="freeProportion.height"
+          :max="maxResolution"
+          :min="minResolution"
+          @update:value="handleFreeProportionHeight"
+        >
+          <template #suffix> H </template>
+        </n-input-number>
+      </n-space>
+    </n-el>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from 'naive-ui';
+import { cloneDeep } from 'lodash-es';
 import { reactiveComputed, useResizeObserver, useVModels } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
+import { playerSettings } from '@/settings';
 export interface ControlListOptions {
   title?: string;
   type: string;
@@ -111,46 +157,92 @@ export interface ControlListOptions {
 interface ControlListMixOptions extends ControlListOptions {
   show: boolean;
 }
+interface FreeProportion {
+  width: number;
+  height: number;
+}
+export interface SelectMixOption extends SelectOption {
+  resolution: FreeProportion;
+}
+
 interface Props {
+  playing: boolean;
   proportion: string;
   speed: number;
-  playing: boolean;
   controlListOptions: ControlListOptions[];
+  isFullscreen?: boolean;
 }
 interface Emits {
   (e: 'update:proportion', value: string): void;
   (e: 'update:speed', value: number): void;
   (e: 'speedChange', value: number, option: any): void;
   (e: 'proportionChange', value: string, option: any): void;
+  (e: 'cssFullscreenChange', state: boolean): void;
 }
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 const { proportion: proportionModelValue, speed: speedModelValue } = useVModels(props, emits);
-const { controlListOptions, playing } = toRefs(props);
+const { controlListOptions, playing, isFullscreen } = toRefs(props);
+const { maxResolution, minResolution, shortestEdgeMaxResolution, shortestEdgeMinResolution, resolutionReferenceBase } =
+  playerSettings;
+const isCssFullscreen = ref<boolean>(false);
+const showFreeProportionModal = ref<boolean>(false);
+const freeProportionLocked = ref<boolean>(false);
+const freeProportionLockedValue = ref<FreeProportion | null>(null);
+const cacheFreeProportion = ref<FreeProportion | null>(null);
+const freeProportion = reactive<FreeProportion>({
+  width: 0,
+  height: 0
+});
 const proportionOptions = [
   {
+    label: '21:9',
+    value: '21:9',
+    resolution: {
+      width: resolutionReferenceBase * (21 / 9),
+      height: resolutionReferenceBase
+    }
+  },
+  {
     label: '16:9',
-    value: '16:9'
+    value: '16:9',
+    resolution: {
+      width: resolutionReferenceBase * (16 / 9),
+      height: resolutionReferenceBase
+    }
   },
   {
     label: '9:16',
-    value: '9:16'
+    value: '9:16',
+    resolution: {
+      width: resolutionReferenceBase,
+      height: resolutionReferenceBase * (16 / 9)
+    }
   },
   {
     label: '1:1',
-    value: '1:1'
+    value: '1:1',
+    resolution: {
+      width: resolutionReferenceBase,
+      height: resolutionReferenceBase
+    }
   },
-  {
-    label: '21:9',
-    value: '21:9'
-  },
+
   {
     label: '4:3',
-    value: '4:3'
+    value: '4:3',
+    resolution: {
+      width: resolutionReferenceBase * (4 / 3),
+      height: resolutionReferenceBase
+    }
   },
   {
     label: '自由',
-    value: 'free'
+    value: 'free',
+    resolution: {
+      width: 0,
+      height: 0
+    }
   }
 ];
 const speedOptions = [
@@ -192,11 +284,20 @@ const controlListMixOptions = reactiveComputed<ControlListMixOptions[]>(() => {
     };
   });
 });
+
 /**
  * 比例选择
  */
-const handleProportionSelect = (key: string, option: SelectOption) => {
-  emits('proportionChange', key, option);
+const handleProportionSelect = (key: string, option: SelectMixOption) => {
+  if (key !== 'free') {
+    proportionModelValue.value = key;
+    freeProportion.width = option.resolution.width;
+    freeProportion.height = option.resolution.height;
+    emits('proportionChange', key, option);
+  } else {
+    showFreeProportionModal.value = true;
+    cacheFreeProportion.value = cloneDeep(freeProportion);
+  }
 };
 /**
  * 速率选择
@@ -204,6 +305,72 @@ const handleProportionSelect = (key: string, option: SelectOption) => {
 const handleSpeedSelect = (key: number, option: SelectOption) => {
   emits('speedChange', key, option);
 };
+/**
+ * 全屏
+ */
+const handleFullScreen = () => {
+  isCssFullscreen.value = !isCssFullscreen.value;
+  emits('cssFullscreenChange', isCssFullscreen.value);
+};
+
+/**
+ * 自由比例确定
+ */
+const handleFreeProportionConfirm = () => {
+  // 通过遍历对象判断对象值是否超出最大最小值
+  const shortestEdgeResolution = Math.min(...Object.values(freeProportion));
+  if (shortestEdgeResolution > shortestEdgeMaxResolution) {
+    window.$message?.warning(`最短边不能超过${shortestEdgeMaxResolution}`);
+    return false;
+  }
+  if (shortestEdgeResolution < shortestEdgeMinResolution) {
+    window.$message?.warning(`最短边不能小于${shortestEdgeMinResolution}`);
+    return false;
+  }
+  proportionModelValue.value = 'free';
+  const freeOption = cloneDeep(proportionOptions).find(item => item.value === 'free');
+  freeOption && (freeOption!.resolution = { ...freeProportion }) && emits('proportionChange', 'free', freeOption);
+  return true;
+};
+/**
+ * modal关闭
+ */
+const handleFreeProportionLeave = () => {
+  freeProportionLockedValue.value = null;
+  freeProportionLocked.value = false;
+  Object.assign(freeProportion, cacheFreeProportion.value);
+  cacheFreeProportion.value = null;
+};
+/**
+ * 比例锁定
+ */
+const handleProportionLockChange = () => {
+  freeProportionLocked.value = !freeProportionLocked.value;
+  freeProportionLocked.value && (freeProportionLockedValue.value = { ...freeProportion });
+};
+/**
+ * 自由比例输入(width)
+ */
+const handleFreeProportionWidth = (value: number | null) => {
+  if (freeProportionLocked.value && freeProportionLockedValue.value && value) {
+    const { width, height } = freeProportionLockedValue.value;
+    const ratio = width / height;
+    freeProportion.height = Math.round(value / ratio);
+  }
+};
+/**
+ * 自由比例输入(height)
+ */
+const handleFreeProportionHeight = (value: number | null) => {
+  if (freeProportionLocked.value && freeProportionLockedValue.value && value) {
+    const { width, height } = freeProportionLockedValue.value;
+    const ratio = height / width;
+    freeProportion.width = Math.round(value / ratio);
+  }
+};
+watchEffect(() => {
+  isCssFullscreen.value = isFullscreen.value;
+});
 /**
  * 根据父容器判断按钮显示数量
  */
@@ -230,6 +397,14 @@ useResizeObserver(playerControlContainerRef, entries => {
   } else {
     controlListMixOptions[2].show = true;
     controlListMixOptions[controlListMixOptions.length - 3].show = true;
+  }
+});
+onMounted(() => {
+  const curProportion = proportionOptions.find(item => item.value === proportionModelValue.value);
+  if (curProportion) {
+    const { width, height } = curProportion.resolution;
+    freeProportion.width = width;
+    freeProportion.height = height;
   }
 });
 </script>

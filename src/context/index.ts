@@ -1,2 +1,3 @@
 import useBetterTabsContext from './useBetterTabsContext';
-export { useBetterTabsContext };
+import usePlayerContext from './usePlayerContext';
+export { useBetterTabsContext, usePlayerContext };

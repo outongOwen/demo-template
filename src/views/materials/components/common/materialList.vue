@@ -72,6 +72,8 @@ const totalPages = ref<number>(0);
 const materialList = ref<any[]>([]);
 const loaded = ref<boolean>(false);
 const errored = ref<boolean>(false);
+const showModal = ref<boolean>(false);
+const previewMaterial = ref<any>({});
 const listConfig = computed((): ListSchema => {
   const config = { width: 160, height: 110, gutter: 10, pageSize: 50 };
   const listSchema = options.value.listSchema || {};
@@ -100,6 +102,7 @@ const pullData = async (): Promise<boolean> => {
   if (!totalPages.value || (totalPages.value && offset.value > totalPages.value)) {
     return true;
   }
+  showModal.value = false;
   const listRes = await props.request(offset.value, listConfig.value.pageSize!);
   const randomImages = transformToGridList(listRes.content);
   materialList.value = [...materialList.value, ...randomImages];
@@ -118,6 +121,7 @@ const initializeList = async () => {
   try {
     loaded.value = true;
     errored.value = false;
+    showModal.value = false;
     const listRes = await props.request(offset.value, listConfig.value.pageSize!);
     totalPages.value = listRes.totalPages;
     materialList.value = transformToGridList(listRes.content);
@@ -137,8 +141,7 @@ const refreshList = () => {
 /**
  * 预览
  */
-const showModal = ref<boolean>(false);
-const previewMaterial = ref<any>({});
+
 const handlePreview = (material: any) => {
   showModal.value = true;
   previewMaterial.value = material.injected;

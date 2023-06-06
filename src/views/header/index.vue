@@ -18,7 +18,7 @@ import { storeToRefs } from 'pinia';
 import { GlobalHeader } from '@/layouts';
 import { useThemeStore, useGlobalStore } from '@/store';
 defineOptions({
-  name: 'Header'
+  name: 'GlobalHeader'
 });
 const themeStore = useThemeStore();
 const globalStore = useGlobalStore();

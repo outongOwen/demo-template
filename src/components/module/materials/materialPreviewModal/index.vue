@@ -5,7 +5,12 @@
  * MaterialPreviewModal.vue
 -->
 <template>
-  <n-modal v-model:show="isShowModal" @after-enter="handleModalAfterEnter" @after-leave="handleModalAfterLeave">
+  <n-modal
+    v-model:show="isShowModal"
+    :auto-focus="false"
+    @after-enter="handleModalAfterEnter"
+    @after-leave="handleModalAfterLeave"
+  >
     <div
       class="w65vw h30vw min-w-screen-md min-h650px of-hidden rounded-[var(--border-radius)] 2xl:min-w-screen-lg xl:min-w-screen-lg lg:min-w-screen-lg dark:bg-dark bg-white"
     >
@@ -13,7 +18,7 @@
         <div class="px-20px py10px flex">
           <!-- 头部区域 -->
           <div class="flex-center font-500 w100% text-18px">{{ materialData.name || '测试' }}</div>
-          <n-button size="tiny" quaternary :focusable="false" @click="isShowModal = false">
+          <n-button tertiary size="tiny" @click="isShowModal = false">
             <template #icon>
               <n-icon :size="25">
                 <icon-ri:close-fill />

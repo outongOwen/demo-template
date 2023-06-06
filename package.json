@@ -8,7 +8,7 @@
     "build:test": "npm run typecheck && cross-env VITE_SERVICE_ENV=test vite build",
     "build:vercel": "cross-env VITE_HASH_ROUTE=Y VITE_VERCEL=Y vite build",
     "clear": "rimraf pnpm-lock.yaml node_modules ",
-    "create-temp": "plop --plopfile ./plop/plopfile.js",
+    "create-template": "plop --plopfile ./plop/plopfile.js",
     "dev": "cross-env VITE_SERVICE_ENV=dev vite",
     "dev:prod": "cross-env VITE_SERVICE_ENV=prod vite",
     "dev:test": "cross-env VITE_SERVICE_ENV=test vite",
@@ -53,7 +53,7 @@
     "colord": "^2.9.3",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.7",
-    "fabric": "6.0.0-beta7",
+    "fabric": "6.0.0-beta8",
     "lodash-es": "^4.17.21",
     "naive-ui": "2.34.4",
     "pinia": "^2.1.1",
@@ -63,9 +63,9 @@
     "uuid": "^9.0.0",
     "vue": "^3.3.4",
     "vue-router": "^4.2.0",
-    "xgplayer": "^3.0.1",
-    "xgplayer-mp4": "^3.0.1",
-    "xgplayer-music": "^3.0.1"
+    "xgplayer": "^3.0.4",
+    "xgplayer-mp4": "^3.0.4",
+    "xgplayer-music": "^3.0.4"
   },
   "devDependencies": {
     "@antfu/ni": "^0.21.3",

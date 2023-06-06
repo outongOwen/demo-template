@@ -19,6 +19,7 @@
 import { GlobalPlayer } from '@/layouts';
 import Canvas from './components/canvas/index.vue';
 import Controls from './components/controls/index.vue';
+defineOptions({ name: 'GlobalPlayer' });
 </script>
 
 <style scoped></style>

@@ -13,23 +13,44 @@
       <player-controls-btn
         v-model:speed="playerSpeed"
         v-model:proportion="playerProportion"
+        :is-fullscreen="getIsFullscreenState"
         :playing="playerPlaying"
         :control-list-options="controlListOptions"
         @speed-change="handleSpeedChange"
         @proportion-change="handleProportionChange"
+        @css-fullscreen-change="handleCssFullscreenChange"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { usePlayerStore } from '@/store';
 import PlayerControlsBtn from '@/components/module/player/PlayerControlsBtn.vue';
 import PlayerProgressBar from '@/components/module/player/PlayerProgressBar.vue';
-import type { ControlListOptions } from '@/components/module/player/PlayerControlsBtn.vue';
+import type { ControlListOptions, SelectMixOption } from '@/components/module/player/PlayerControlsBtn.vue';
+defineOptions({ name: 'PlayerControls' });
+const playerStore = usePlayerStore();
+const { getIsFullscreenState, getProportion, getSpeed } = storeToRefs(playerStore);
 const currentTime = ref<number>(0);
 const playerPlaying = ref<boolean>(false);
-const playerSpeed = ref<number>(1);
-const playerProportion = ref<string>('16:9');
+const playerSpeed = computed({
+  set: (value: number) => {
+    playerStore.setSpeed(value);
+  },
+  get: (): number => {
+    return getSpeed.value;
+  }
+});
+const playerProportion = computed({
+  set: (value: string) => {
+    playerStore.setProportion(value);
+  },
+  get: (): string => {
+    return getProportion.value;
+  }
+});
 /**
  * 播放
  */
@@ -110,8 +131,11 @@ const controlListOptions: ControlListOptions[] = [
 const handleSpeedChange = (key: number, option: any) => {
   console.log(key, option);
 };
-const handleProportionChange = (key: string, option: any) => {
-  console.log(key, option);
+const handleProportionChange = (_key: string, option: SelectMixOption) => {
+  playerStore.setResolution(option.resolution);
+};
+const handleCssFullscreenChange = (state: boolean) => {
+  playerStore.setFullscreenState(state);
 };
 </script>
 
