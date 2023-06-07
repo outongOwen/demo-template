@@ -143,7 +143,7 @@
 <script setup lang="ts">
 import type { SelectOption } from 'naive-ui';
 import { cloneDeep } from 'lodash-es';
-import { reactiveComputed, useResizeObserver, useVModels } from '@vueuse/core';
+import { reactiveComputed, useResizeObserver, useVModels, watchOnce } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
 import { playerSettings } from '@/settings';
 export interface ControlListOptions {
@@ -338,7 +338,7 @@ const handleFreeProportionConfirm = () => {
 const handleFreeProportionLeave = () => {
   freeProportionLockedValue.value = null;
   freeProportionLocked.value = false;
-  Object.assign(freeProportion, cacheFreeProportion.value);
+  cacheFreeProportion.value && Object.assign(freeProportion, cacheFreeProportion.value);
   cacheFreeProportion.value = null;
 };
 /**
@@ -371,6 +371,20 @@ const handleFreeProportionHeight = (value: number | null) => {
 watchEffect(() => {
   isCssFullscreen.value = isFullscreen.value;
 });
+watchOnce(
+  proportionModelValue,
+  () => {
+    const curProportion = proportionOptions.find(item => item.value === proportionModelValue.value);
+    if (curProportion) {
+      const { width, height } = curProportion.resolution;
+      freeProportion.width = width;
+      freeProportion.height = height;
+    }
+  },
+  {
+    immediate: true
+  }
+);
 /**
  * 根据父容器判断按钮显示数量
  */
@@ -397,14 +411,6 @@ useResizeObserver(playerControlContainerRef, entries => {
   } else {
     controlListMixOptions[2].show = true;
     controlListMixOptions[controlListMixOptions.length - 3].show = true;
-  }
-});
-onMounted(() => {
-  const curProportion = proportionOptions.find(item => item.value === proportionModelValue.value);
-  if (curProportion) {
-    const { width, height } = curProportion.resolution;
-    freeProportion.width = width;
-    freeProportion.height = height;
   }
 });
 </script>

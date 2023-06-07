@@ -20,7 +20,7 @@ import type { StyleValue } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePlayerStore, useThemeStore } from '@/store';
 import { useCssFullscreen } from '@/hooks';
-defineOptions({ name: 'CanvasLayout' });
+defineOptions({ name: 'PlayerLayout' });
 const playerStore = usePlayerStore();
 const themeStore = useThemeStore();
 const { getIsFullscreenState } = storeToRefs(playerStore);
@@ -34,7 +34,7 @@ const fullscreenStyle = computed((): StyleValue => {
         height: '100%',
         minWidth: '500px',
         minHeight: '500px',
-        backgroundColor: darkMode.value ? '#000' : '#fff'
+        backgroundColor: darkMode.value ? '#282828' : '#fff'
       }
     : {};
 });

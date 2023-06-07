@@ -16,7 +16,7 @@ export interface CreateContextOptions {
   native?: boolean; // 是否原生
 }
 
-export default function useContext<T>(contextName = 'context', options: CreateContextOptions = {}) {
+export function useContext<T>(contextName = 'context', options: CreateContextOptions = {}) {
   const injectKey: InjectionKey<T> = Symbol(contextName);
   function useProvide(context: T) {
     const { readonly = true, native = false } = options;
