@@ -28,8 +28,8 @@ const demoList = (() => {
       category: 'nature'
     });
     item.path = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 1920, max: 2160 }),
-      height: faker.number.int({ min: 1080, max: 1440 }),
+      width: faker.number.int({ min: 3840, max: 3840 }),
+      height: faker.number.int({ min: 2160, max: 2160 }),
       category: 'nature'
     });
   });

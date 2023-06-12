@@ -1,18 +1,23 @@
 import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Text } from 'fabric';
+import type { TextProps as FabricTextProps } from '@fabric/shapes/Text/Text';
+import type { TProps } from '@fabric/shapes/Object/types';
 import { cloneDeep } from 'lodash-es';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindTextEvent, useWatchUpdateProps } from '../hooks';
+export type FTextProps = TProps<FabricTextProps> & {
+  text: string;
+};
 export type TextInst = {
   instance: Text;
 };
 /**
- * todo:ITextProps 类型完善
+ * todo:TextProps 类型完善
  */
 export const textProps = {
   config: {
-    type: Object as PropType<any>,
+    type: Object as PropType<FTextProps | Record<string, any>>,
     default: () => {},
     required: true
   }

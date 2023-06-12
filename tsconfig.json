@@ -9,23 +9,38 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
     "moduleResolution": "node",
+    "isolatedModules": true,
     "resolveJsonModule": true,
     "noUnusedLocals": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
-    "typeRoots": ["./node_modules/@types/", "./types"],
     "paths": {
       "~/*": ["./*"],
       "@/*": ["./src/*"],
-      "#/*": ["./types/*"]
+      "#/*": ["./types/*"],
+      "@fabric/*": ["node_modules/fabric/dist/src/*"]
     },
     "types": [
       "vite/client",
       "node",
       "unplugin-icons/types/vue",
+      "unplugin-vue-define-options/macros-global",
       "naive-ui/volar",
-      "unplugin-vue-define-options/macros-global"
+      "fabric",
     ]
   },
-  "exclude": ["node_modules", "dist", "src/typings/auto-import.d.ts"]
+  "include": [
+    "tests/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "types/**/*.d.ts",
+    "types/**/*.ts",
+    "build/**/*.ts",
+    "build/**/*.d.ts",
+    "mock/**/*.ts",
+    "vite.config.ts",
+  ],
+  "exclude": ["node_modules","dist", "Editor-template", "src/typings/auto-import.d.ts"]
 }

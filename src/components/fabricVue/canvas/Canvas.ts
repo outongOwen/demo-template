@@ -1,16 +1,21 @@
 import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
-import { Canvas } from 'fabric';
 import { useBindCanvasEvent } from '../hooks';
 import { useCanvasContext } from '../context';
+import { CanvasVue } from './Canvas.class';
+import type { FConfiguration, ICanvasVue, FOptions } from './Canvas.class';
 export interface CanvasInst {
-  instance: Canvas;
+  instance: ICanvasVue;
   renderAll: () => void;
   requestRenderAll: () => void;
 }
 export const canvasProps = {
   config: {
-    type: Object as PropType<Partial<typeof Canvas>>,
+    type: Object as PropType<FOptions>,
+    default: () => {}
+  },
+  configuration: {
+    type: Object as PropType<FConfiguration>,
     default: () => {}
   }
 } as const;
@@ -22,8 +27,14 @@ export default defineComponent({
   setup(props): CanvasInst {
     const { provideCanvasContext } = useCanvasContext();
     const canvasElement = document.createElement('canvas');
-    const canvas = new Canvas(canvasElement, props.config);
-    canvas.renderAll();
+    const canvas = new CanvasVue({
+      el: canvasElement,
+      configuration: props.configuration,
+      options: props.config
+    });
+    canvas.on('after:render', () => {
+      console.log(canvas.getObjects(), 'canvas.getObjects()');
+    });
     const renderAll = () => {
       canvas.renderAll();
     };

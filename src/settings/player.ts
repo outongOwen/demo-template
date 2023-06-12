@@ -1,4 +1,5 @@
 const defaultPlayerSettings: Player.Setting = {
+  frameRate: 25,
   volume: 1,
   speed: 1,
   resolutionReferenceBase: 720,

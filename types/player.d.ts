@@ -5,6 +5,8 @@ declare namespace Player {
   }
   /** 播放器配置 */
   interface Setting {
+    /** 帧率 */
+    frameRate: number;
     /** 音量 */
     volume: number;
     /** 倍速 */

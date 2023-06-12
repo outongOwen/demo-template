@@ -1,18 +1,26 @@
 import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Textbox } from 'fabric';
+// import {} from '@fabric/shapes/Textbox';
+import type { textboxDefaultValues } from '@fabric/shapes/Textbox';
+import type { TProps } from '@fabric/shapes/Object/types';
 import { cloneDeep } from 'lodash-es';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindTextEvent, useWatchUpdateProps } from '../hooks';
+export type FTextboxProps = TProps<
+  typeof textboxDefaultValues & {
+    text: string;
+  }
+>;
 export type TextboxInst = {
   instance: Textbox;
 };
 /**
- * todo:ITextProps 类型完善
+ * todo:TextboxProps 类型完善
  */
 export const textboxProps = {
   config: {
-    type: Object as PropType<any>,
+    type: Object as PropType<FTextboxProps | Record<string, any>>,
     default: () => {},
     required: true
   }

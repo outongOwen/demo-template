@@ -22,6 +22,7 @@
         :min="0"
         :tooltip="false"
         style="padding: 0"
+        @update:value="handleTimeChange"
       >
         <template #thumb>
           <div class="w18px h8px bg-primary" />
@@ -35,30 +36,33 @@
 import type { CSSProperties } from 'vue';
 import { toRefs, useVModel } from '@vueuse/core';
 import { formatFrameByTime } from '@/utils';
+defineOptions({ name: 'PlayerProgressBar' });
 interface Props {
+  time: number;
+  totalTime: number;
   style?: CSSProperties;
-  time?: number;
-  totalTime?: number;
   frameRate?: number;
 }
 interface Emits {
   (event: 'update:time', value: number): void;
+  (event: 'change', time: number): void;
 }
 const props = withDefaults(defineProps<Props>(), {
   style: () => ({}),
-  totalTime: 0,
-  time: 0,
   frameRate: 25
 });
 const emits = defineEmits<Emits>();
 const currentTime = useVModel(props, 'time', emits);
-const { totalTime } = toRefs(props);
+const { totalTime, frameRate } = toRefs(props);
 const playerTotalTime = computed(() => {
-  return formatFrameByTime(totalTime.value);
+  return formatFrameByTime(totalTime.value, frameRate.value);
 });
 const playerCurrentTime = computed(() => {
-  return formatFrameByTime(currentTime.value);
+  return formatFrameByTime(currentTime.value, frameRate.value);
 });
+const handleTimeChange = () => {
+  emits('change', currentTime.value);
+};
 </script>
 <style lang="scss" scoped>
 :deep(.n-slider-rail) {

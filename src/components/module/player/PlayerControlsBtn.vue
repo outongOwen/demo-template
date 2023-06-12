@@ -122,7 +122,7 @@
           :min="minResolution"
           @update:value="handleFreeProportionWidth"
         >
-          <template #suffix> W </template>
+          <template #suffix>W</template>
         </n-input-number>
         <n-icon :size="25" class="flex-center cursor-pointer select-none" @click="handleProportionLockChange">
           <svg-icon :icon="freeProportionLocked ? 'pixelarticons:link' : 'pixelarticons:unlink'" />
@@ -133,7 +133,7 @@
           :min="minResolution"
           @update:value="handleFreeProportionHeight"
         >
-          <template #suffix> H </template>
+          <template #suffix>H</template>
         </n-input-number>
       </n-space>
     </n-el>
@@ -146,6 +146,7 @@ import { cloneDeep } from 'lodash-es';
 import { reactiveComputed, useResizeObserver, useVModels, watchOnce } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
 import { playerSettings } from '@/settings';
+defineOptions({ name: 'PlayerControlsBtn' });
 export interface ControlListOptions {
   title?: string;
   type: string;
@@ -185,15 +186,16 @@ const { proportion: proportionModelValue, speed: speedModelValue } = useVModels(
 const { controlListOptions, playing, isFullscreen } = toRefs(props);
 const { maxResolution, minResolution, shortestEdgeMaxResolution, shortestEdgeMinResolution, resolutionReferenceBase } =
   playerSettings;
-const isCssFullscreen = ref<boolean>(false);
-const showFreeProportionModal = ref<boolean>(false);
-const freeProportionLocked = ref<boolean>(false);
-const freeProportionLockedValue = ref<FreeProportion | null>(null);
-const cacheFreeProportion = ref<FreeProportion | null>(null);
+const isCssFullscreen = ref<boolean>(false); // css全屏开关
+const showFreeProportionModal = ref<boolean>(false); // 自由比例弹窗开关
+const freeProportionLocked = ref<boolean>(false); // 自由比例锁定开关
+const freeProportionLockedValue = ref<FreeProportion | null>(null); // 缓存锁定比例
+const cacheFreeProportion = ref<FreeProportion | null>(null); // 缓存自由比例
+const isRestFreeProportion = ref<boolean>(true); // 重置自由比例开关
 const freeProportion = reactive<FreeProportion>({
   width: 0,
   height: 0
-});
+}); // 自由比例
 const proportionOptions = [
   {
     label: '21:9',
@@ -330,6 +332,7 @@ const handleFreeProportionConfirm = () => {
   proportionModelValue.value = 'free';
   const freeOption = cloneDeep(proportionOptions).find(item => item.value === 'free');
   freeOption && (freeOption!.resolution = { ...freeProportion }) && emits('proportionChange', 'free', freeOption);
+  isRestFreeProportion.value = false;
   return true;
 };
 /**
@@ -338,8 +341,12 @@ const handleFreeProportionConfirm = () => {
 const handleFreeProportionLeave = () => {
   freeProportionLockedValue.value = null;
   freeProportionLocked.value = false;
-  cacheFreeProportion.value && Object.assign(freeProportion, cacheFreeProportion.value);
+  if (cacheFreeProportion.value && isRestFreeProportion.value) {
+    freeProportion.width = cacheFreeProportion.value.width;
+    freeProportion.height = cacheFreeProportion.value.height;
+  }
   cacheFreeProportion.value = null;
+  isRestFreeProportion.value = true;
 };
 /**
  * 比例锁定

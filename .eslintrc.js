@@ -130,11 +130,14 @@ module.exports = {
             position: 'before'
           }
         ],
-        pathGroupsExcludedImportTypes: ['vue', 'vue-router', 'pinia', 'naive-ui']
+        pathGroupsExcludedImportTypes: ['vue', 'vue-router', 'pinia', 'naive-ui', 'fabric@6.0.0-beta8']
       }
     ],
     'no-unused-expressions': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
-    'class-methods-use-this': 'off'
+    'class-methods-use-this': 'off',
+    'no-underscore-dangle': 'off',
+    'import/no-unresolved': ['error', { ignore: ['^node_modules/'] }]
+    // 'import/no-unresolved': 'off'
   }
 };

@@ -3,7 +3,7 @@
     <template #left>
       <n-switch v-model:value="testSelectState" />
     </template>
-    <template #center> 项目名称 </template>
+    <template #center>{{ '项目名称' }}</template>
     <template #right>
       <div class="flex-center text-18px cursor-pointer transition-base" @click="handleThemeModeSwitch">
         <icon-mdi-moon-waning-crescent v-if="themeStore.darkMode" />

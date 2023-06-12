@@ -1,4 +1,4 @@
-export function formatFrameByTime(duration = 0, format = 'str', fps = 25) {
+export function formatFrameByTime(duration = 0, fps = 25, format = 'str') {
   const HOUR = 3600000;
   const MINUTE = 60000;
   const SECOND = 1000;

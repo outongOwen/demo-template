@@ -3,15 +3,21 @@ import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Group } from 'fabric';
 // import type { GroupOwnProps as FGroupProps } from 'fabric';
 import { cloneDeep } from 'lodash-es';
+import type { GroupProps as FabricGroupProps } from '@fabric/shapes/Group';
+import type { TProps } from '@fabric/shapes/Object/types';
 import { throwError } from '../utils';
 import { useBindObjectEvent, useWatchUpdateProps } from '../hooks';
 import { useCanvasContext, useGroupContext } from '../context';
+export interface FGroupProps extends TProps<FabricGroupProps> {}
 export type GroupInst = {
   instance: Group;
 };
+/**
+ * todo:GroupProps 类型完善
+ */
 export const groupProps = {
   config: {
-    type: Object as PropType<Partial<typeof Group>>,
+    type: Object as PropType<FGroupProps | Record<string, any>>,
     default: () => {},
     required: true
   }

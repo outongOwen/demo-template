@@ -7,7 +7,12 @@
 <template>
   <div class="w100% flex flex-col">
     <div class="h50px w100%">
-      <player-progress-bar v-model:time="currentTime" :total-time="1000000" />
+      <player-progress-bar
+        v-model:time="playerCurrentTime"
+        :total-time="1000000"
+        :frame-rate="playerSettings.frameRate"
+        @change="handlePlayerTimeChange"
+      />
     </div>
     <div class="h28px w100%">
       <player-controls-btn
@@ -26,6 +31,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { playerSettings } from '@/settings';
 import { usePlayerStore } from '@/store';
 import PlayerControlsBtn from '@/components/module/player/PlayerControlsBtn.vue';
 import PlayerProgressBar from '@/components/module/player/PlayerProgressBar.vue';
@@ -33,7 +39,7 @@ import type { ControlListOptions, SelectMixOption } from '@/components/module/pl
 defineOptions({ name: 'PlayerControls' });
 const playerStore = usePlayerStore();
 const { getIsFullscreenState, getProportion, getSpeed } = storeToRefs(playerStore);
-const currentTime = ref<number>(0);
+const playerCurrentTime = ref<number>(0);
 const playerPlaying = ref<boolean>(false);
 const playerSpeed = computed({
   set: (value: number) => {
@@ -136,6 +142,13 @@ const handleProportionChange = (_key: string, option: SelectMixOption) => {
 };
 const handleCssFullscreenChange = (state: boolean) => {
   playerStore.setFullscreenState(state);
+};
+/**
+ * 播放器时间更新
+ */
+const handlePlayerTimeChange = (_time: number) => {
+  // 时间更新相关操作
+  // console.log(time, 'time');
 };
 </script>
 
