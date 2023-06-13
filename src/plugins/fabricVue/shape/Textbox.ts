@@ -1,45 +1,46 @@
 import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
-import type { ITextProps as FabricITextProps } from '@fabric/shapes/IText/IText';
+import { Textbox } from 'fabric';
+// import {} from '@fabric/shapes/Textbox';
+import type { textboxDefaultValues } from '@fabric/shapes/Textbox';
 import type { TProps } from '@fabric/shapes/Object/types';
-import { IText } from 'fabric';
 import { cloneDeep } from 'lodash-es';
 import { useCanvasContext } from '../context';
-import { useObjectParent, useBindTextEvent, useWatchUpdateProps } from '../hooks';
-export type FITextProps = TProps<FabricITextProps> & {
-  text: string;
+import { useObjectParent, useBindTextEvent, useWatchUpdateProps, useControls } from '../hooks';
+export type FTextboxProps = TProps<
+  typeof textboxDefaultValues & {
+    text: string;
+  }
+>;
+export type TextboxInst = {
+  instance: Textbox;
 };
-export type ITextInst = {
-  instance: IText;
-};
-/**
- * todo:ITextProps 类型完善
- */
-export const iTextProps = {
+export const textboxProps = {
   config: {
-    type: Object as PropType<FITextProps | Record<string, any>>,
-    default: () => {},
+    type: Object as PropType<FTextboxProps | Record<string, any>>,
     required: true
   }
 } as const;
-export type ITextProps = typeof iTextProps;
+export type TextboxProps = typeof textboxProps;
 export default defineComponent({
-  name: 'FabricIText',
+  name: 'FabricTextbox',
   inheritAttrs: false,
-  props: iTextProps,
-  setup(props): ITextInst {
+  props: textboxProps,
+  setup(props): TextboxInst {
     const { injectCanvasContext } = useCanvasContext();
     const canvasInject = injectCanvasContext();
     const { parentInstance } = useObjectParent();
-    const textObject = new IText(props.config.text, props.config);
+    const { setControls } = useControls();
+    const textObject = new Textbox(props.config.text, props.config);
+    setControls(textObject, props.config);
     parentInstance.add(textObject);
     canvasInject?.instance && useWatchUpdateProps(() => cloneDeep(props.config), textObject, canvasInject.instance);
     onMounted(() => {
-      useBindTextEvent(textObject, 'on');
+      useBindTextEvent(textObject, 'bind');
     });
     onBeforeUnmount(() => {
       parentInstance && parentInstance.remove(textObject);
-      useBindTextEvent(textObject, 'off');
+      useBindTextEvent(textObject, 'unbind');
     });
     return {
       instance: textObject

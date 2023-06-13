@@ -15,9 +15,7 @@ export function throwError(location: string, message: string): never {
 interface BaseObject {
   [key: string]: any;
 }
-
 interface DifferenceResult extends BaseObject {}
-
 export function difference(difObject: BaseObject, baseObject: BaseObject): DifferenceResult {
   function changes(_difObject: BaseObject, _baseObject: BaseObject): DifferenceResult {
     const result: DifferenceResult = {};
@@ -32,4 +30,8 @@ export function difference(difObject: BaseObject, baseObject: BaseObject): Diffe
     return result;
   }
   return changes(difObject, baseObject);
+}
+// 获取Object的keys
+export function objectKeys<T>(obj: T & Record<string, any>): Array<keyof T> {
+  return Object.keys(obj) as Array<keyof T>;
 }

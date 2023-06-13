@@ -137,7 +137,8 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'off',
     'class-methods-use-this': 'off',
     'no-underscore-dangle': 'off',
-    'import/no-unresolved': ['error', { ignore: ['^node_modules/'] }]
+    'import/no-unresolved': ['error', { ignore: ['^node_modules/'] }],
+    'no-plusplus': 'off'
     // 'import/no-unresolved': 'off'
   }
 };

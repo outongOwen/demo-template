@@ -5,10 +5,14 @@ export interface CanvasContextProps {
   renderAll: () => void;
   requestRenderAll: () => void;
 }
+export interface CanvasContext {
+  provideCanvasContext: (context: CanvasContextProps) => void;
+  injectCanvasContext: () => CanvasContextProps | undefined;
+}
 const { useInject, useProvide } = useContext<CanvasContextProps>('CanvasContext', {
   native: true
 });
-export default function useCanvasContext() {
+export default function useCanvasContext(): CanvasContext {
   const provideCanvasContext = (context: CanvasContextProps) => {
     useProvide(context);
   };

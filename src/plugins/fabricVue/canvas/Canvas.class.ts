@@ -22,8 +22,8 @@ export class CanvasVue extends Canvas implements ICanvasVue {
   }
 
   constructor(options: ICanvasVueOptions) {
-    const { el, options: fOptions = {}, configuration = {} } = options;
-    super(el, fOptions);
+    const { el, options: fabricOptions = {}, configuration = {} } = options;
+    super(el, fabricOptions);
     this._initConfig(configuration);
   }
 }

@@ -9,17 +9,13 @@
     <Canvas
       ref="playerCanvasRef"
       :configuration="canvasConfiguration"
-      :config="{
-        borderColor: '#116548',
-        cornerColor: '#116548',
-        transparentCorners: false,
-        cornerStrokeColor: '#116548',
-        borderScaleFactor: 2
-      }"
+      :control-props="controlPropsSetting"
+      :controls-visibility="controlsVisibilitySetting"
+      :controls="customControls"
+      @once:after:render="handleAfterRender"
       @selection:created="handleObjectSelected"
       @selection:update="handleObjectSelected"
       @object:added="handleObjectAdded"
-      @after:render="handleAfterRender"
     >
       <IText :config="textConfig" />
       <Text :config="textConfig" />
@@ -36,25 +32,45 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { util } from 'fabric';
+import { omit, pick } from 'lodash-es';
+import { reactiveComputed } from '@vueuse/core';
+import { util, Control, controlsUtils } from 'fabric';
 import type { ImageSource, Object as FabricObject, TPointerEvent } from 'fabric';
-import { usePlayerStore } from '@/store';
-import { Canvas, Image, Group, IText, Text, Textbox, Rect } from '@/components/fabricVue';
+import { usePlayerStore, useThemeStore } from '@/store';
+import { Canvas, Image, Group, IText, Text, Textbox, Rect } from '~/src/plugins/fabricVue';
 import type {
   CanvasInst,
   ImageInst,
   GroupInst,
-  FConfiguration,
+  FCanvasConfiguration,
   FTextboxProps,
   FTextProps,
   FGroupProps,
   FRectProps,
   FImageProps
-} from '@/components/fabricVue';
+} from '~/src/plugins/fabricVue';
 defineOptions({ name: 'PlayerCanvas' });
+// eslint-disable-next-line max-params
+function drawImg(
+  ctx: CanvasRenderingContext2D,
+  left: number,
+  top: number,
+  img: HTMLImageElement,
+  wSize: number,
+  hSize: number,
+  angle: number | undefined
+) {
+  if (angle === undefined) return;
+  ctx.save();
+  ctx.translate(left, top);
+  ctx.rotate(util.degreesToRadians(angle));
+  ctx.drawImage(img, -wSize / 2, -hSize / 2, wSize, hSize);
+  ctx.restore();
+}
 const playerStore = usePlayerStore();
+const themeStore = useThemeStore();
 const { getResolution } = storeToRefs(playerStore);
-const canvasConfiguration: FConfiguration = {
+const canvasConfiguration: FCanvasConfiguration = {
   // DPI: 300
 };
 const playerCanvasRef = ref<CanvasInst>();
@@ -67,12 +83,12 @@ const imageConfig = reactive<FImageProps>({
   top: 120,
   scaleX: 1,
   scaleY: 1,
-  strokeWidth: 0,
-  borderColor: '#1890FF',
-  cornerColor: '#fff',
-  transparentCorners: false,
-  cornerStrokeColor: '#fff',
-  borderScaleFactor: 2
+  strokeWidth: 0
+  // borderColor: '#1890FF',
+  // cornerColor: '#fff',
+  // transparentCorners: false,
+  // cornerStrokeColor: '#fff',
+  // borderScaleFactor: 2
 });
 
 const textConfig = reactive<FTextProps>({
@@ -80,18 +96,15 @@ const textConfig = reactive<FTextProps>({
   fontSize: 100,
   left: 0,
   top: 0,
-  fill: '#116548',
-  borderColor: '#116548',
-  cornerColor: '#116548',
-  transparentCorners: false,
-  cornerStrokeColor: '#116548',
-  borderScaleFactor: 2.5
+  fill: '#116548'
+  // borderColor: '#fff'
 });
 
 const groupConfig = reactive<FGroupProps>({
   width: 500,
-  height: 500
-  // layout: 'fixed'
+  height: 500,
+  layout: 'fixed',
+  borderColor: '#fff'
 });
 const groupRectConfig = reactive<FRectProps>({
   width: 500,
@@ -125,7 +138,7 @@ watchEffect(() => {
     });
 });
 const handleAfterRender = ({ ctx }: { ctx: CanvasRenderingContext2D }) => {
-  console.log(ctx, 'handleObjectAddedhandleObjectAddedhandleObjectAdded');
+  console.log(ctx, 'once:after:renderonce:after:renderonce:after:renderonce:after:renderonce:after:render');
   // console.log(unref(playerCanvasRef)!.instance);
   // unref(playerCanvasRef)!
   //   .instance.getObjects()
@@ -143,10 +156,50 @@ const handleObjectSelected = ({ e, selected }: { e: TPointerEvent; selected: Arr
 const handleObjectAdded = ({ target }: { target: FabricObject }) => {
   console.log('targettargettargettarget', target);
 };
+const customControls = reactiveComputed(() => {
+  const delImg = document.createElement('img');
+  delImg.src = new URL('@/assets/svg-icon/arrows-rotate.svg', import.meta.url).href;
+  return {
+    mtr: new Control({
+      x: 0,
+      y: 0.5,
+      offsetY: 30,
+      sizeX: 30,
+      sizeY: 30,
+      touchSizeX: 30,
+      touchSizeY: 30,
+      actionName: 'rotate',
+      cursorStyle: 'alias',
+      actionHandler: controlsUtils.rotationWithSnapping,
+      // cursorStyleHandler: controlsUtils.rotationStyleHandler,
+      // eslint-disable-next-line func-name-matching, max-params
+      render: function renderDelIcon(
+        ctx: CanvasRenderingContext2D,
+        left: number,
+        top: number,
+        _styleOverride: any,
+        fabricObject: FabricObject
+      ) {
+        // 绘制圆形背景
+        ctx.beginPath();
+        ctx.arc(left, top, 15, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        drawImg(ctx, left, top, delImg, 20, 20, fabricObject.angle);
+      }
+    })
+  };
+});
+const controlPropsSetting = reactiveComputed(() => {
+  return omit(themeStore.getPlayerSettings.controls, ['visibility']);
+});
+const controlsVisibilitySetting = reactiveComputed(() => {
+  return pick(themeStore.getPlayerSettings.controls, ['visibility']);
+});
 onMounted(async () => {
   // const canvas = new Canvas(playerCanvasRef.value!);
   // canvasInstance = canvas;
-  const imageObject = await util.loadImage('https://loremflickr.com/2151/1333/model?lock=1812595036127232');
+  const imageObject = await util.loadImage('https://loremflickr.com/3840/2160/nature?lock=7660529522835456');
   imageConfig.width = imageObject.width;
   imageConfig.height = imageObject.height;
   groupTextboxConfig.width = groupRectConfig.width;

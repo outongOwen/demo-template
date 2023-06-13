@@ -1,3 +1,9 @@
+import type { FControlProps, ControlsVisibility } from '~/src/plugins/fabricVue/types';
+interface DefaultCanvasSettings {
+  controls: Required<FControlProps> & {
+    visibility: ControlsVisibility;
+  };
+}
 const defaultPlayerSettings: Player.Setting = {
   frameRate: 25,
   volume: 1,
@@ -14,5 +20,30 @@ const defaultPlayerSettings: Player.Setting = {
   shortestEdgeMaxResolution: 1080,
   shortestEdgeMinResolution: 480
 };
-
-export const playerSettings = defaultPlayerSettings;
+const defaultCanvasSettings: DefaultCanvasSettings = {
+  controls: {
+    borderColor: '#fff',
+    cornerColor: '#fff',
+    cornerStrokeColor: '#fff',
+    transparentCorners: false,
+    touchCornerSize: 24,
+    cornerSize: 13,
+    cornerStyle: 'rect',
+    cornerDashArray: null,
+    borderScaleFactor: 2,
+    padding: 0,
+    hasControls: true,
+    visibility: {
+      ml: true,
+      mr: true,
+      mb: true,
+      mt: true,
+      tl: true,
+      tr: true,
+      bl: true,
+      br: true,
+      mtr: true
+    }
+  }
+};
+export const playerSettings = { ...defaultPlayerSettings, ...defaultCanvasSettings };

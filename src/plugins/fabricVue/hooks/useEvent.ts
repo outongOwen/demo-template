@@ -2,6 +2,7 @@ import type { ComponentInternalInstance, SetupContext } from 'vue';
 import { getCurrentInstance } from 'vue';
 import type { Object as FabricObject, StaticCanvas, Canvas, Group, IText, Text, Textbox, Image } from 'fabric';
 import type { TEventCallback } from '@fabric/Observable';
+type EventAction = 'bind' | 'unbind';
 export const canvasEvents = [
   'object:modified',
   'object:moving',
@@ -67,8 +68,8 @@ export const objectEvents = [
   'drop'
 ];
 export const textEvents = ['changed', 'selection:changed', 'editing:entered', 'editing:exited'];
-const suffixRegExp = /^on([A-Za-z:]+)$/;
-// export const
+// 匹配once事件 例如onOnceClick
+const eventSuffixRegExp = /^(onOnce|on)(:?)([A-Za-z:]*)$/;
 /**
  * @abstract 事件绑定/解绑
  * @param instance 组件实例
@@ -78,26 +79,32 @@ const suffixRegExp = /^on([A-Za-z:]+)$/;
  */
 
 const bindEvent = (
-  instance: FabricObject | Canvas | Group | StaticCanvas,
+  instance: StaticCanvas | Canvas | Group | FabricObject,
   {
     attrs,
     eventsName,
     eventAction
-  }: { attrs: ComponentInternalInstance['attrs']; eventsName: string[]; eventAction?: 'on' | 'off' }
+  }: { attrs: ComponentInternalInstance['attrs']; eventsName: string[]; eventAction?: EventAction }
 ) => {
   // 事件绑定
   for (const attrItem of Object.entries(attrs)) {
     const [name, handlerEvent] = attrItem as [string, TEventCallback];
-    const match = name.match(suffixRegExp);
+    const match = name.match(eventSuffixRegExp);
     if (match) {
-      const eventName = match[1].toLowerCase() as any;
+      const actionType = match[1] === 'onOnce' ? 'once' : match[1];
+      const eventName = match[3].toLowerCase() as any;
       if (eventsName.includes(eventName)) {
-        if (eventAction === 'on') {
-          instance.off(eventName);
-          instance.on(eventName, handlerEvent);
+        if (eventAction === 'bind' && actionType === 'once') {
+          instance.once(eventName, handlerEvent);
+          return;
         }
-        if (eventAction === 'off') {
+        if (eventAction === 'bind' && actionType === 'on') {
+          instance.on(eventName, handlerEvent);
+          return;
+        }
+        if (eventAction === 'unbind') {
           instance.off(eventName);
+          return;
         }
       }
     }
@@ -108,7 +115,7 @@ const bindEvent = (
  * @param canvas 画布实例
  * @param {enum} type on/off 绑定/解绑
  */
-export function useBindCanvasEvent(canvas: Canvas, eventAction: 'on' | 'off') {
+export function useBindCanvasEvent(canvas: Canvas, eventAction: EventAction) {
   const ctx = getCurrentInstance();
   if (!ctx) return;
   const { attrs } = ctx;
@@ -120,7 +127,7 @@ export function useBindCanvasEvent(canvas: Canvas, eventAction: 'on' | 'off') {
  * @param object 画布实例
  * @param {enum} type on/off 绑定/解绑
  */
-export function useBindObjectEvent(object: FabricObject, eventAction: 'on' | 'off') {
+export function useBindObjectEvent(object: FabricObject, eventAction: EventAction) {
   const ctx = getCurrentInstance();
   if (!ctx) return;
   const { attrs } = ctx;
@@ -133,7 +140,7 @@ export function useBindObjectEvent(object: FabricObject, eventAction: 'on' | 'of
  * @param text 文字实例
  * @param {enum} type on/off 绑定/解绑
  */
-export function useBindTextEvent(textObject: Textbox | IText | Text, eventAction: 'on' | 'off') {
+export function useBindTextEvent(textObject: Textbox | IText | Text, eventAction: EventAction) {
   const ctx = getCurrentInstance();
   if (!ctx) return;
   const { attrs } = ctx;
@@ -147,7 +154,7 @@ export function useBindTextEvent(textObject: Textbox | IText | Text, eventAction
  * @param {String[]} attrs on/off 绑定/解绑
  * @param {enum} type on/off 绑定/解绑
  */
-export function useBindImageEvent(image: Image, attrs: SetupContext['attrs'], eventAction: 'on' | 'off') {
+export function useBindImageEvent(image: Image, attrs: SetupContext['attrs'], eventAction: EventAction) {
   if (!Object.keys(attrs).length) return;
   bindEvent(image, { attrs, eventsName: objectEvents, eventAction });
 }

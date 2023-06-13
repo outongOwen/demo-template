@@ -6,15 +6,12 @@ import { cloneDeep } from 'lodash-es';
 import type { GroupProps as FabricGroupProps } from '@fabric/shapes/Group';
 import type { TProps } from '@fabric/shapes/Object/types';
 import { throwError } from '../utils';
-import { useBindObjectEvent, useWatchUpdateProps } from '../hooks';
+import { useBindObjectEvent, useWatchUpdateProps, useControls } from '../hooks';
 import { useCanvasContext, useGroupContext } from '../context';
 export interface FGroupProps extends TProps<FabricGroupProps> {}
 export type GroupInst = {
   instance: Group;
 };
-/**
- * todo:GroupProps 类型完善
- */
 export const groupProps = {
   config: {
     type: Object as PropType<FGroupProps | Record<string, any>>,
@@ -33,6 +30,7 @@ export default defineComponent({
   setup(props): GroupInst {
     const { injectCanvasContext } = useCanvasContext();
     const { provideGroupContext } = useGroupContext();
+    const { setControls } = useControls();
     const canvasInject = injectCanvasContext();
     if (!canvasInject?.instance) {
       throwError('Group', 'must be placed inside Canvas');
@@ -40,18 +38,19 @@ export default defineComponent({
     const { instance: canvasInstance } = canvasInject;
     // 创建组
     const groupObject = new Group();
-    props.config && groupObject.set(props.config);
+    // 添加自定义控件
+    setControls(groupObject, props.config);
     canvasInstance.add(groupObject);
     provideGroupContext({
       instance: groupObject
     });
     useWatchUpdateProps(() => cloneDeep(props.config), groupObject, canvasInject.instance);
     onMounted(() => {
-      useBindObjectEvent(groupObject, 'on');
+      useBindObjectEvent(groupObject, 'bind');
     });
     onBeforeUnmount(() => {
       canvasInstance?.remove(groupObject);
-      useBindObjectEvent(groupObject, 'off');
+      useBindObjectEvent(groupObject, 'unbind');
     });
     return {
       instance: groupObject
