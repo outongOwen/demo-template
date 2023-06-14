@@ -50,7 +50,7 @@ export default defineComponent({
     });
     onBeforeUnmount(() => {
       canvasInstance?.remove(groupObject);
-      useBindObjectEvent(groupObject, 'unbind');
+      groupObject.off();
     });
     return {
       instance: groupObject

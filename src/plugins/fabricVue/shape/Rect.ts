@@ -38,7 +38,7 @@ export default defineComponent({
     });
     onBeforeUnmount(() => {
       parentInstance && parentInstance.remove(rectObject);
-      useBindObjectEvent(rectObject, 'unbind');
+      rectObject.off();
     });
     return {
       instance: rectObject

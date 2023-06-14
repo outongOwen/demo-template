@@ -103,7 +103,7 @@ const bindEvent = (
           return;
         }
         if (eventAction === 'unbind') {
-          instance.off(eventName);
+          instance.off({ eventName, handlerEvent });
           return;
         }
       }

@@ -72,6 +72,7 @@ const themeStore = useThemeStore();
 const { getResolution } = storeToRefs(playerStore);
 const canvasConfiguration: FCanvasConfiguration = {
   // DPI: 300
+  // devicePixelRatio: 2
 };
 const playerCanvasRef = ref<CanvasInst>();
 const imageRef = ref<ImageInst>();
@@ -194,12 +195,12 @@ const controlPropsSetting = reactiveComputed(() => {
   return omit(themeStore.getPlayerSettings.controls, ['visibility']);
 });
 const controlsVisibilitySetting = reactiveComputed(() => {
-  return pick(themeStore.getPlayerSettings.controls, ['visibility']);
+  return { ...pick(themeStore.getPlayerSettings.controls, ['visibility']).visibility };
 });
 onMounted(async () => {
   // const canvas = new Canvas(playerCanvasRef.value!);
   // canvasInstance = canvas;
-  const imageObject = await util.loadImage('https://loremflickr.com/3840/2160/nature?lock=7660529522835456');
+  const imageObject = await util.loadImage('https://loremflickr.com/3840/2160/city?lock=6726747135410176');
   imageConfig.width = imageObject.width;
   imageConfig.height = imageObject.height;
   groupTextboxConfig.width = groupRectConfig.width;

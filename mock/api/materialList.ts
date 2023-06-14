@@ -25,12 +25,12 @@ const demoList = (() => {
     item.preUrl = faker.image.urlLoremFlickr({
       width: faker.number.int({ min: 90, max: 192 }),
       height: faker.number.int({ min: 70, max: 108 }),
-      category: 'nature'
+      category: 'city'
     });
     item.path = faker.image.urlLoremFlickr({
       width: faker.number.int({ min: 3840, max: 3840 }),
       height: faker.number.int({ min: 2160, max: 2160 }),
-      category: 'nature'
+      category: 'city'
     });
   });
   return data.list;

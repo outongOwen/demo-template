@@ -79,8 +79,11 @@ export default defineComponent({
     );
 
     onBeforeUnmount(() => {
-      parentInstance && imageObject.value && parentInstance.remove(imageObject.value);
-      imageObject.value && useBindImageEvent(imageObject.value, attrs, 'unbind');
+      if (imageObject.value) {
+        imageObject.value.off();
+        parentInstance && parentInstance.remove(imageObject.value);
+        imageObject.value.off();
+      }
     });
     return {
       instance: imageObjectRef as unknown as Image

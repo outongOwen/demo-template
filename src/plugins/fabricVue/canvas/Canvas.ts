@@ -51,6 +51,7 @@ export default defineComponent({
   setup(props): CanvasInst {
     const { provideCanvasContext } = useCanvasContext();
     const { provideControlsContext } = useControlsContext();
+
     const canvasElement = document.createElement('canvas');
     const canvas = new Canvas(canvasElement, props.config);
     /**
@@ -64,7 +65,6 @@ export default defineComponent({
       canvas
     });
     guideline.init();
-    // console.log(guideline, 'guidelineguidelineguideline');
     const renderAll = () => {
       canvas.renderAll();
     };
@@ -87,9 +87,9 @@ export default defineComponent({
       useBindCanvasEvent(canvas, 'bind');
     });
     onBeforeUnmount(() => {
+      canvas.off(); // 移除所有事件
       canvas?.dispose();
       canvasElement?.remove();
-      useBindCanvasEvent(canvas, 'unbind');
     });
     return {
       instance: canvas,

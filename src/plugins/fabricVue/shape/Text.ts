@@ -38,7 +38,7 @@ export default defineComponent({
     });
     onBeforeUnmount(() => {
       parentInstance && parentInstance.remove(textObject);
-      useBindTextEvent(textObject, 'unbind');
+      textObject.off();
     });
     return {
       instance: textObject
