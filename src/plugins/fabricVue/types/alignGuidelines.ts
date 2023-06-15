@@ -18,6 +18,7 @@ export type ACoordsExtendsCenter = TACoords & {
 };
 export interface AlignGuidelinesOptions {
   [key: string]: any;
+  autoAdsorb?: boolean;
   aligningLineMargin?: number;
   aligningLineWidth?: number;
   aligningLineColor?: string;

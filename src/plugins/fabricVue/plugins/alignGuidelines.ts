@@ -1,5 +1,5 @@
-import { Object as FabricObject, util, Point } from 'fabric';
-import type { Canvas, TMat2D } from 'fabric';
+import { Object as FabricObject, util, Point, Line } from 'fabric';
+import type { Canvas, ModifiedEvent } from 'fabric';
 import { objectKeys } from '../utils';
 import type {
   VerticalLineCoords,
@@ -13,6 +13,7 @@ import type {
   PointArray
 } from '../types';
 const defaultAlignGuidelinesOptions: AlignGuidelinesOptions = {
+  autoAdsorb: true,
   aligningLineMargin: 5,
   aligningLineWidth: 1,
   aligningLineColor: '#fff',
@@ -23,11 +24,16 @@ const defaultAlignGuidelinesOptions: AlignGuidelinesOptions = {
 };
 export class AlignGuidelines {
   /**
-   * 吸附线的间距，即吸附线距离对象的进入距离
+   * 吸附安全距离
    * @type {number}
    * @default 5
    */
   declare aligningLineMargin: number;
+
+  /**
+   * 吸附开关
+   */
+  declare autoAdsorb: boolean;
 
   /**
    * 吸附线的宽度
@@ -79,40 +85,29 @@ export class AlignGuidelines {
    * canvas的上下文
    * @type {CanvasRenderingContext2D}
    */
-  private ctx: CanvasRenderingContext2D;
-
-  /**
-   * 视口的变换
-   * @type {TMat2D}
-   */
-  declare viewportTransform: TMat2D;
+  private _canvasCtx: CanvasRenderingContext2D;
 
   /**
    * 水平线集合
    * @type {HorizontalLineCoords[]}
    */
-  private horizontalLines: HorizontalLineCoords[] = [];
+  private _horizontalLines: HorizontalLineCoords[] = [];
 
   /**
    * 垂直线集合
    * @type {VerticalLineCoords[]}
    */
-  private verticalLines: VerticalLineCoords[] = [];
+  private _verticalLines: VerticalLineCoords[] = [];
 
   /**
    * 拖拽的元素实例对象
    * @type {FabricObject}
    */
-  private canvasActiveObject: FabricObject = new FabricObject();
-
-  /**
-   * 记录对象锁定前激活状态的position
-   * @type {x:number,y:number}
-   */
+  private _canvasActiveObject: FabricObject = new FabricObject();
 
   constructor({ canvas, options }: AlignGuidelinesProps) {
     this.canvas = canvas;
-    this.ctx = canvas.getSelectionContext();
+    this._canvasCtx = canvas.getSelectionContext();
     const alignOptions: AlignGuidelinesOptions = options
       ? { ...defaultAlignGuidelinesOptions, ...options }
       : defaultAlignGuidelinesOptions;
@@ -132,7 +127,7 @@ export class AlignGuidelines {
    * @param y {number} y坐标
    */
   private drawSign(x: number, y: number) {
-    const ctx = this.ctx;
+    const ctx = this._canvasCtx;
     ctx.lineWidth = 0.5;
     ctx.strokeStyle = this.aligningLineColor;
     ctx.beginPath();
@@ -153,7 +148,7 @@ export class AlignGuidelines {
    */
   // eslint-disable-next-line max-params
   private drawLine(x1: number, y1: number, x2: number, y2: number) {
-    const ctx = this.ctx;
+    const ctx = this._canvasCtx;
     const point1 = util.transformPoint(new Point(x1, y1), this.canvas.viewportTransform);
     const point2 = util.transformPoint(new Point(x2, y2), this.canvas.viewportTransform);
 
@@ -175,12 +170,12 @@ export class AlignGuidelines {
   }
 
   /**
-   *  绘制垂直直辅助线
+   *  绘制垂直辅助线
    * @param coords {VerticalLineCoords}
    * @returns {void}
    */
   private drawVerticalLine(coords: VerticalLineCoords): void {
-    const movingCoords = this.getObjDraggingObjCoords(this.canvasActiveObject);
+    const movingCoords = this.getObjDraggingObjCoords(this._canvasActiveObject);
     if (!objectKeys(movingCoords).some(key => Math.abs(movingCoords[key].x - coords.x) < 0.0001)) return;
     this.drawLine(coords.x, Math.min(coords.y1, coords.y2), coords.x, Math.max(coords.y1, coords.y2));
   }
@@ -191,9 +186,47 @@ export class AlignGuidelines {
    * @returns {void}
    */
   private drawHorizontalLine(coords: HorizontalLineCoords): void {
-    const movingCoords = this.getObjDraggingObjCoords(this.canvasActiveObject);
+    const movingCoords = this.getObjDraggingObjCoords(this._canvasActiveObject);
     if (!objectKeys(movingCoords).some(key => Math.abs(movingCoords[key].y - coords.y) < 0.0001)) return;
     this.drawLine(Math.min(coords.x1, coords.x2), coords.y, Math.max(coords.x1, coords.x2), coords.y);
+  }
+
+  /**
+   * 绘制旋转辅助线
+   */
+  private drawDottedLine(startPoint: Point, endPoint: Point) {
+    const context = this._canvasCtx;
+    // context.save();
+    context.setLineDash([5, 5]);
+    context.beginPath();
+    context.moveTo(startPoint.x, startPoint.y);
+    context.lineTo(endPoint.x, endPoint.y);
+    context.stroke();
+    // context.restore();
+  }
+
+  private drawRotationGuidelines(object: FabricObject): void {
+    // 获取对象中心点坐标
+    const center = object.getCenterPoint();
+
+    // 绘制辅助线
+    let angle = 0;
+    const step = 45;
+    while (angle < 360) {
+      // 计算辅助线的终点坐标
+      const endPoint = util.rotatePoint(new Point(object.left, object.top), center, util.degreesToRadians(angle));
+      // console.log(endPoint, 'endPointendPoint');
+      // 绘制虚线
+      console.log(center, endPoint);
+      this.drawDottedLine(center, endPoint);
+      // 绘制虚线
+      const dashedLine = new Line([center.x, center.y, endPoint.x, endPoint.y], {
+        strokeDashArray: [5, 5],
+        stroke: '#e20000'
+      });
+      this.canvas.add(dashedLine);
+      angle += step;
+    }
   }
 
   /**
@@ -210,8 +243,8 @@ export class AlignGuidelines {
    *  置空吸附线缓存
    */
   private clearLinesMeta() {
-    this.horizontalLines.length = 0;
-    this.verticalLines.length = 0;
+    this._horizontalLines.length = 0;
+    this._verticalLines.length = 0;
   }
 
   /**
@@ -371,10 +404,10 @@ export class AlignGuidelines {
                 ...activeObject.aCoords,
                 c: this.calcCenterPointByACoords(activeObject.aCoords)
               });
-              this.horizontalLines.push({ y, x1, x2 });
+              this._horizontalLines.push({ y, x1, x2 });
             } else {
               const { x1, x2 } = calcHorizontalLineCoords(objPoint, objCoordsByMovingDistance);
-              this.horizontalLines.push({ y, x1, x2 });
+              this._horizontalLines.push({ y, x1, x2 });
             }
           }
         });
@@ -403,20 +436,21 @@ export class AlignGuidelines {
                 ...activeObject.aCoords,
                 c: this.calcCenterPointByACoords(activeObject.aCoords)
               });
-              this.verticalLines.push({ x, y1, y2 });
+              this._verticalLines.push({ x, y1, y2 });
             } else {
               const { y1, y2 } = calcVerticalLineCoords(objPoint, objCoordsByMovingDistance);
-              this.verticalLines.push({ x, y1, y2 });
+              this._verticalLines.push({ x, y1, y2 });
             }
           }
         });
       });
-      this.snap({
-        activeObject,
-        draggingObjCoords: objCoordsByMovingDistance,
-        snapXPoints,
-        snapYPoints
-      });
+      this.autoAdsorb &&
+        this.snap({
+          activeObject,
+          draggingObjCoords: objCoordsByMovingDistance,
+          snapXPoints,
+          snapYPoints
+        });
     }
   }
 
@@ -424,45 +458,61 @@ export class AlignGuidelines {
    * 清除辅助线
    */
   private clearGuideline() {
-    this.canvas.clearContext(this.ctx);
+    this.canvas.clearContext(this._canvasCtx);
+  }
+  /**
+   * 属性修改事件回调
+   */
+
+  private bindEventModifiedCallback(e: ModifiedEvent) {
+    this.clearLinesMeta();
+    const activeObject = e.target;
+    const canvasAllObjects: FabricObject[] = [];
+    this._canvasActiveObject = activeObject;
+    const canvasObjects = this.canvas.getObjects().filter(obj => {
+      if (this.ignoreObjTypes?.length) {
+        return !this.ignoreObjTypes.some(item => (obj as any)[item.key] === item.value);
+      }
+      if (this.pickObjTypes?.length) {
+        return this.pickObjTypes.some(item => (obj as any)[item.key] === item.value);
+      }
+      return true;
+    }) as FabricObject[];
+    this.isOpenElementAlignGuidelines && canvasAllObjects.push(...canvasObjects);
+    if (this.isOpenCanvasAlignGuidelines) {
+      // 模拟一个画布对象，添加中心和边界辅助线
+      const cObject = new FabricObject({
+        left: 0,
+        top: 0,
+        width: this.canvas.width,
+        height: this.canvas.height,
+        selectable: false,
+        evented: false,
+        strokeWidth: 0
+      });
+      cObject.setCoords();
+      canvasAllObjects.push(cObject);
+    }
+    const transform = this.canvas._currentTransform;
+    if (!transform) return;
+    this.traverseAllObjects(activeObject, canvasAllObjects);
   }
 
   /**
-   * 监听对象移动事件
+   * 监听对象属性修改事件
    */
-  private watchObjectMoving() {
-    this.canvas.on('object:moving', e => {
-      this.canvas.renderAll();
-      this.clearLinesMeta();
-      const activeObject = e.target;
-      const canvasAllObjects: FabricObject[] = [];
-      this.canvasActiveObject = activeObject;
-      const canvasObjects = this.canvas.getObjects().filter(obj => {
-        if (this.ignoreObjTypes?.length) {
-          return !this.ignoreObjTypes.some(item => (obj as any)[item.key] === item.value);
-        }
-        if (this.pickObjTypes?.length) {
-          return this.pickObjTypes.some(item => (obj as any)[item.key] === item.value);
-        }
-        return true;
-      }) as FabricObject[];
-      if (this.isOpenCanvasAlignGuidelines) {
-        const cObject = new FabricObject({
-          left: 0,
-          top: 0,
-          width: this.canvas.width,
-          height: this.canvas.height,
-          selectable: false,
-          evented: false,
-          strokeWidth: 0
-        });
-        cObject.setCoords();
-        canvasAllObjects.push(cObject);
-      }
-      this.isOpenElementAlignGuidelines && canvasAllObjects.push(...canvasObjects);
-      const transform = this.canvas._currentTransform;
-      if (!transform) return;
-      this.traverseAllObjects(activeObject, canvasAllObjects);
+  private watchObjectModified() {
+    this.canvas.on('object:moving', (e: ModifiedEvent) => {
+      this.bindEventModifiedCallback(e);
+    });
+    this.canvas.on('object:scaling', (e: ModifiedEvent) => {
+      this.autoAdsorb = false;
+      this.bindEventModifiedCallback(e);
+      this.autoAdsorb = true;
+    });
+    this.canvas.on('object:rotating', (e: ModifiedEvent) => {
+      // 绘制旋转辅助线
+      this.drawRotationGuidelines(e.target);
     });
   }
 
@@ -473,13 +523,12 @@ export class AlignGuidelines {
     this.canvas.on('before:render', () => {
       this.clearGuideline();
     });
-
     this.canvas.on('after:render', () => {
-      for (let i = this.verticalLines.length; i--; ) {
-        this.drawVerticalLine(this.verticalLines[i]);
+      for (let i = this._verticalLines.length; i--; ) {
+        this.drawVerticalLine(this._verticalLines[i]);
       }
-      for (let i = this.horizontalLines.length; i--; ) {
-        this.drawHorizontalLine(this.horizontalLines[i]);
+      for (let i = this._horizontalLines.length; i--; ) {
+        this.drawHorizontalLine(this._horizontalLines[i]);
       }
       this.canvas.calcOffset();
     });
@@ -491,7 +540,6 @@ export class AlignGuidelines {
   private watchMouseDown() {
     this.canvas.on('mouse:down', () => {
       this.clearLinesMeta();
-      this.viewportTransform = this.canvas.viewportTransform;
     });
   }
 
@@ -500,6 +548,7 @@ export class AlignGuidelines {
    */
   private watchMouseUp() {
     this.canvas.on('mouse:up', () => {
+      this.clearGuideline();
       this.clearLinesMeta();
       this.canvas.renderAll();
     });
@@ -515,8 +564,7 @@ export class AlignGuidelines {
   }
 
   init() {
-    this.watchObjectMoving();
-    // this.watchBeforeMouseMove();
+    this.watchObjectModified();
     this.watchRender();
     this.watchMouseDown();
     this.watchMouseUp();

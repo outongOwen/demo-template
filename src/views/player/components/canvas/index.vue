@@ -71,7 +71,7 @@ const playerStore = usePlayerStore();
 const themeStore = useThemeStore();
 const { getResolution } = storeToRefs(playerStore);
 const canvasConfiguration: FCanvasConfiguration = {
-  // DPI: 300
+  DPI: 300
   // devicePixelRatio: 2
 };
 const playerCanvasRef = ref<CanvasInst>();
@@ -84,7 +84,8 @@ const imageConfig = reactive<FImageProps>({
   top: 120,
   scaleX: 1,
   scaleY: 1,
-  strokeWidth: 0
+  strokeWidth: 0,
+  centeredScaling: true
   // borderColor: '#1890FF',
   // cornerColor: '#fff',
   // transparentCorners: false,
