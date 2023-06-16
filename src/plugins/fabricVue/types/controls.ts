@@ -9,3 +9,8 @@ export type TControlSet = {
 export type ControlsVisibility = {
   [key in ControlsPointEnum]?: boolean;
 };
+// export interface ControlsConfigProps {
+//   controlsVisibility: ControlsVisibility,
+//   controlProps: FControlProps,
+
+// }

@@ -1,11 +1,9 @@
-import type { FControlProps, ControlsVisibility } from '~/src/plugins/fabricVue/types';
 interface DefaultCanvasSettings {
-  controls: Required<FControlProps> & {
-    visibility: ControlsVisibility;
-  };
+  controls: Player.CanvasControlsSetting;
+  alignGuidelines: Player.CanvasAlignGuidelinesSetting;
 }
-const defaultPlayerSettings: Player.Setting = {
-  frameRate: 25,
+const defaultPlayerSettings: Player.BaseSetting = {
+  frameRate: 60,
   volume: 1,
   speed: 1,
   resolutionReferenceBase: 720,
@@ -20,30 +18,51 @@ const defaultPlayerSettings: Player.Setting = {
   shortestEdgeMaxResolution: 1080,
   shortestEdgeMinResolution: 480
 };
-const defaultCanvasSettings: DefaultCanvasSettings = {
-  controls: {
-    borderColor: '#fff',
-    cornerColor: '#fff',
-    cornerStrokeColor: '#fff',
-    transparentCorners: false,
-    touchCornerSize: 24,
-    cornerSize: 13,
-    cornerStyle: 'rect',
-    cornerDashArray: null,
-    borderScaleFactor: 2,
-    padding: 0,
-    hasControls: true,
-    visibility: {
-      ml: true,
-      mr: true,
-      mb: true,
-      mt: true,
-      tl: true,
-      tr: true,
-      bl: true,
-      br: true,
-      mtr: true
-    }
+const defaultCanvasControlsSettings: Player.CanvasControlsSetting = {
+  borderColor: '#fff',
+  cornerColor: '#fff',
+  cornerStrokeColor: '#fff',
+  transparentCorners: false,
+  touchCornerSize: 24,
+  cornerSize: 13,
+  cornerStyle: 'rect',
+  cornerDashArray: null,
+  borderScaleFactor: 2,
+  padding: 0,
+  hasControls: true,
+  visibility: {
+    ml: true,
+    mr: true,
+    mb: true,
+    mt: true,
+    tl: true,
+    tr: true,
+    bl: true,
+    br: true,
+    mtr: true
   }
 };
-export const playerSettings = { ...defaultPlayerSettings, ...defaultCanvasSettings };
+const defaultCanvasAlignGuidelinesSettings: Player.CanvasAlignGuidelinesSetting = {
+  autoAdsorb: true,
+  aligningLineMargin: 5,
+  aligningLineWidth: 1,
+  aligningLineColor: '#fff',
+  isOpenLineSign: true,
+  isOpenAlignGuidelines: true,
+  alignGuidelinesPreset: ['canvas', 'object', 'objectRotation'],
+  lineSignOptions: {
+    lineWidth: 0.5,
+    size: 2.5,
+    color: '#fff'
+  },
+  ignoreObjTypes: [],
+  pickObjTypes: []
+};
+const defaultCanvasSettings: DefaultCanvasSettings = {
+  controls: defaultCanvasControlsSettings,
+  alignGuidelines: defaultCanvasAlignGuidelinesSettings
+};
+export const playerSettings = {
+  ...defaultPlayerSettings,
+  ...defaultCanvasSettings
+};

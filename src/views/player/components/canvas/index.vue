@@ -12,6 +12,7 @@
       :control-props="controlPropsSetting"
       :controls-visibility="controlsVisibilitySetting"
       :controls="customControls"
+      :align-guidelines="alignGuidelinesSetting"
       @once:after:render="handleAfterRender"
       @selection:created="handleObjectSelected"
       @selection:update="handleObjectSelected"
@@ -47,7 +48,8 @@ import type {
   FTextProps,
   FGroupProps,
   FRectProps,
-  FImageProps
+  FImageProps,
+  FControlProps
 } from '~/src/plugins/fabricVue';
 defineOptions({ name: 'PlayerCanvas' });
 // eslint-disable-next-line max-params
@@ -72,7 +74,6 @@ const themeStore = useThemeStore();
 const { getResolution } = storeToRefs(playerStore);
 const canvasConfiguration: FCanvasConfiguration = {
   DPI: 300
-  // devicePixelRatio: 2
 };
 const playerCanvasRef = ref<CanvasInst>();
 const imageRef = ref<ImageInst>();
@@ -84,8 +85,8 @@ const imageConfig = reactive<FImageProps>({
   top: 120,
   scaleX: 1,
   scaleY: 1,
-  strokeWidth: 0,
-  centeredScaling: true
+  strokeWidth: 0
+  // centeredScaling: true
   // borderColor: '#1890FF',
   // cornerColor: '#fff',
   // transparentCorners: false,
@@ -192,16 +193,19 @@ const customControls = reactiveComputed(() => {
     })
   };
 });
-const controlPropsSetting = reactiveComputed(() => {
-  return omit(themeStore.getPlayerSettings.controls, ['visibility']);
+const controlPropsSetting = reactiveComputed((): FControlProps => {
+  return omit(themeStore.getPlayerSettings.controls, ['visibility']) as FControlProps;
 });
 const controlsVisibilitySetting = reactiveComputed(() => {
   return { ...pick(themeStore.getPlayerSettings.controls, ['visibility']).visibility };
 });
+const alignGuidelinesSetting = reactiveComputed(() => {
+  return themeStore.getPlayerSettings.alignGuidelines;
+});
 onMounted(async () => {
   // const canvas = new Canvas(playerCanvasRef.value!);
   // canvasInstance = canvas;
-  const imageObject = await util.loadImage('https://loremflickr.com/3840/2160/city?lock=6726747135410176');
+  const imageObject = await util.loadImage('https://loremflickr.com/3840/2160/city?lock=8314014077550592');
   imageConfig.width = imageObject.width;
   imageConfig.height = imageObject.height;
   groupTextboxConfig.width = groupRectConfig.width;

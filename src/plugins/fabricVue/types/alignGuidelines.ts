@@ -1,5 +1,5 @@
-import type { Point, TCornerPoint, Canvas, Object as FabricObject } from 'fabric';
-
+import type { Point, TCornerPoint, Canvas, Object as FabricObject, TEvent } from 'fabric';
+export type AlignGuidelinesPreset = Array<'canvas' | 'object' | 'objectRotation'>;
 export interface VerticalLineCoords {
   x: number;
   y1: number;
@@ -16,14 +16,21 @@ export type IgnoreObjTypes = Array<Record<string, any>>;
 export type ACoordsExtendsCenter = TACoords & {
   c: Point;
 };
+export interface LineSignOptions {
+  color?: string;
+  size?: number;
+  lineWidth?: number;
+}
 export interface AlignGuidelinesOptions {
   [key: string]: any;
   autoAdsorb?: boolean;
   aligningLineMargin?: number;
   aligningLineWidth?: number;
   aligningLineColor?: string;
-  isOpenElementAlignGuidelines?: boolean;
-  isOpenCanvasAlignGuidelines?: boolean;
+  isOpenAlignGuidelines?: boolean;
+  isOpenLineSign?: boolean;
+  lineSignOptions?: LineSignOptions;
+  alignGuidelinesPreset?: AlignGuidelinesPreset;
   ignoreObjTypes?: IgnoreObjTypes;
   pickObjTypes?: IgnoreObjTypes;
 }
@@ -38,3 +45,7 @@ export interface SnapProps {
   snapYPoints: number[];
 }
 export type PointArray = [keyof ACoordsExtendsCenter, Point];
+export type SelectionEvent = Partial<TEvent> & {
+  selected: FabricObject[];
+  deselected: FabricObject[];
+};

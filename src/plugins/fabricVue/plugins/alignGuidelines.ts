@@ -1,4 +1,4 @@
-import { Object as FabricObject, util, Point, Line } from 'fabric';
+import { Object as FabricObject, util, Point, Color } from 'fabric';
 import type { Canvas, ModifiedEvent } from 'fabric';
 import { objectKeys } from '../utils';
 import type {
@@ -10,6 +10,8 @@ import type {
   SnapProps,
   AlignGuidelinesProps,
   AlignGuidelinesOptions,
+  AlignGuidelinesPreset,
+  LineSignOptions,
   PointArray
 } from '../types';
 const defaultAlignGuidelinesOptions: AlignGuidelinesOptions = {
@@ -17,8 +19,14 @@ const defaultAlignGuidelinesOptions: AlignGuidelinesOptions = {
   aligningLineMargin: 5,
   aligningLineWidth: 1,
   aligningLineColor: '#fff',
-  isOpenElementAlignGuidelines: true,
-  isOpenCanvasAlignGuidelines: true,
+  isOpenLineSign: true,
+  isOpenAlignGuidelines: true,
+  alignGuidelinesPreset: ['canvas', 'object', 'objectRotation'],
+  lineSignOptions: {
+    lineWidth: 0.5,
+    size: 2.5,
+    color: '#fff'
+  },
   ignoreObjTypes: [],
   pickObjTypes: []
 };
@@ -32,6 +40,8 @@ export class AlignGuidelines {
 
   /**
    * 吸附开关
+   * @type {boolean}
+   * @default true
    */
   declare autoAdsorb: boolean;
 
@@ -50,18 +60,28 @@ export class AlignGuidelines {
   declare aligningLineColor: string;
 
   /**
-   * 是否开启画布对齐线
+   * 是否开启辅助线
    * @type {boolean}
    * @default true
    */
-  declare isOpenCanvasAlignGuidelines?: boolean;
+  declare isOpenAlignGuidelines?: boolean;
 
   /**
-   * 是否开启元素对齐线
-   * @type {boolean}
-   * @default true
+   * 是否开启标记线
    */
-  declare isOpenElementAlignGuidelines?: boolean;
+  declare isOpenLineSign?: boolean;
+
+  /**
+   * 标记线样式选项
+   */
+  declare lineSignOptions?: LineSignOptions;
+
+  /**
+   * 辅助线预设 canvas: 画布边缘及其画布XY中心轴  object: 对象边缘  objectRotation: 对象旋转的边缘
+   * @type {AlignGuidelinesPreset}  'canvas' | 'object' | 'objectRotation'
+   * @default 'canvas'
+   */
+  declare alignGuidelinesPreset?: AlignGuidelinesPreset;
 
   /**
    * 忽略的对象类型
@@ -88,22 +108,22 @@ export class AlignGuidelines {
   private _canvasCtx: CanvasRenderingContext2D;
 
   /**
-   * 水平线集合
+   * 水平辅助线集合
    * @type {HorizontalLineCoords[]}
    */
   private _horizontalLines: HorizontalLineCoords[] = [];
 
   /**
-   * 垂直线集合
+   * 垂直辅助线集合
    * @type {VerticalLineCoords[]}
    */
   private _verticalLines: VerticalLineCoords[] = [];
 
   /**
-   * 拖拽的元素实例对象
-   * @type {FabricObject}
+   * 旋转辅助线开关
+   * @type {boolean}
    */
-  private _canvasActiveObject: FabricObject = new FabricObject();
+  private _onOffRotationGuidelines = false;
 
   constructor({ canvas, options }: AlignGuidelinesProps) {
     this.canvas = canvas;
@@ -128,10 +148,10 @@ export class AlignGuidelines {
    */
   private drawSign(x: number, y: number) {
     const ctx = this._canvasCtx;
-    ctx.lineWidth = 0.5;
-    ctx.strokeStyle = this.aligningLineColor;
+    const size = this.lineSignOptions!.size!;
+    ctx.lineWidth = this.lineSignOptions!.lineWidth!;
+    ctx.strokeStyle = this.lineSignOptions?.color ? this.lineSignOptions.color : this.aligningLineColor;
     ctx.beginPath();
-    const size = 2;
     ctx.moveTo(x - size, y - size);
     ctx.lineTo(x + size, y + size);
     ctx.moveTo(x + size, y - size);
@@ -152,7 +172,6 @@ export class AlignGuidelines {
     const point1 = util.transformPoint(new Point(x1, y1), this.canvas.viewportTransform);
     const point2 = util.transformPoint(new Point(x2, y2), this.canvas.viewportTransform);
 
-    // use origin canvas api to draw guideline
     ctx.save();
     ctx.lineWidth = this.aligningLineWidth;
     ctx.strokeStyle = this.aligningLineColor;
@@ -163,8 +182,8 @@ export class AlignGuidelines {
 
     ctx.stroke();
 
-    this.drawSign(point1.x, point1.y);
-    this.drawSign(point2.x, point2.y);
+    this.isOpenLineSign && this.drawSign(point1.x, point1.y);
+    this.isOpenLineSign && this.drawSign(point2.x, point2.y);
 
     ctx.restore();
   }
@@ -175,9 +194,16 @@ export class AlignGuidelines {
    * @returns {void}
    */
   private drawVerticalLine(coords: VerticalLineCoords): void {
-    const movingCoords = this.getObjDraggingObjCoords(this._canvasActiveObject);
-    if (!objectKeys(movingCoords).some(key => Math.abs(movingCoords[key].x - coords.x) < 0.0001)) return;
-    this.drawLine(coords.x, Math.min(coords.y1, coords.y2), coords.x, Math.max(coords.y1, coords.y2));
+    const activeObject = this.canvas.getActiveObject();
+    if (!activeObject) return;
+    const movingCoords = this.getObjDraggingObjCoords(activeObject);
+    if (!objectKeys(movingCoords).some(key => Math.abs(movingCoords[key].x - coords.x) < 0.1)) return;
+    this.drawLine(
+      coords.x ? coords.x - this.aligningLineWidth / 2 : coords.x + this.aligningLineWidth / 2,
+      Math.min(coords.y1, coords.y2),
+      coords.x ? coords.x - this.aligningLineWidth / 2 : coords.x + this.aligningLineWidth / 2,
+      Math.max(coords.y1, coords.y2)
+    );
   }
 
   /**
@@ -186,47 +212,68 @@ export class AlignGuidelines {
    * @returns {void}
    */
   private drawHorizontalLine(coords: HorizontalLineCoords): void {
-    const movingCoords = this.getObjDraggingObjCoords(this._canvasActiveObject);
-    if (!objectKeys(movingCoords).some(key => Math.abs(movingCoords[key].y - coords.y) < 0.0001)) return;
-    this.drawLine(Math.min(coords.x1, coords.x2), coords.y, Math.max(coords.x1, coords.x2), coords.y);
+    const activeObject = this.canvas.getActiveObject();
+    if (!activeObject) return;
+    const movingCoords = this.getObjDraggingObjCoords(activeObject);
+    if (!objectKeys(movingCoords).some(key => Math.abs(movingCoords[key].y - coords.y) < 0.1)) return;
+    this.drawLine(
+      Math.min(coords.x1, coords.x2),
+      coords.y ? coords.y - this.aligningLineWidth / 2 : coords.y + this.aligningLineWidth / 2,
+      Math.max(coords.x1, coords.x2),
+      coords.y ? coords.y - this.aligningLineWidth / 2 : coords.y + this.aligningLineWidth / 2
+    );
   }
 
   /**
    * 绘制旋转辅助线
    */
-  private drawDottedLine(startPoint: Point, endPoint: Point) {
-    const context = this._canvasCtx;
-    // context.save();
-    context.setLineDash([5, 5]);
-    context.beginPath();
-    context.moveTo(startPoint.x, startPoint.y);
-    context.lineTo(endPoint.x, endPoint.y);
-    context.stroke();
-    // context.restore();
-  }
-
-  private drawRotationGuidelines(object: FabricObject): void {
+  private drawRotationGuidelines(): void {
+    const activeObject = this.canvas.getActiveObject();
+    if (!activeObject || !this._onOffRotationGuidelines) return;
     // 获取对象中心点坐标
-    const center = object.getCenterPoint();
-
-    // 绘制辅助线
-    let angle = 0;
-    const step = 45;
-    while (angle < 360) {
-      // 计算辅助线的终点坐标
-      const endPoint = util.rotatePoint(new Point(object.left, object.top), center, util.degreesToRadians(angle));
-      // console.log(endPoint, 'endPointendPoint');
-      // 绘制虚线
-      console.log(center, endPoint);
-      this.drawDottedLine(center, endPoint);
-      // 绘制虚线
-      const dashedLine = new Line([center.x, center.y, endPoint.x, endPoint.y], {
-        strokeDashArray: [5, 5],
-        stroke: '#e20000'
-      });
-      this.canvas.add(dashedLine);
-      angle += step;
-    }
+    const center = activeObject!.getCenterPoint();
+    const angle = activeObject!.angle;
+    const { width, height } = this.canvas;
+    const lineSize = width > height ? width : height;
+    const lineColor = new Color(this.aligningLineColor);
+    const ctx = this._canvasCtx;
+    // 虚线从中心到边缘透明度过渡
+    const gradient = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, lineSize / 2);
+    gradient.addColorStop(1, lineColor.setAlpha(0).toRgba());
+    gradient.addColorStop(0, lineColor.setAlpha(1).toRgba());
+    ctx.save();
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = this.aligningLineColor;
+    ctx.lineWidth = this.aligningLineWidth;
+    ctx.strokeStyle = gradient;
+    ctx.beginPath();
+    // 0度角
+    ctx.moveTo(center.x, center.y - lineSize / 2);
+    ctx.lineTo(center.x, center.y + lineSize / 2);
+    // 90度角
+    ctx.moveTo(center.x - lineSize / 2, center.y);
+    ctx.lineTo(center.x + lineSize / 2, center.y);
+    // 45度角
+    ctx.moveTo(center.x - lineSize / 2, center.y - lineSize / 2);
+    ctx.lineTo(center.x + lineSize / 2, center.y + lineSize / 2);
+    // 135度角
+    ctx.moveTo(center.x + lineSize / 2, center.y - lineSize / 2);
+    ctx.lineTo(center.x - lineSize / 2, center.y + lineSize / 2);
+    ctx.stroke();
+    // 添加矩形
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.beginPath();
+    ctx.fillRect(center.x - 18, center.y - 10, 36, 20);
+    ctx.stroke();
+    // 添加文字
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.beginPath();
+    ctx.fillText(`${Math.round(angle)}°`, center.x, center.y);
+    ctx.stroke();
+    ctx.restore();
   }
 
   /**
@@ -236,7 +283,8 @@ export class AlignGuidelines {
    * @returns {boolean}
    */
   private isInRange(point1: number, point2: number) {
-    return Math.abs(Math.round(point1) - Math.round(point2)) <= this.aligningLineMargin / this.canvas.getZoom();
+    const zoom = this.canvas.getZoom();
+    return Math.abs(point1 - point2) <= this.aligningLineMargin / zoom;
   }
 
   /**
@@ -464,11 +512,10 @@ export class AlignGuidelines {
    * 属性修改事件回调
    */
 
-  private bindEventModifiedCallback(e: ModifiedEvent) {
+  private bindModifiedEventCallback(e: ModifiedEvent) {
     this.clearLinesMeta();
     const activeObject = e.target;
     const canvasAllObjects: FabricObject[] = [];
-    this._canvasActiveObject = activeObject;
     const canvasObjects = this.canvas.getObjects().filter(obj => {
       if (this.ignoreObjTypes?.length) {
         return !this.ignoreObjTypes.some(item => (obj as any)[item.key] === item.value);
@@ -478,17 +525,20 @@ export class AlignGuidelines {
       }
       return true;
     }) as FabricObject[];
-    this.isOpenElementAlignGuidelines && canvasAllObjects.push(...canvasObjects);
-    if (this.isOpenCanvasAlignGuidelines) {
+    this.alignGuidelinesPreset?.includes('object') && canvasAllObjects.push(...canvasObjects);
+    if (this.alignGuidelinesPreset?.includes('canvas')) {
+      const zoom = this.canvas.getZoom();
       // 模拟一个画布对象，添加中心和边界辅助线
       const cObject = new FabricObject({
         left: 0,
         top: 0,
-        width: this.canvas.width,
-        height: this.canvas.height,
+        padding: 0,
+        width: this.canvas.width / zoom,
+        height: this.canvas.height / zoom,
         selectable: false,
         evented: false,
-        strokeWidth: 0
+        strokeWidth: 0,
+        stroke: 'transparent'
       });
       cObject.setCoords();
       canvasAllObjects.push(cObject);
@@ -503,16 +553,17 @@ export class AlignGuidelines {
    */
   private watchObjectModified() {
     this.canvas.on('object:moving', (e: ModifiedEvent) => {
-      this.bindEventModifiedCallback(e);
+      this.bindModifiedEventCallback(e);
     });
     this.canvas.on('object:scaling', (e: ModifiedEvent) => {
       this.autoAdsorb = false;
-      this.bindEventModifiedCallback(e);
+      this.bindModifiedEventCallback(e);
       this.autoAdsorb = true;
     });
-    this.canvas.on('object:rotating', (e: ModifiedEvent) => {
-      // 绘制旋转辅助线
-      this.drawRotationGuidelines(e.target);
+    this.canvas.on('object:rotating', () => {
+      if (this.alignGuidelinesPreset?.includes('objectRotation')) {
+        !this._onOffRotationGuidelines && (this._onOffRotationGuidelines = true);
+      }
     });
   }
 
@@ -530,44 +581,34 @@ export class AlignGuidelines {
       for (let i = this._horizontalLines.length; i--; ) {
         this.drawHorizontalLine(this._horizontalLines[i]);
       }
+      this.alignGuidelinesPreset?.includes('objectRotation') && this.drawRotationGuidelines();
       this.canvas.calcOffset();
     });
   }
 
   /**
-   * 监听鼠标按下事件
+   * 监听鼠标事件
    */
-  private watchMouseDown() {
+  private watchMouseEvent() {
     this.canvas.on('mouse:down', () => {
       this.clearLinesMeta();
     });
-  }
-
-  /**
-   * 监听鼠标抬起事件
-   */
-  private watchMouseUp() {
     this.canvas.on('mouse:up', () => {
+      this._onOffRotationGuidelines = false;
       this.clearGuideline();
       this.clearLinesMeta();
       this.canvas.renderAll();
     });
-  }
-
-  /**
-   * 监听鼠标滚轮事件
-   */
-  private watchMouseWheel() {
     this.canvas.on('mouse:wheel', () => {
       this.clearLinesMeta();
     });
   }
 
   init() {
-    this.watchObjectModified();
-    this.watchRender();
-    this.watchMouseDown();
-    this.watchMouseUp();
-    this.watchMouseWheel();
+    if (this.isOpenAlignGuidelines) {
+      this.watchObjectModified();
+      this.watchRender();
+      this.watchMouseEvent();
+    }
   }
 }

@@ -4,7 +4,7 @@ import { Canvas, config as fabricConfigurations } from 'fabric';
 import type { TConfiguration } from '@fabric/config';
 import { useBindCanvasEvent } from '../hooks';
 import { useCanvasContext, useControlsContext } from '../context';
-import type { FControlProps, TControlSet, ControlsVisibility } from '../types';
+import type { FControlProps, TControlSet, ControlsVisibility, AlignGuidelinesOptions } from '../types';
 import { AlignGuidelines } from '../plugins';
 export interface FCanvasConfiguration extends TConfiguration {}
 export type FCanvasConfig = Record<string, any>;
@@ -34,13 +34,9 @@ export const canvasProps = {
     type: Object as PropType<TControlSet>,
     default: () => {}
   },
-  isOpenAlignGuidelines: {
-    type: Boolean,
-    default: true
-  },
   alignGuidelines: {
-    type: String as PropType<'box' | 'grid'>,
-    default: 'box'
+    type: Object as PropType<AlignGuidelinesOptions>,
+    default: () => {}
   }
 } as const;
 export type CanvasProps = typeof canvasProps;
@@ -62,7 +58,8 @@ export default defineComponent({
      * 设置对齐线
      */
     const guideline = new AlignGuidelines({
-      canvas
+      canvas,
+      options: props.alignGuidelines
     });
     guideline.init();
     const renderAll = () => {

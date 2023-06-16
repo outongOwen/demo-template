@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { darkTheme } from 'naive-ui';
+import { cloneDeep } from 'lodash-es';
 import { playerSettings } from '@/settings';
 import { getNaiveThemeOverrides, initThemeSettings } from './helpers';
 export const useThemeStore = defineStore('ThemeStore', {
@@ -20,15 +21,22 @@ export const useThemeStore = defineStore('ThemeStore', {
     },
     /** 获取播放器配置 */
     getPlayerSettings() {
-      playerSettings.controls = {
+      const clonePlayerSettings = cloneDeep(playerSettings);
+      clonePlayerSettings.controls = {
         ...playerSettings.controls,
-        ...{
-          borderColor: this.themeColor,
-          cornerColor: this.themeColor,
-          cornerStrokeColor: this.themeColor
+        borderColor: this.themeColor,
+        cornerColor: this.themeColor,
+        cornerStrokeColor: this.themeColor
+      };
+      clonePlayerSettings.alignGuidelines = {
+        ...playerSettings.alignGuidelines,
+        aligningLineColor: this.themeColor,
+        lineSignOptions: {
+          ...clonePlayerSettings.alignGuidelines.lineSignOptions,
+          color: this.themeColor
         }
       };
-      return playerSettings;
+      return clonePlayerSettings;
     }
   },
   actions: {
