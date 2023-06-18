@@ -1,7 +1,8 @@
-import type { ComponentInternalInstance, SetupContext } from 'vue';
+import type { ComponentInternalInstance } from 'vue';
 import { getCurrentInstance } from 'vue';
-import type { Object as FabricObject, StaticCanvas, Canvas, Group, IText, Text, Textbox, Image } from 'fabric';
+import type { StaticCanvas, Canvas, Group, IText, Text, Textbox, Image } from 'fabric';
 import type { TEventCallback } from '@fabric/Observable';
+import type { FabricObject } from '../types';
 type EventAction = 'bind' | 'unbind';
 export const canvasEvents = [
   'object:modified',
@@ -96,15 +97,12 @@ const bindEvent = (
       if (eventsName.includes(eventName)) {
         if (eventAction === 'bind' && actionType === 'once') {
           instance.once(eventName, handlerEvent);
-          return;
         }
         if (eventAction === 'bind' && actionType === 'on') {
           instance.on(eventName, handlerEvent);
-          return;
         }
         if (eventAction === 'unbind') {
           instance.off({ eventName, handlerEvent });
-          return;
         }
       }
     }
@@ -154,7 +152,10 @@ export function useBindTextEvent(textObject: Textbox | IText | Text, eventAction
  * @param {String[]} attrs on/off 绑定/解绑
  * @param {enum} type on/off 绑定/解绑
  */
-export function useBindImageEvent(image: Image, attrs: SetupContext['attrs'], eventAction: EventAction) {
+export function useBindImageEvent(image: Image, eventAction: EventAction) {
+  const ctx = getCurrentInstance();
+  if (!ctx) return;
+  const { attrs } = ctx;
   if (!Object.keys(attrs).length) return;
   bindEvent(image, { attrs, eventsName: objectEvents, eventAction });
 }

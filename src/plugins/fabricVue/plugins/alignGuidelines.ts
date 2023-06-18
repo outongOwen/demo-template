@@ -1,6 +1,5 @@
-import { Object as FabricObject, util, Point, Color } from 'fabric';
+import { Object as FObject, util, Point, Color } from 'fabric';
 import type { Canvas, ModifiedEvent } from 'fabric';
-import { objectKeys } from '../utils';
 import type {
   VerticalLineCoords,
   HorizontalLineCoords,
@@ -12,8 +11,10 @@ import type {
   AlignGuidelinesOptions,
   AlignGuidelinesPreset,
   LineSignOptions,
-  PointArray
+  PointArray,
+  FabricObject
 } from '../types';
+import { objectKeys } from '../utils';
 const defaultAlignGuidelinesOptions: AlignGuidelinesOptions = {
   autoAdsorb: true,
   aligningLineMargin: 5,
@@ -529,7 +530,7 @@ export class AlignGuidelines {
     if (this.alignGuidelinesPreset?.includes('canvas')) {
       const zoom = this.canvas.getZoom();
       // 模拟一个画布对象，添加中心和边界辅助线
-      const cObject = new FabricObject({
+      const cObject = new FObject({
         left: 0,
         top: 0,
         padding: 0,
@@ -597,7 +598,6 @@ export class AlignGuidelines {
       this._onOffRotationGuidelines = false;
       this.clearGuideline();
       this.clearLinesMeta();
-      this.canvas.renderAll();
     });
     this.canvas.on('mouse:wheel', () => {
       this.clearLinesMeta();

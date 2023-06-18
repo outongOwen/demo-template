@@ -8,6 +8,9 @@
   <div class="wh-full">
     <Canvas
       ref="playerCanvasRef"
+      :config="{
+        selection: false //锁定多选
+      }"
       :configuration="canvasConfiguration"
       :control-props="controlPropsSetting"
       :controls-visibility="controlsVisibilitySetting"
@@ -21,9 +24,12 @@
       <IText :config="textConfig" />
       <Text :config="textConfig" />
       <Textbox :config="textConfig" />
-      <Image ref="imageRef" :img-src="imageSrc" :config="imageConfig" />
+      <FabricVideo :src="videoUrl" :config="videoConfig" />
+      <!-- <FabricVideo key="2" src="https://dao-library.54traveler.com/videos/ouzhou.mp4" :config="videoConfig" />
+      <FabricVideo key="3" src="https://dao-library.54traveler.com/videos/ouzhou.mp4" :config="videoConfig" /> -->
+      <Image ref="imageRef" :image-source="imageSrc" :config="imageConfig" />
       <Group ref="groupRef" :config="groupConfig">
-        <Image ref="groupImageRef" :img-src="imageSrc" :config="groupImageConfig" @added="handleGroupImageAdded" />
+        <Image ref="groupImageRef" :image-source="imageSrc" :config="groupImageConfig" />
         <Rect :config="groupRectConfig" />
         <Textbox :config="groupTextboxConfig" />
       </Group>
@@ -35,7 +41,7 @@
 import { storeToRefs } from 'pinia';
 import { omit, pick } from 'lodash-es';
 import { reactiveComputed } from '@vueuse/core';
-import { util, Control, controlsUtils } from 'fabric';
+import { util, Control, controlsUtils, filters } from 'fabric';
 import type { ImageSource, Object as FabricObject, TPointerEvent } from 'fabric';
 import { usePlayerStore, useThemeStore } from '@/store';
 import { Canvas, Image, Group, IText, Text, Textbox, Rect } from '~/src/plugins/fabricVue';
@@ -52,6 +58,9 @@ import type {
   FControlProps
 } from '~/src/plugins/fabricVue';
 defineOptions({ name: 'PlayerCanvas' });
+// const videoUrl = new URL('@/assets/1.mp4', import.meta.url).href;
+const videoUrl = 'https://dao-library.54traveler.com/videos/gaojiasuo.mp4';
+const imageUrl = new URL('@/assets/1.png', import.meta.url).href;
 // eslint-disable-next-line max-params
 function drawImg(
   ctx: CanvasRenderingContext2D,
@@ -73,19 +82,32 @@ const playerStore = usePlayerStore();
 const themeStore = useThemeStore();
 const { getResolution } = storeToRefs(playerStore);
 const canvasConfiguration: FCanvasConfiguration = {
-  DPI: 300
+  // DPI: 300
 };
 const playerCanvasRef = ref<CanvasInst>();
 const imageRef = ref<ImageInst>();
 const groupImageRef = ref<ImageInst>();
 const groupRef = ref<GroupInst>();
+// const videoRef = ref<any>();
 const imageSrc = ref<ImageSource>();
-const imageConfig = reactive<FImageProps>({
-  left: 120,
-  top: 120,
+const videoConfig = reactive<FImageProps>({
+  left: 200,
+  top: 200,
   scaleX: 1,
   scaleY: 1,
   strokeWidth: 0
+});
+const imageConfig = reactive<FImageProps>({
+  left: 0,
+  top: 0,
+  scaleX: 1,
+  scaleY: 1,
+  strokeWidth: 0,
+  filters: [
+    new filters.Blur({
+      blur: 0
+    })
+  ]
   // centeredScaling: true
   // borderColor: '#1890FF',
   // cornerColor: '#fff',
@@ -104,14 +126,16 @@ const textConfig = reactive<FTextProps>({
 });
 
 const groupConfig = reactive<FGroupProps>({
-  width: 500,
-  height: 500,
+  width: 800,
+  height: 800,
   layout: 'fixed',
   borderColor: '#fff'
+  // interactive: true,
+  // subTargetCheck: true
 });
 const groupRectConfig = reactive<FRectProps>({
-  width: 500,
-  height: 500,
+  width: 800,
+  height: 800,
   left: 0,
   top: 0,
   strokeWidth: 0,
@@ -133,6 +157,12 @@ const groupImageConfig = reactive<FImageProps>({
   top: 0,
   scaleX: 1,
   scaleY: 1
+  // filters: [
+  //   new filters.Blur({
+  //     blur: 0
+  //   }),
+  //   new filters.BlendColor()
+  // ]
 });
 watchEffect(() => {
   getResolution.value &&
@@ -151,7 +181,6 @@ const handleAfterRender = ({ ctx }: { ctx: CanvasRenderingContext2D }) => {
   //   });
   // console.log('unref(playerCanvasRef)!.instance.getObjects(): ', unref(playerCanvasRef)!.instance.getObjects());
 };
-const handleGroupImageAdded = () => {};
 const handleObjectSelected = ({ e, selected }: { e: TPointerEvent; selected: Array<FabricObject> }) => {
   console.log('eeee', e);
   console.log('selectedselectedselectedselected', selected);
@@ -203,9 +232,9 @@ const alignGuidelinesSetting = reactiveComputed(() => {
   return themeStore.getPlayerSettings.alignGuidelines;
 });
 onMounted(async () => {
-  // const canvas = new Canvas(playerCanvasRef.value!);
-  // canvasInstance = canvas;
-  const imageObject = await util.loadImage('https://loremflickr.com/3840/2160/city?lock=8314014077550592');
+  const imageObject = await util.loadImage(imageUrl, {
+    crossOrigin: 'anonymous'
+  });
   imageConfig.width = imageObject.width;
   imageConfig.height = imageObject.height;
   groupTextboxConfig.width = groupRectConfig.width;
@@ -215,11 +244,25 @@ onMounted(async () => {
   groupImageConfig.scaleX = groupRectConfig.width! / imageObject.width;
   groupImageConfig.scaleY = groupRectConfig.height! / imageObject.height;
   imageSrc.value = imageObject;
+  imageConfig.scaleX = groupRectConfig.width! / imageConfig.width;
+  imageConfig.scaleY = groupRectConfig.height! / imageConfig.width;
   nextTick(() => {
+    // console.log(imageRef.value?.instance, 'imageRef.value!.instanceimageRef.value!.instance');
     // console.log(imageRef.value!.instance, 'imageRef.value!.instanceimageRef.value!.instance');
-    imageRef.value!.instance.scaleToWidth(groupRectConfig.width!);
-    imageRef.value!.instance.scaleToHeight(groupRectConfig.width!);
-    groupRef.value!.instance.sendObjectToBack(groupImageRef.value!.instance);
+    // imageRef.value!.instance.scaleToWidth(groupRectConfig.width!);
+    // playerCanvasRef.value?.renderAll();
+    // setTimeout(() => {
+    //   const newBlur = new filters.Blur({
+    //     blur: 0.2
+    //   });
+    // imageConfig.filters = [];
+    // groupImageConfig.filters = [newBlur];
+    // groupImageRef.value!.instance.set('filters', [newBlur]);
+    // groupImageRef.value!.instance.applyFilters();
+    // playerCanvasRef.value?.renderAll();
+    // }, 3000);
+    // console.log(videoRef.value?.getVideoInstance(), '213213213');
+    groupRef.value?.instance.sendObjectToBack(groupImageRef.value!.instance);
   });
 });
 </script>

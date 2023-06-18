@@ -1,21 +1,35 @@
 interface Visibility {
+  /** 左中 */
   ml: boolean;
+  /** 右中 */
   mr: boolean;
+  /** 下中 */
   mb: boolean;
+  /** 上中 */
   mt: boolean;
+  /** 左上 */
   tl: boolean;
+  /** 右上 */
   tr: boolean;
+  /** 左下 */
   bl: boolean;
+  /** 右下 */
   br: boolean;
+  /** 旋转 */
   mtr: boolean;
 }
+/** 对齐线标志设置 */
 interface LineSignOptions {
+  /** 线宽 */
   lineWidth: number;
+  /** 大小 */
   size: number;
+  /** 颜色 */
   color: string;
 }
 
 declare namespace Player {
+  /** 分辨率 */
   interface Resolution {
     width: number;
     height: number;

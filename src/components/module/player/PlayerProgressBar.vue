@@ -17,7 +17,7 @@
     <div class="w100% relative z9">
       <n-slider
         v-model:value="currentTime"
-        :step="frameRate"
+        :step="progressStep"
         :max="totalTime"
         :min="0"
         :tooltip="false"
@@ -59,6 +59,9 @@ const playerTotalTime = computed(() => {
 });
 const playerCurrentTime = computed(() => {
   return formatFrameByTime(currentTime.value, frameRate.value);
+});
+const progressStep = computed(() => {
+  return Math.round((1000 / frameRate.value) * 100000) / 100000;
 });
 const handleTimeChange = () => {
   emits('change', currentTime.value);

@@ -22,16 +22,13 @@ const demoList = (() => {
     ]
   });
   data.list.forEach((item: any) => {
-    item.preUrl = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 90, max: 192 }),
-      height: faker.number.int({ min: 70, max: 108 }),
-      category: 'city'
+    const url = faker.image.urlLoremFlickr({
+      width: faker.number.int({ min: 1920, max: 2160 }),
+      height: faker.number.int({ min: 1080, max: 1440 }),
+      category: 'nature'
     });
-    item.path = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 3840, max: 3840 }),
-      height: faker.number.int({ min: 2160, max: 2160 }),
-      category: 'city'
-    });
+    item.preUrl = url; // 视频封面
+    item.path = url; // 源文件
   });
   return data.list;
 })();
@@ -44,9 +41,9 @@ const audioDemoList = (() => {
         duration: '@integer( 10000, 2 * 60 * 60 * 1000 )',
         'sourcePath|1': [
           // 视频
-          'http://36.155.98.104:12480/vrnas/audio/source/local/bigFile/bd9ab3abdc9/3906568f914edbf479cac/user/10024776/1661928013639622656.MP3',
-          'http://36.155.98.104:12480/vrnas/audio/source/local/bigFile/bd9ab3abdc9/3906568f914edbf479cac/user/10024776/1661928015275401216.MP3',
-          'http://36.155.98.104:12480/vrnas/audio/source/local/bigFile/bd9ab3abdc9/3906568f914edbf479cac/user/10024776/1661916977410777088.MP3'
+          'https://raw.githubusercontent.com/outongOwen/picture_bed/main/image/202306190000628.mp3',
+          'https://raw.githubusercontent.com/outongOwen/picture_bed/main/image/202306190001205.mp3',
+          'https://raw.githubusercontent.com/outongOwen/picture_bed/main/image/202306190002439.mp3'
         ]
       }
     ]

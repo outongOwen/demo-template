@@ -1,6 +1,7 @@
 import { watch } from 'vue';
-import type { Object as FabricObject, Canvas } from 'fabric';
+import type { Canvas } from 'fabric';
 import { isEmpty } from 'lodash-es';
+import type { FabricObject } from '../types';
 import { difference } from '../utils';
 /**
  * @abstract watch props and update targetObj

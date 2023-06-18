@@ -9,7 +9,7 @@
     <div class="h50px w100%">
       <player-progress-bar
         v-model:time="playerCurrentTime"
-        :total-time="1000000"
+        :total-time="125280"
         :frame-rate="playerSettings.frameRate"
         @change="handlePlayerTimeChange"
       />
@@ -38,9 +38,9 @@ import PlayerProgressBar from '@/components/module/player/PlayerProgressBar.vue'
 import type { ControlListOptions, SelectMixOption } from '@/components/module/player/PlayerControlsBtn.vue';
 defineOptions({ name: 'PlayerControls' });
 const playerStore = usePlayerStore();
-const { getIsFullscreenState, getProportion, getSpeed } = storeToRefs(playerStore);
+const { getIsFullscreenState, getProportion, getSpeed, getPlayerState } = storeToRefs(playerStore);
 const playerCurrentTime = ref<number>(0);
-const playerPlaying = ref<boolean>(false);
+// const playerPlaying = ref<boolean>(false);
 const playerSpeed = computed({
   set: (value: number) => {
     playerStore.setSpeed(value);
@@ -57,17 +57,24 @@ const playerProportion = computed({
     return getProportion.value;
   }
 });
+const playerPlaying = computed(() => {
+  return getPlayerState.value.isPlaying;
+});
 /**
  * 播放
  */
 const playerPlay = () => {
-  playerPlaying.value = !playerPlaying.value;
+  playerStore.setPlayerState({
+    isPlaying: !playerPlaying.value
+  });
 };
 /**
  * 暂停
  */
 const playerPause = () => {
-  playerPlaying.value = !playerPlaying.value;
+  playerStore.setPlayerState({
+    isPlaying: !playerPlaying.value
+  });
 };
 /**
  * seek

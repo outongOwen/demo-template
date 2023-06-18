@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Rect
+ * @see {@link:}
+ */
 import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Rect } from 'fabric';
@@ -29,7 +33,7 @@ export default defineComponent({
     const canvasInject = injectCanvasContext();
     const { parentInstance } = useObjectParent();
     const { setControls } = useControls();
-    const rectObject = new Rect(props.config as any);
+    const rectObject = new Rect(props.config);
     setControls(rectObject, props.config);
     parentInstance.add(rectObject);
     canvasInject?.instance && useWatchUpdateProps(() => cloneDeep(props.config), rectObject, canvasInject.instance);

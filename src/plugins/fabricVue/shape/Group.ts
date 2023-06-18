@@ -38,6 +38,7 @@ export default defineComponent({
     const { instance: canvasInstance } = canvasInject;
     // 创建组
     const groupObject = new Group();
+    groupObject.set(props.config);
     // 添加自定义控件
     setControls(groupObject, props.config);
     canvasInstance.add(groupObject);

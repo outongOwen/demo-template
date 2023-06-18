@@ -14,6 +14,7 @@ declare module 'vue' {
     ConfigurationContent: typeof import('./../src/components/module/packages/configurationContent/index.vue')['default']
     ContentLayout: typeof import('./../src/components/module/packages/configurationContent/ContentLayout.vue')['default']
     ExceptionBase: typeof import('./../src/components/common/ExceptionBase.vue')['default']
+    FabricVideo: typeof import('./../src/components/custom/FabricVideo.vue')['default']
     'IconIc:sharpClose': typeof import('~icons/ic/sharp-close')['default']
     IconLocalNoPermission: typeof import('~icons/local/no-permission')['default']
     IconLocalNotFound: typeof import('~icons/local/not-found')['default']

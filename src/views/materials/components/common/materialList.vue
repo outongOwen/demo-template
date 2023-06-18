@@ -112,9 +112,7 @@ const pullData = async (): Promise<boolean> => {
 const pullDataWithDelay = (): Promise<boolean> => {
   return new Promise(resolve =>
     // eslint-disable-next-line no-promise-executor-return
-    setTimeout(() => {
-      return resolve(pullData());
-    }, 1000)
+    resolve(pullData())
   );
 };
 const initializeList = async () => {

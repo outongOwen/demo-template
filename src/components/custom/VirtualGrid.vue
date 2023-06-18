@@ -49,7 +49,7 @@
     <div v-if="updateLock && !bottomReached" :style="{ height: `${updateTriggerMargin}px` }" class="wh-full">
       <div v-if="updateLock && !errorLock" class="wh-full flex-center flex-row">
         <n-spin :size="18" class="mr5px" />
-        <n-text> 加载中...</n-text>
+        <n-text>{{ '加载中...' }}</n-text>
       </div>
       <div v-if="updateLock && errorLock" class="flex-center wh-full">
         <n-text class="dark:color-[rgba(255,255,255,0.2)]">加载失败，请</n-text>

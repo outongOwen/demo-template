@@ -1,13 +1,16 @@
 import { defineStore } from 'pinia';
 import { playerSettings } from '@/settings';
-import type { PlayerStateType } from './index.type';
+import type { PlayerType, PlayerState } from './index.type';
 const { proportion, defaultResolution, speed } = playerSettings;
 export const usePlayerStore = defineStore('usePlayerStore', {
-  state: (): PlayerStateType => ({
+  state: (): PlayerType => ({
     isFullscreen: false,
     proportion,
     resolution: defaultResolution,
-    speed
+    speed,
+    playerState: {
+      isPlaying: false
+    }
   }),
   getters: {
     // 获取全屏状态
@@ -25,6 +28,10 @@ export const usePlayerStore = defineStore('usePlayerStore', {
     // 获取倍速
     getSpeed(): number {
       return this.speed;
+    },
+    // 获取播放状态
+    getPlayerState(): PlayerState {
+      return this.playerState;
     }
   },
   actions: {
@@ -43,6 +50,10 @@ export const usePlayerStore = defineStore('usePlayerStore', {
     // 设置倍速
     setSpeed(speedValue: number) {
       this.speed = speedValue;
+    },
+    // 设置播放状态
+    setPlayerState({ isPlaying }: PlayerState) {
+      this.playerState.isPlaying = isPlaying;
     }
   }
 });

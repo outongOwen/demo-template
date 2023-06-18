@@ -1,4 +1,5 @@
-import type { Point, TCornerPoint, Canvas, Object as FabricObject, TEvent } from 'fabric';
+import type { Point, TCornerPoint, Canvas, TEvent } from 'fabric';
+import type { FabricObject } from './object';
 export type AlignGuidelinesPreset = Array<'canvas' | 'object' | 'objectRotation'>;
 export interface VerticalLineCoords {
   x: number;

@@ -22,14 +22,14 @@
     </div>
     <n-text class="w100% h20px">
       <n-ellipsis>
-        {{ formatFrameByTime(item.injected.duration) }}
+        {{ item.injected.duration }}
       </n-ellipsis>
     </n-text>
   </div>
 </template>
 
 <script setup lang="ts">
-import { formatFrameByTime } from '@/utils';
+// import { formatFrameByTime } from '@/utils';
 interface Props {
   item: {
     id: string;
