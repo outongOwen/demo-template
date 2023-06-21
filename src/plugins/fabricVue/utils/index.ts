@@ -19,6 +19,12 @@ interface BaseObject {
 }
 type DifferenceResult = Record<string, any>;
 const excludesKey = ['clipPath', 'controls'];
+/**
+ * 这是一个 TypeScript 函数，它比较两个对象并返回它们之间的差异。
+ * @param {BaseObject} difObject - 包含需要与基础对象进行比较的新值或更新值的对象。
+ * @param {BaseObject} baseObject - 基础对象是我们要与之比较差异的原始对象。
+ * @returns 函数“difference”返回一个“DifferenceResult”对象，该对象包含两个“BaseObject”对象之间的差异。
+ */
 export function difference(difObject: BaseObject, baseObject: BaseObject): DifferenceResult {
   function changes(_difObject: any, _baseObject: any): DifferenceResult {
     const result: DifferenceResult = {};

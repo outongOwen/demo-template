@@ -6,13 +6,13 @@ import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Rect } from 'fabric';
 import type { RectProps as FabricRectProps } from '@fabric/shapes/Rect';
-import type { TProps } from '@fabric/shapes/Object/types';
 import { cloneDeep } from 'lodash-es';
+import type { TProps, TObjectInstance } from '../types';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindObjectEvent, useWatchUpdateProps, useControls } from '../hooks';
 export type FRectProps = TProps<FabricRectProps>;
 export type RectInst = {
-  instance: Rect;
+  instance: TObjectInstance<Rect>;
 };
 /**
  * todo:RectProps 类型完善

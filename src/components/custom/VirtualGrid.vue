@@ -36,13 +36,7 @@
         }"
       >
         <slot :item="item">
-          <component
-            :is="item.renderComponent"
-            v-if="item.renderComponent"
-            :item="item"
-            :intersection-observer-options="intersectionObserverOptions"
-            lazy
-          />
+          <component :is="item.renderComponent" v-if="item.renderComponent" :item="item" />
         </slot>
       </div>
     </div>
@@ -116,12 +110,6 @@ interface Props {
   items: Item[];
   scrollElement?: HTMLElement | null;
   updateTriggerMargin?: number;
-  intersectionObserverOptions?: {
-    root?: Element | Document | string | null;
-    rootMargin?: string;
-    threshold?: number | number[];
-  };
-  lazy?: boolean;
   updateFunction?: () => Promise<boolean>;
   getGridGap?: (elementWidth: number, windowHeight: number) => number;
   getColumnCount?: (elementWidth: number) => number;
@@ -131,7 +119,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   scrollElement: null,
   updateTriggerMargin: 50,
-  intersectionObserverOptions: undefined,
   updateFunction: () => Promise.resolve(true),
   getGridGap: () => 10,
   getItemRatioHeight: (height: number, width: number, columnWidth: number) => {
@@ -145,7 +132,7 @@ const props = withDefaults(defineProps<Props>(), {
     return windowHeight / 2;
   }
 });
-const { items, updateTriggerMargin, scrollElement, intersectionObserverOptions } = toRefs(props);
+const { items, updateTriggerMargin, scrollElement } = toRefs(props);
 const virtualGridRef = ref<HTMLElement | null>();
 const updateLock = ref(false);
 const errorLock = ref(false);

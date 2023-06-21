@@ -15,11 +15,9 @@
         :width="item.width"
         :src="item.injected.preUrl"
         :preview-src="item.injected.path"
-        :lazy="lazy"
         fallback-src=""
         object-fit="contain"
         preview-disabled
-        :intersection-observer-options="intersectionObserverOptions"
       >
         <template #placeholder>
           <n-skeleton class="w-full h-[calc(100%-20px)]" />
@@ -35,11 +33,11 @@
 </template>
 
 <script setup lang="ts">
-interface IntersectionObserverOptions {
-  root?: Element | Document | null | string;
-  rootMargin?: string;
-  threshold?: number | number[];
-}
+// interface IntersectionObserverOptions {
+//   root?: Element | Document | null | string;
+//   rootMargin?: string;
+//   threshold?: number | number[];
+// }
 interface Props {
   item: {
     id: string;
@@ -48,8 +46,6 @@ interface Props {
     width: number;
     columnSpan: number;
   };
-  intersectionObserverOptions?: IntersectionObserverOptions;
-  lazy?: boolean;
 }
 interface Emits {
   (event: 'preview', material: any): void;
@@ -57,5 +53,5 @@ interface Emits {
 defineOptions({ name: 'TransparentItem' });
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
-const { item, intersectionObserverOptions } = toRefs(props);
+const { item } = toRefs(props);
 </script>

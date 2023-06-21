@@ -35,11 +35,11 @@
 
 <script setup lang="ts">
 // import { formatFrameByTime } from '@/utils';
-interface IntersectionObserverOptions {
-  root?: Element | Document | null | string;
-  rootMargin?: string;
-  threshold?: number | number[];
-}
+// interface IntersectionObserverOptions {
+//   root?: Element | Document | null | string;
+//   rootMargin?: string;
+//   threshold?: number | number[];
+// }
 interface Props {
   item: {
     id: string;
@@ -48,8 +48,6 @@ interface Props {
     width: number;
     columnSpan: number;
   };
-  intersectionObserverOptions?: IntersectionObserverOptions;
-  lazy?: boolean;
 }
 interface Emits {
   (event: 'preview', material: any): void;

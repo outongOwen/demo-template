@@ -3,8 +3,8 @@ import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Textbox } from 'fabric';
 // import {} from '@fabric/shapes/Textbox';
 import type { textboxDefaultValues } from '@fabric/shapes/Textbox';
-import type { TProps } from '@fabric/shapes/Object/types';
 import { cloneDeep } from 'lodash-es';
+import type { TProps, TObjectInstance } from '../types';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindTextEvent, useWatchUpdateProps, useControls } from '../hooks';
 export type FTextboxProps = TProps<
@@ -13,7 +13,7 @@ export type FTextboxProps = TProps<
   }
 >;
 export type TextboxInst = {
-  instance: Textbox;
+  instance: TObjectInstance<Textbox>;
 };
 export const textboxProps = {
   config: {

@@ -17,7 +17,9 @@
     <template #centerRightArea>
       <Player />
     </template>
-    <template #trackArea>轨道</template>
+    <template #trackArea>
+      <Track />
+    </template>
   </global-layout>
 </template>
 
@@ -28,9 +30,9 @@ import { sliderMenuOptions } from '@/settings';
 import { useGlobalStore } from '@/store';
 import Header from '@/views/header/index.vue';
 import Materials from '@/views/materials/index.vue';
-// import Canvas from '@/views/canvas/index.vue';
 import Player from '@/views/player/index.vue';
 import Configuration from '@/views/configuration/index.vue';
+import Track from '@/views/track/index.vue';
 import { getMenuList } from '@/service/api';
 import { GlobalLayout, GlobalSliderMenu } from '@/layouts/components';
 import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';

@@ -4,13 +4,13 @@ import { Group } from 'fabric';
 // import type { GroupOwnProps as FGroupProps } from 'fabric';
 import { cloneDeep } from 'lodash-es';
 import type { GroupProps as FabricGroupProps } from '@fabric/shapes/Group';
-import type { TProps } from '@fabric/shapes/Object/types';
+import type { TProps, TObjectInstance } from '../types';
 import { throwError } from '../utils';
 import { useBindObjectEvent, useWatchUpdateProps, useControls } from '../hooks';
 import { useCanvasContext, useGroupContext } from '../context';
 export interface FGroupProps extends TProps<FabricGroupProps> {}
 export type GroupInst = {
-  instance: Group;
+  instance: TObjectInstance<Group>;
 };
 export const groupProps = {
   config: {

@@ -6,53 +6,84 @@
  * Video.vue
 -->
 <template>
-  <FabricImage
+  <Image
     ref="imageRef"
     v-bind="$attrs"
     :image-source="imageSource"
     :config="imageConfig"
-    @added="handleImageAdd"
     @selected="handleSelected"
     @deselected="handleDeselected"
   />
 </template>
 
 <script setup lang="ts">
+import { omit } from 'lodash-es';
 import { getFilterBackend, util } from 'fabric';
 import type { WebGLFilterBackend } from 'fabric';
-// import type { FilterBackend } from '@fabric/filters/FilterBackend';
-import { reactiveComputed } from '@vueuse/core';
-import { Image as FabricImage } from '@/plugins/fabricVue';
+import { useEventListener, reactiveComputed } from '@vueuse/core';
+import { Image } from '@/plugins/fabricVue';
 import type { ImageInst, FImageProps } from '@/plugins/fabricVue';
 defineOptions({ name: 'FabricVideo' });
-
-type VideoConfig = {
-  [T: string]: any;
-};
+export interface VideoInst {
+  context: HTMLVideoElement;
+  imageRef: ImageInst;
+}
 interface Props {
   src: string;
-  config: VideoConfig & FImageProps;
+  config: FImageProps;
+
+  /**
+   * @abstract `fitMode` 是一个可选属性，用于确定应如何缩放视频以适应组件的尺寸。它可以具有以下三个值之一：“包含”、“填充”或“无”。
+   * @default 'contain'
+   * @description 'contain':等比例缩放; fill:平铺; none:不缩放，原始尺寸，超出部分裁剪
+   */
+  fitMode?: 'contain' | 'fill' | 'none';
 }
-const props = defineProps<Props>();
-const { src, config } = toRefs(props);
+const props = withDefaults(defineProps<Props>(), {
+  fitMode: 'contain'
+});
+const { src, config, fitMode } = toRefs(props);
 const imageRef = ref<ImageInst>();
-const videoElement = ref<HTMLVideoElement>();
-const localConfig = reactive<FImageProps>({});
-const imageConfig = reactiveComputed((): Exclude<FImageProps, keyof VideoConfig> => {
-  console.log('localConfig', localConfig);
+const videoConfig = reactive<FImageProps>({});
+const imageConfig = reactiveComputed((): FImageProps => {
+  if (fitMode.value === 'none') {
+    return {
+      ...config.value,
+      ...videoConfig
+    };
+  }
   return {
-    ...config.value,
-    ...localConfig
+    ...omit(config.value, ['width', 'height', 'scaleX', 'scaleY']),
+    ...videoConfig
   };
 });
-const imageSource = shallowRef<HTMLVideoElement>();
-const handleImageAdd = () => {
-  localConfig.scaleX = 0.3;
-  localConfig.scaleY = 0.3;
-  // imageRef.value!.instance.scaleToWidth(800);
-  // imageRef.value?.instance?.canvas?.renderAll();
+const videoElement = document.createElement('video');
+const imageSource = shallowRef<HTMLVideoElement | null>(null);
+const applyToVideoByFitMode = (videoWidth: number, videoHeight: number) => {
+  const videoFit = fitMode.value;
+  if (videoFit === 'contain') {
+    const minSize = Math.min(config.value.width, config.value.height);
+    const maxVideoSize = Math.max(videoWidth, videoHeight);
+    const scale = minSize / maxVideoSize;
+    videoConfig.scaleX = scale;
+    videoConfig.scaleY = scale;
+    // config.value.scaleX = scale;
+    // config.value.scaleY = scale;
+    // config.value.width = videoWidth * scale;
+    // config.value.height = videoHeight * scale;
+  }
+  if (videoFit === 'fill') {
+    const scaleX = config.value.width / videoWidth;
+    const scaleY = config.value.height / videoHeight;
+    videoConfig.scaleX = scaleX;
+    videoConfig.scaleY = scaleY;
+    config.value.scaleX = scaleX;
+    config.value.scaleY = scaleY;
+    config.value.width = videoWidth * scaleX;
+    config.value.height = videoHeight * scaleY;
+  }
 };
-let timer = 0;
+let animFrameTimer = 0;
 const animationRender = () => {
   const instance = imageRef.value?.instance;
   const canvas = instance?.canvas;
@@ -66,27 +97,20 @@ const animationRender = () => {
     instance?.applyFilters();
     instance?.setCoords();
     canvas?.renderAll();
-    timer = util.requestAnimFrame(render);
+    animFrameTimer = util.requestAnimFrame(render);
   };
-  timer = util.requestAnimFrame(render);
+  animFrameTimer = util.requestAnimFrame(render);
 };
-
 const handleVideoPlay = () => {
-  console.log('handleVideoPlay');
-  videoElement.value?.play();
+  imageSource.value?.play();
   animationRender();
 };
 const handleVideoPause = () => {
-  videoElement.value?.pause();
-  util.cancelAnimFrame(timer);
+  imageSource.value?.pause();
+  util.cancelAnimFrame(animFrameTimer);
+  animFrameTimer = 0;
 };
-// const handleVideoReset = () => {
-//   handleVideoPause();
-//   videoElement.value!.currentTime = 0;
-//   handleVideoPlay();
-// };
 const handleSelected = () => {
-  console.log('21321312');
   handleVideoPlay();
 };
 const handleDeselected = () => {
@@ -94,27 +118,46 @@ const handleDeselected = () => {
 };
 const handleVideoLoadeddata = (e: Event) => {
   const target = e.target as HTMLVideoElement;
-  videoElement.value = target;
   target.width = target.videoWidth;
   target.height = target.videoHeight;
   imageSource.value = target;
-  imageRef.value?.instance?.applyFilters();
-  imageRef.value?.instance?.canvas?.renderAll();
+  applyToVideoByFitMode(target.videoWidth, target.videoHeight);
+};
+const handleVideoCanplay = () => {
+  imageRef.value?.instance?.canvas?.requestRenderAll();
 };
 /**
  * 初始化video
  */
 const initVideo = () => {
-  const video = document.createElement('video');
-  video.src = src.value;
-  video.crossOrigin = 'anonymous';
-  video.currentTime = 0.00001;
-  video.addEventListener('loadeddata', handleVideoLoadeddata);
+  videoElement.src = src.value;
+  videoElement.crossOrigin = 'anonymous';
+  videoElement.currentTime = 100.00001;
+  imageSource.value = null;
 };
+/**
+ * 监听video事件
+ */
+useEventListener(videoElement, 'loadeddata', handleVideoLoadeddata);
+useEventListener(videoElement, 'canplay', handleVideoCanplay);
+// useEventListener(videoElement, 'seeked', handleVideoSeeked);
+useEventListener(videoElement, 'error', e => {
+  console.error(e);
+});
+watch(src, srcValue => {
+  if (srcValue && imageSource.value) {
+    imageRef.value?.instance.canvas?.discardActiveObject();
+    handleVideoPause();
+    initVideo();
+  }
+});
 onMounted(() => {
   initVideo();
 });
-defineExpose({});
+defineExpose<VideoInst>({
+  context: videoElement,
+  imageRef: toRef(imageRef, 'value') as unknown as ImageInst
+});
 </script>
 
 <style scoped></style>

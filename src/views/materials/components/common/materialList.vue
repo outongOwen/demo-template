@@ -18,16 +18,7 @@
         }"
     >
       <template #default="{ item }">
-        <component
-          :is="renderComponent"
-          v-if="renderComponent"
-          :item="item"
-          :intersection-observer-options="{
-            root: virtualGridContainerRef
-          }"
-          lazy
-          @preview="handlePreview"
-        />
+        <component :is="renderComponent" v-if="renderComponent" :item="item" @preview="handlePreview" />
       </template>
     </virtual-grid>
     <div v-if="errored" class="absolute-center wh-full flex">

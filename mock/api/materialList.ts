@@ -23,8 +23,8 @@ const demoList = (() => {
   });
   data.list.forEach((item: any) => {
     const url = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 1920, max: 2160 }),
-      height: faker.number.int({ min: 1080, max: 1440 }),
+      width: faker.number.int({ min: 192, max: 216 }),
+      height: faker.number.int({ min: 108, max: 144 }),
       category: 'nature'
     });
     item.preUrl = url; // 视频封面
@@ -55,8 +55,8 @@ const audioDemoList = (() => {
       category: 'model'
     });
     item.path = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 1920, max: 2160 }),
-      height: faker.number.int({ min: 1080, max: 1440 }),
+      width: faker.number.int({ min: 192, max: 216 }),
+      height: faker.number.int({ min: 108, max: 144 }),
       category: 'model'
     });
   });

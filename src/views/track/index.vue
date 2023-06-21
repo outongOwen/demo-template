@@ -5,9 +5,11 @@
  * index.vue
 -->
 <template>
-  <div class="container"></div>
+  <global-track></global-track>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import GlobalTrack from '@/layouts/components/globalTrack.vue';
+</script>
 
 <style scoped></style>

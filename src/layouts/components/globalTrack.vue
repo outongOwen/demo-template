@@ -5,7 +5,7 @@
  * globalTrack.vue
 -->
 <template>
-  <div class="container"></div>
+  <div class="container">轨道</div>
 </template>
 
 <script setup lang="ts">

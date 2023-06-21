@@ -1,16 +1,16 @@
 import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import type { ITextProps as FabricITextProps } from '@fabric/shapes/IText/IText';
-import type { TProps } from '@fabric/shapes/Object/types';
 import { IText } from 'fabric';
 import { cloneDeep } from 'lodash-es';
+import type { TProps, TObjectInstance } from '../types';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindTextEvent, useWatchUpdateProps, useControls } from '../hooks';
 export type FITextProps = TProps<FabricITextProps> & {
   text: string;
 };
 export type ITextInst = {
-  instance: IText;
+  instance: TObjectInstance<IText>;
 };
 export const iTextProps = {
   config: {
