@@ -37,14 +37,13 @@
 import { useMouseInElement, watchOnce } from '@vueuse/core';
 import type { ScrollReturnOption } from '@/components/custom/BetterScrollBar.vue';
 import BetterScrollBar from '@/components/custom/BetterScrollBar.vue';
-import type { ExtendMenuOptions } from '#/packages.d';
 defineOptions({ name: 'SliderMenuLayout' });
 interface Props {
-  menuOptions: ExtendMenuOptions[];
+  menuOptions: GlobalMenuOptions.ExtendMenuOptions[];
   defaultMenuKey?: string | number | null;
 }
 interface Emits {
-  (e: 'selectMenuOption', key: string | number | null, item: ExtendMenuOptions): void;
+  (e: 'selectMenuOption', key: string | number | null, item: GlobalMenuOptions.ExtendMenuOptions): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {

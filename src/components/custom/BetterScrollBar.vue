@@ -59,11 +59,9 @@ interface Props {
 }
 const emit = defineEmits<Emits>();
 const props = withDefaults(defineProps<Props>(), {
-  trigger: 'none',
-  xScrollable: false,
-  isShowScrollBar: true
+  trigger: 'none'
 });
-const { isShowScrollBar } = toRefs(props);
+const { isShowScrollBar, xScrollable } = toRefs(props);
 const scrollbarRef = ref<InstanceType<typeof NScrollbar> | null>(null);
 const scrollbarContainerRef = ref<HTMLElement | null>();
 const scrollOptions = useScroll(scrollbarContainerRef);
@@ -109,11 +107,18 @@ defineExpose<ExposAPI>({
 </script>
 
 <style scoped lang="scss">
-:deep(.n-scrollbar-rail) {
-  display: v-bind("isShowScrollBar?'block':'none'");
-  @apply : rounded-0 important-right-0 important-bottom-0 important-top-0;
+:deep(.n-scrollbar) {
+  .n-scrollbar-rail {
+    display: v-bind("isShowScrollBar ? 'block' : 'none'") rounded-0;
+  }
   .n-scrollbar-rail__scrollbar {
     @apply important-rounded-0 z9;
+  }
+  .n-scrollbar-rail--vertical {
+    @apply :  important-right-0 important-top-0;
+  }
+  .n-scrollbar-rail--horizontal {
+    @apply important-left-0 important-right-0 important-bottom-0;
   }
 }
 </style>

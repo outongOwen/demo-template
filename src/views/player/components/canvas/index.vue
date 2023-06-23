@@ -54,7 +54,7 @@ import { reactiveComputed } from '@vueuse/core';
 import { util, Control, controlsUtils, filters } from 'fabric';
 import type { ImageSource, Object as FabricObject, TPointerEvent } from 'fabric';
 import { usePlayerStore, useThemeStore } from '@/store';
-import type { VideoInst } from '@/components/custom/FabricVideo.vue';
+// import type { VideoInst } from '@/components/custom/FabricVideo.vue';
 import { Canvas, Image, Group, IText, Text, Textbox } from '~/src/plugins/fabricVue';
 import type {
   CanvasInst,
@@ -111,10 +111,7 @@ const playerCanvasRef = ref<CanvasInst>();
 const imageRef = ref<ImageInst>();
 const groupImageRef = ref<ImageInst>();
 const groupRef = ref<GroupInst>();
-const videoRef = ref<VideoInst>();
-nextTick(() => {
-  console.log(videoRef.value, 'videoRef.value?.imageRef');
-});
+// const videoRef = ref<VideoInst>();
 const imageSrc = ref<ImageSource>();
 const videoConfig = reactive<FImageProps>({
   width: 400,
@@ -204,8 +201,8 @@ watchEffect(() => {
       unref(playerCanvasRef)!.instance!.setDimensions({ ...getResolution.value });
     });
 });
-const handleAfterRender = ({ ctx }: { ctx: CanvasRenderingContext2D }) => {
-  console.log(ctx, 'once:after:renderonce:after:renderonce:after:renderonce:after:renderonce:after:render');
+const handleAfterRender = ({ _ctx }: { _ctx: CanvasRenderingContext2D }) => {
+  // console.log(ctx, 'once:after:renderonce:after:renderonce:after:renderonce:after:renderonce:after:render');
   // console.log(unref(playerCanvasRef)!.instance);
   // unref(playerCanvasRef)!
   //   .instance.getObjects()
@@ -215,12 +212,12 @@ const handleAfterRender = ({ ctx }: { ctx: CanvasRenderingContext2D }) => {
   //   });
   // console.log('unref(playerCanvasRef)!.instance.getObjects(): ', unref(playerCanvasRef)!.instance.getObjects());
 };
-const handleObjectSelected = ({ e, selected }: { e: TPointerEvent; selected: Array<FabricObject> }) => {
-  console.log('eeee', e);
-  console.log('selectedselectedselectedselected', selected);
+const handleObjectSelected = ({ _e, _selected }: { _e: TPointerEvent; _selected: Array<FabricObject> }) => {
+  // console.log('eeee', e);
+  // console.log('selectedselectedselectedselected', selected);
 };
-const handleObjectAdded = ({ target }: { target: FabricObject }) => {
-  console.log('targettargettargettarget', target);
+const handleObjectAdded = ({ _target }: { _target: FabricObject }) => {
+  // console.log('targettargettargettarget', target);
 };
 const customControls = reactiveComputed(() => {
   const delImg = document.createElement('img');
@@ -270,7 +267,7 @@ onMounted(async () => {
     const imageObject = await util.loadImage(imageUrl, {
       crossOrigin: 'anonymous'
     });
-    console.log(imageObject, 'imageObject');
+    // console.log(imageObject, 'imageObject');
     imageConfig.width = imageObject.width;
     imageConfig.height = imageObject.height;
     groupTextboxConfig.width = groupRectConfig.width;

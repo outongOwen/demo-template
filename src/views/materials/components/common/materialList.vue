@@ -40,13 +40,12 @@ import type { Item as GridItem } from '@/components/custom/VirtualGrid.vue';
 import VirtualGrid from '@/components/custom/VirtualGrid.vue';
 import MaterialPreviewModal from '@/components/module/materials/materialPreviewModal/index.vue';
 import type { PlayerType } from '@/components/module/materials/materialPreviewModal/index.vue';
-import type { ListSchema, ExtendMenuOptions } from '#/packages.d.ts';
 defineOptions({ name: 'MaterialList' });
 interface ExposeAPI {
   refreshList: () => void;
 }
 interface Props {
-  options: ExtendMenuOptions;
+  options: GlobalMenuOptions.ExtendMenuOptions;
   renderComponent?: Component;
   request: (offset: number, pageSize: number) => Promise<any>;
 }
@@ -65,7 +64,7 @@ const loaded = ref<boolean>(false);
 const errored = ref<boolean>(false);
 const showModal = ref<boolean>(false);
 const previewMaterial = ref<any>({});
-const listConfig = computed((): ListSchema => {
+const listConfig = computed((): GlobalMenuOptions.ListSchema => {
   const config = { width: 160, height: 110, gutter: 10, pageSize: 50 };
   const listSchema = options.value.listSchema || {};
   return { ...config, ...listSchema };

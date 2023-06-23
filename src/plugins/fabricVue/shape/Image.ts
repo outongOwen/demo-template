@@ -46,7 +46,6 @@ export default defineComponent({
       canvasInject?.instance.requestRenderAll();
     });
     watch(imageSource, (src: ImageSource | null | undefined) => {
-      console.log(src, 'srcsrcsrcsrcsrcsrcsrcsrcsrcsrcsrcsrc');
       if (!src || !canvasInject) return;
       imageObject.value.setElement(src);
       imageObject.value.set(config.value);

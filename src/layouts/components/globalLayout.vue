@@ -19,12 +19,12 @@
       >
         <pane>
           <splitpanes>
-            <pane min-size="30" max-size="80">
+            <pane class="min-w-340px" min-size="20" max-size="70">
               <div class="wh-full relative">
                 <slot name="centerLeftArea"></slot>
               </div>
             </pane>
-            <pane class="min-w-550px">
+            <pane class="min-w-450px">
               <slot name="centerRightArea"></slot>
             </pane>
           </splitpanes>

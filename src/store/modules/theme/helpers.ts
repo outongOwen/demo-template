@@ -44,9 +44,9 @@ function getThemeColors(colors: [ColorType, string][]) {
 
   return themeColor;
 }
-
+/** 定制 */
 /** 获取naive的主题颜色 */
-export function getNaiveThemeOverrides(colors: Record<ColorType, string>): GlobalThemeOverrides {
+export function getNaiveThemeOverrides(colors: Record<ColorType, string>, _darkMode: boolean): GlobalThemeOverrides {
   const { primary, success, warning, error } = colors;
 
   const info = themeSetting.isCustomizeInfoColor ? colors.info : getColorPalette(primary, 7);
@@ -58,12 +58,12 @@ export function getNaiveThemeOverrides(colors: Record<ColorType, string>): Globa
     ['warning', warning],
     ['error', error]
   ]);
-
   const colorLoading = primary;
-
   return {
     common: {
-      ...themeColors
+      ...themeColors,
+      popoverColor: _darkMode ? '#282828' : '#fff',
+      modalColor: _darkMode ? '#282828' : '#fff'
     },
     LoadingBar: {
       colorLoading

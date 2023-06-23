@@ -40,13 +40,12 @@ import SecondMenuRadioButton from '@/components/custom/RadioButtonGroup.vue';
 import type { FromModelInst } from '@/components/module/materials/searchForm/TransparentForm.vue';
 import { getCatalogMediumList } from '@/service/api';
 import { MaterialGirdList } from './common';
-import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'TransparentMaterial' });
 interface QueryCondition extends FromModelInst {
   id: string;
 }
 interface Props {
-  options: ExtendMenuOptions;
+  options: GlobalMenuOptions.ExtendMenuOptions;
 }
 const props = defineProps<Props>();
 const { options } = toRefs(props);
@@ -59,7 +58,7 @@ const searchFormModel = ref<FromModelInst>({
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('key');
 const curSecondMenuKey = ref<string>('');
-const secondMenuOptions = computed((): SecondMenuOptions[] => {
+const secondMenuOptions = computed((): GlobalMenuOptions.SecondMenuOptions[] => {
   return options.value?.secondMenuOptions ? options.value?.secondMenuOptions : [];
 });
 const queryCondition = computed((): QueryCondition => {

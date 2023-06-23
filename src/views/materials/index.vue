@@ -20,10 +20,9 @@ import {
   TextMaterial,
   SubtitleMaterial
 } from './components';
-import type { ExtendMenuOptions } from '#/packages.d';
 defineOptions({ name: 'MaterialsModules' });
 interface Props {
-  menuOptions: ExtendMenuOptions;
+  menuOptions: GlobalMenuOptions.ExtendMenuOptions;
 }
 const props = defineProps<Props>();
 const { menuOptions } = toRefs(props);

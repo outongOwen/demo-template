@@ -64,7 +64,7 @@
           <div class="w25% h100%">
             <n-descriptions label-placement="left" title="视频信息" size="large" :column="1">
               <n-descriptions-item>
-                <template #label> 类型 </template>
+                <template #label>{{ '类型' }}</template>
                 视频
               </n-descriptions-item>
               <n-descriptions-item label="分辨率">

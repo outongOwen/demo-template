@@ -1,6 +1,5 @@
 // import { NEllipsis } from 'naive-ui';
 import { useIconRender } from '@/hooks';
-import type { ExtendMenuOptions } from '#/packages.d';
 const { iconRender } = useIconRender();
 const createDefaultAreaConfig = (secondMenu = true, searchForm = true, materialBody = true) => {
   return {
@@ -9,7 +8,7 @@ const createDefaultAreaConfig = (secondMenu = true, searchForm = true, materialB
     materialBody
   };
 };
-const defaultSliderMenuOptions: ExtendMenuOptions[] = [
+const defaultSliderMenuOptions: GlobalMenuOptions.ExtendMenuOptions[] = [
   {
     label: '视频',
     key: 'Video',

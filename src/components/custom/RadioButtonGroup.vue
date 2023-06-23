@@ -47,9 +47,8 @@
 <script lang="ts" setup>
 import { useVModel, useResizeObserver } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
-import type { SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'RadioButtonGroup' });
-export interface RadioButtonGroupOption extends SecondMenuOptions {}
+export interface RadioButtonGroupOption extends GlobalMenuOptions.SecondMenuOptions {}
 interface Props {
   options: RadioButtonGroupOption[] | [];
   value: string | number | null;

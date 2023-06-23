@@ -12,7 +12,7 @@ const defaultThemeSetting: Theme.Setting = {
     error: '#f5222d'
   },
   isCustomizeInfoColor: true,
-  layoutMinWidth: 1200,
+  layoutMinWidth: 0,
   layoutMinHeight: 540,
   header: {
     height: 50,

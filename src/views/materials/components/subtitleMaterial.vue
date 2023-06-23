@@ -9,10 +9,9 @@
 </template>
 
 <script setup lang="ts">
-import type { ExtendMenuOptions } from '#/packages.d';
 defineOptions({ name: 'SubtitleMaterial' });
 interface Props {
-  options: ExtendMenuOptions;
+  options: GlobalMenuOptions.ExtendMenuOptions;
 }
 const props = defineProps<Props>();
 const { options } = toRefs(props);

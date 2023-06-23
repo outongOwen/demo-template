@@ -35,13 +35,12 @@ import Configuration from '@/views/configuration/index.vue';
 import Track from '@/views/track/index.vue';
 import { getMenuList } from '@/service/api';
 import { GlobalLayout, GlobalSliderMenu } from '@/layouts/components';
-import type { ExtendMenuOptions, SecondMenuOptions } from '#/packages.d';
 defineOptions({ name: 'EditorLayout' });
 const globalStore = useGlobalStore();
 const { getTestSelect } = storeToRefs(globalStore);
 const defaultMenuKey = ref<string | number | null>(null);
-const currentMenuOption = ref<ExtendMenuOptions | null>();
-const sliderMenuOptionsAuthList = reactive<ExtendMenuOptions[]>([]);
+const currentMenuOption = ref<GlobalMenuOptions.ExtendMenuOptions | null>();
+const sliderMenuOptionsAuthList = reactive<GlobalMenuOptions.ExtendMenuOptions[]>([]);
 /**
  * @abstract 权限过滤
  */
@@ -51,7 +50,7 @@ const sliderMenuOptionsAuthFilter = async () => {
     const authMenuOptions = cloneDeep(sliderMenuOptions).filter(item => {
       return authList.some((auth: any) => {
         if (auth.type === item.key && auth?.children?.length) {
-          item.secondMenuOptions = auth.children.reduce((pre: SecondMenuOptions[], cur: any) => {
+          item.secondMenuOptions = auth.children.reduce((pre: GlobalMenuOptions.SecondMenuOptions[], cur: any) => {
             const { type, name } = cur;
             const option = {
               label: name,
@@ -70,7 +69,7 @@ const sliderMenuOptionsAuthFilter = async () => {
     console.log(error);
   }
 };
-const handleSelectMenuOption = (_key: string | number | null, item: ExtendMenuOptions) => {
+const handleSelectMenuOption = (_key: string | number | null, item: GlobalMenuOptions.ExtendMenuOptions) => {
   globalStore.setTestSelect(false);
   currentMenuOption.value = item;
 };
