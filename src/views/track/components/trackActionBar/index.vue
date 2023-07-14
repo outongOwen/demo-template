@@ -6,8 +6,12 @@
 -->
 <template>
   <div class="h-full flex justify-between items-center">
-    <left-action-bar />
-    <right-action-bar />
+    <n-space class="!flex-nowrap mr10px" :wrap-item="false">
+      <left-action-bar />
+    </n-space>
+    <n-space class="!flex-nowrap" :wrap-item="false">
+      <right-action-bar />
+    </n-space>
   </div>
 </template>
 

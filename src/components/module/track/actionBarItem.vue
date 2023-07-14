@@ -12,10 +12,11 @@
       :options="options.options"
       placement="bottom-start"
       size="small"
+      :to="false"
       @update:value="handleValueChange"
       @update:show="handleShowChange"
     >
-      <n-popover trigger="hover" placement="top">
+      <n-popover trigger="hover" placement="top" :to="false" class="px4px! py2px!">
         <template #trigger>
           <n-button
             quaternary
@@ -41,7 +42,7 @@
             />
           </n-button>
         </template>
-        <n-text>{{ currentLabel }}</n-text>
+        <n-text class="text-12px!">{{ currentLabel }}</n-text>
       </n-popover>
     </n-popselect>
     <n-dropdown
@@ -52,7 +53,7 @@
       @update:show="handleShowChange"
       @select="handleSelect"
     >
-      <n-popover trigger="hover" placement="top">
+      <n-popover trigger="hover" placement="top" :to="false" class="px4px! py2px!">
         <template #trigger>
           <n-button
             quaternary
@@ -71,15 +72,16 @@
             </n-element>
           </n-button>
         </template>
-        <n-text>{{ options.label }}</n-text>
+        <n-text class="text-12px!">{{ options.label }}</n-text>
       </n-popover>
     </n-dropdown>
-    <n-popover v-if="options.btnType === 'Button'" trigger="hover" placement="top">
+    <n-popover v-if="options.btnType === 'Button'" trigger="hover" placement="top" :to="false" class="px4px! py2px!">
       <template #trigger>
         <n-button
           quaternary
           size="small"
           :focusable="false"
+          :disabled="options.disabled"
           tag="div"
           :class="{ 'color-primary!': selectValue === options.key }"
           @click="handleChecked"
@@ -92,7 +94,7 @@
           <component :is="options.icon" v-else :style="{ fontSize: `${iconSize}px` }" />
         </n-button>
       </template>
-      <n-text>
+      <n-text class="text-12px!">
         {{
           options.checked
             ? selectValue === options.key
@@ -107,12 +109,13 @@
       trigger="hover"
       placement="bottom-start"
       class="p3px!"
+      :to="false"
       :show-arrow="false"
       :show="isFocusShow"
       @update:show="handleShowChange"
     >
       <template #trigger>
-        <n-popover trigger="hover" placement="top" :to="true">
+        <n-popover trigger="hover" placement="top" :to="false" class="px4px! py2px!">
           <template #trigger>
             <div>
               <n-button
@@ -144,7 +147,7 @@
               </n-button>
             </div>
           </template>
-          <n-text>{{ options.label }}</n-text>
+          <n-text class="text-12px!">{{ options.label }}</n-text>
         </n-popover>
       </template>
       <n-space v-for="(item, index) in (options.options as SelectOption[])" :key="index">
@@ -184,33 +187,48 @@
         </n-button>
       </n-space>
     </n-popover>
-    <n-space v-if="options.btnType === 'Slider'" class="!flex-nowrap">
-      <n-popover>
+    <n-space v-if="options.btnType === 'Slider'" :wrap-item="false" :size="0" class="!flex-nowrap">
+      <n-popover :to="false" class="px4px! py2px!">
         <template #trigger>
-          <n-button quaternary size="small" :focusable="false" tag="div" @click="handleMinusClick">
+          <n-button
+            quaternary
+            size="small"
+            :focusable="false"
+            tag="div"
+            :disabled="options.disabled"
+            @click="handleMinusClick"
+          >
             <icon-ic:baseline-minus class="text-20px" />
           </n-button>
         </template>
-        <n-text>轨道缩小</n-text>
+        <n-text class="text-12px!">轨道缩小</n-text>
       </n-popover>
-      <n-element tag="div" class="h100% w150px flex-center">
+      <n-element tag="div" class="h100% w130px flex-center scale-70">
         <n-slider
           :value="sliderValue"
           :max="sliderMaxValue"
           :tooltip="false"
           :min="0"
-          :step="1"
+          :step="0.1"
+          :to="false"
           :disabled="options.disabled"
           @update:value="handleSliderChange"
         />
       </n-element>
-      <n-popover>
+      <n-popover :to="false" class="px4px! py2px!">
         <template #trigger>
-          <n-button quaternary size="small" :focusable="false" tag="div" @click="handleAddClick">
+          <n-button
+            quaternary
+            size="small"
+            :focusable="false"
+            tag="div"
+            :disabled="options.disabled"
+            @click="handleAddClick"
+          >
             <icon-ic:baseline-add class="text-20px" />
           </n-button>
         </template>
-        <n-text>轨道放大</n-text>
+        <n-text class="text-12px!">轨道放大</n-text>
       </n-popover>
     </n-space>
   </template>
@@ -224,7 +242,7 @@ interface Props {
 }
 const props = defineProps<Props>();
 const iconSize = 20;
-const sliderMaxValue = 100;
+const sliderMaxValue = 10;
 const selectValue = ref(props.options.defaultValue);
 const sliderValue = ref<number>(props.options.defaultValue as number);
 const isFocusShow = ref(false);
@@ -326,13 +344,6 @@ const handleAddClick = () => {
   @apply important-px-5px;
 }
 .triangle-sign::after {
-  content: '';
-  position: absolute;
-  bottom: 1px;
-  right: 1px;
-  width: 0;
-  height: 0;
-  border-bottom: 6px solid #fff;
-  border-left: 6px solid transparent;
+  @apply content-[''] absolute bottom-1px right-1px w0 h0 border-b-6px border-b-color-#fff border-l-6px border-l-color-transparent;
 }
 </style>

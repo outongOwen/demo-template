@@ -25,7 +25,7 @@ const demoList = (() => {
     const url = faker.image.urlLoremFlickr({
       width: faker.number.int({ min: 192, max: 216 }),
       height: faker.number.int({ min: 108, max: 144 }),
-      category: 'nature'
+      category: 'airline'
     });
     item.preUrl = url; // 视频封面
     item.path = url; // 源文件

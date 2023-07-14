@@ -20,16 +20,16 @@
 /* .splitpanes--horizontal >.splitpanes__splitter:hover:before {opacity: 1;}
 .splitpanes--vertical >.splitpanes__splitter:hover:before {opacity: 1;} */
 .splitpanes--vertical > .splitpanes__splitter:before {
-  left: -5px;
-  right: -5px;
+  left: -2px;
+  right: -2px;
 }
 .splitpanes--horizontal > .splitpanes__splitter:before {
-  top: -5px;
-  bottom: -5px;
+  top: -2px;
+  bottom: -2px;
 }
 .splitpanes--vertical > .splitpanes__splitter:before {
-  top: -5px;
-  bottom: -5px;
+  top: -2px;
+  bottom: -2px;
 }
 .splitpanes--vertical>.splitpanes__splitter{
   min-width: 5px;

@@ -130,7 +130,7 @@ module.exports = {
             position: 'before'
           }
         ],
-        pathGroupsExcludedImportTypes: ['vue', 'vue-router', 'pinia', 'naive-ui', 'fabric@6.0.0-beta8']
+        pathGroupsExcludedImportTypes: ['vue', 'vue-router', 'pinia', 'naive-ui', 'fabric@6.0.0-beta10']
       }
     ],
     'no-unused-expressions': 'off',
@@ -138,7 +138,8 @@ module.exports = {
     'class-methods-use-this': 'off',
     'no-underscore-dangle': 'off',
     'import/no-unresolved': ['error', { ignore: ['^node_modules/'] }],
-    'no-plusplus': 'off'
+    'no-plusplus': 'off',
+    'no-warning-comments': 'off'
     // 'import/no-unresolved': 'off'
   }
 };

@@ -5,15 +5,17 @@
  * leftActionBar.vue
 -->
 <template>
-  <n-space class="!flex-nowrap mr10px" :wrap-item="false">
-    <ActionBarItem v-for="(item, index) in barItemOptions" :key="index" :options="item" />
-  </n-space>
+  <ActionBarItem v-for="(item, index) in barItemProps" :key="index" :options="item" />
 </template>
 
 <script setup lang="ts">
+import { reactiveComputed } from '@vueuse/core';
 import { useIconRender } from '@/hooks';
+import ActionBarItem from '@/components/module/track/ActionBarItem.vue';
 const { iconRender } = useIconRender();
-const barItemOptions: Track.ActionBarItem[] = [
+// TODO 补充选中新状态
+const selectMaterialType = ref('Video');
+const defaultBarItemOptions: Track.ActionBarItem[] = [
   {
     label: '切换指正状态',
     btnType: 'CPopselect',
@@ -25,7 +27,7 @@ const barItemOptions: Track.ActionBarItem[] = [
       {
         label: '选择 A',
         value: 'select',
-        icon: 'la:mouse-pointer'
+        icon: 'lucide:mouse-pointer'
       },
       {
         label: `切割 B`,
@@ -60,6 +62,15 @@ const barItemOptions: Track.ActionBarItem[] = [
     }
   },
   {
+    icon: 'fluent:split-vertical-28-filled',
+    label: '分割',
+    btnType: 'Button',
+    key: 'split',
+    change: (key: any) => {
+      console.log(key);
+    }
+  },
+  {
     icon: 'fluent:split-hint-20-filled',
     label: '左分割',
     btnType: 'Button',
@@ -77,15 +88,7 @@ const barItemOptions: Track.ActionBarItem[] = [
       console.log(key);
     }
   },
-  {
-    icon: 'fluent:split-vertical-28-filled',
-    label: '分割',
-    btnType: 'Button',
-    key: 'split',
-    change: (key: any) => {
-      console.log(key);
-    }
-  },
+
   {
     icon: 'carbon:copy',
     label: '复制',
@@ -100,19 +103,22 @@ const barItemOptions: Track.ActionBarItem[] = [
     label: '删除',
     btnType: 'Button',
     key: 'delete',
+    disabled: true,
     change: key => {
       console.log(key);
     }
-  },
-  {
-    icon: 'iconoir:crop-rotate-tl',
-    label: '旋转',
-    btnType: 'Button',
-    key: 'rotate',
-    change: key => {
-      console.log(key);
-    }
-  },
+  }
+  // {
+  //   icon: 'iconoir:crop-rotate-tl',
+  //   label: '旋转',
+  //   btnType: 'Button',
+  //   key: 'rotate',
+  //   change: key => {
+  //     console.log(key);
+  //   }
+  // },
+];
+const videoBarItemOptions: Track.ActionBarItem[] = [
   {
     icon: 'iconoir:crop',
     label: '裁剪',
@@ -143,6 +149,12 @@ const barItemOptions: Track.ActionBarItem[] = [
     }
   }
 ];
+const barItemProps = reactiveComputed(() => {
+  if (selectMaterialType.value === 'Video') {
+    return [...defaultBarItemOptions, ...videoBarItemOptions];
+  }
+  return defaultBarItemOptions;
+});
 </script>
 
 <style scoped></style>

@@ -115,10 +115,10 @@ defineExpose<ExposAPI>({
     @apply important-rounded-0 z9;
   }
   .n-scrollbar-rail--vertical {
-    @apply :  important-right-0 important-top-0;
+    @apply important-right-0 important-top-0;
   }
   .n-scrollbar-rail--horizontal {
-    @apply important-left-0 important-right-0 important-bottom-0;
+    @apply important-left-0  important-bottom-0;
   }
 }
 </style>

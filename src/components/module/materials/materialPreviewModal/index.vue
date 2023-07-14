@@ -111,7 +111,7 @@ const isShowPreviewInfoLoading = ref<boolean>(true);
 const musicAnalyzeRef = ref<HTMLElement | null>();
 let xgPlayer: Player;
 /**
- * todo 临时解决方案，后续需要根据素材类型来判断
+ * #TODO 临时解决方案，后续需要根据素材类型来判断
  */
 const playerType = computed((): PlayerType => {
   // const { materialType } = materialData.value;

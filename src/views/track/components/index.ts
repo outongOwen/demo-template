@@ -1,2 +1,3 @@
 import TrackActionBar from './trackActionBar/index.vue';
-export { TrackActionBar };
+import TrackContainer from './trackContainer/index.vue';
+export { TrackActionBar, TrackContainer };

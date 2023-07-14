@@ -4,6 +4,7 @@ import { setupAssets } from './plugins';
 import { setupStore } from './store';
 import { setupDirectives } from './directives';
 import { setupRouter } from './router';
+
 async function setupApp() {
   // import assets: js、css
   setupAssets();

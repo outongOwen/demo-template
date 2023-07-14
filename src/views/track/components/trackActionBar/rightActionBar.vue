@@ -1,11 +1,10 @@
 <template>
-  <n-space class="!flex-nowrap">
-    <ActionBarItem v-for="(item, index) in barItemOptions" :key="index" :options="item" />
-  </n-space>
+  <ActionBarItem v-for="(item, index) in barItemOptions" :key="index" :options="item" />
 </template>
 
 <script setup lang="ts">
 import { useIconRender } from '@/hooks';
+import ActionBarItem from '@/components/module/track/ActionBarItem.vue';
 const { iconRender } = useIconRender();
 const barItemOptions: Track.ActionBarItem[] = [
   {
@@ -82,6 +81,7 @@ const barItemOptions: Track.ActionBarItem[] = [
     label: '',
     btnType: 'Slider',
     defaultValue: 0,
+    disabled: false,
     change: (key: any) => {
       console.log(key);
     }

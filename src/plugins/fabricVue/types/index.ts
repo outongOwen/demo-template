@@ -1,4 +1,4 @@
-export * from './controls';
-export * from './alignGuidelines';
-export * from './object';
+export type * from './controls';
+export type * from './alignGuidelines';
+export type * from './object';
 // export * from './common';
