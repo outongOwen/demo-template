@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { omit } from 'lodash-es';
+import { omit } from 'lodash';
 import { getFilterBackend, util } from 'fabric';
 import type { WebGLFilterBackend } from 'fabric';
 import { useEventListener, reactiveComputed } from '@vueuse/core';

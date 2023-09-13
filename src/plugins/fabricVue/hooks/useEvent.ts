@@ -1,6 +1,7 @@
+// @ts-nocheck
 import type { ComponentInternalInstance } from 'vue';
 import { getCurrentInstance } from 'vue';
-import type { StaticCanvas, Canvas, Group, IText, Text, Textbox, Image } from 'fabric';
+import type { StaticCanvas, Canvas, CanvasEvents, IText, Text, Textbox, Image } from 'fabric';
 import type { TEventCallback } from '@fabric/Observable';
 import type { FabricObject } from '../types';
 type EventAction = 'bind' | 'unbind';
@@ -80,12 +81,16 @@ const eventSuffixRegExp = /^(onOnce|on)(:?)([A-Za-z:]*)$/;
  */
 
 const bindEvent = (
-  instance: StaticCanvas | Canvas | Group | FabricObject,
+  instance: StaticCanvas | Canvas,
   {
     attrs,
     eventsName,
     eventAction
-  }: { attrs: ComponentInternalInstance['attrs']; eventsName: string[]; eventAction?: EventAction }
+  }: {
+    attrs: ComponentInternalInstance['attrs'];
+    eventsName: CanvasEvents[];
+    eventAction?: EventAction;
+  }
 ) => {
   // 事件绑定
   for (const attrItem of Object.entries(attrs)) {
@@ -93,7 +98,7 @@ const bindEvent = (
     const match = name.match(eventSuffixRegExp);
     if (match) {
       const actionType = match[1] === 'onOnce' ? 'once' : match[1];
-      const eventName = match[3].toLowerCase() as any;
+      const eventName = match[3].toLowerCase();
       if (eventsName.includes(eventName)) {
         if (eventAction === 'bind' && actionType === 'once') {
           instance.once(eventName, handlerEvent);

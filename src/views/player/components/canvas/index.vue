@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { omit, pick } from 'lodash-es';
+import { omit, pick } from 'lodash';
 import { reactiveComputed } from '@vueuse/core';
 import { util, Control, controlsUtils, filters } from 'fabric';
 import type { ImageSource, Object as FabricObject, TPointerEvent } from 'fabric';
@@ -63,7 +63,7 @@ import type {
   FCanvasConfiguration,
   FTextboxProps,
   FTextProps,
-  FGroupProps,
+  // FGroupProps,
   FRectProps,
   FImageProps,
   FControlProps
@@ -84,6 +84,7 @@ defineOptions({ name: 'PlayerCanvas' });
 // }, 5000);
 const imageUrl = 'https://raw.githubusercontent.com/outongOwen/picture_bed/main/image/202303281502545.heic';
 const imageUrl1 = new URL('@/assets/1.png', import.meta.url).href;
+console.log(imageUrl1, 'imageUrl1imageUrl1imageUrl1imageUrl1');
 // eslint-disable-next-line max-params
 function drawImg(
   ctx: CanvasRenderingContext2D,
@@ -156,11 +157,13 @@ const textConfig = reactive<FTextProps>({
   // borderColor: '#fff'
 });
 
-const groupConfig = reactive<FGroupProps>({
+const groupConfig = reactive({
   width: 500,
   height: 500,
   layout: 'fixed',
-  borderColor: '#fff'
+  borderColor: '#fff',
+  ID: '123123'
+  // id: '213213'
   // interactive: true,
   // subTargetCheck: true
 });

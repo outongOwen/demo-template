@@ -26,7 +26,7 @@ export default function useContext<T>(contextName = 'context', options: CreateCo
     return { state };
   }
   function useInject() {
-    return inject(injectKey);
+    return inject(injectKey) as T;
   }
   return { useProvide, useInject };
 }

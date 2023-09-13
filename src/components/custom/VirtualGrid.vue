@@ -57,6 +57,8 @@
 </template>
 
 <script setup lang="ts">
+import type { VNodeChild } from 'vue';
+
 defineOptions({ name: 'VirtualGrid' });
 export interface Item {
   id: string;
@@ -65,7 +67,7 @@ export interface Item {
   width?: number;
   columnSpan: number;
   newRow?: boolean;
-  renderComponent?: Component;
+  renderComponent?: Component | VNodeChild;
 }
 interface ContainerData {
   windowSize: ElementSize;

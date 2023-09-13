@@ -25,6 +25,7 @@ declare namespace GlobalMenuOptions {
     icon?: string | import('@iconify/vue').IconifyIcon;
     [key: string]: unknown;
   }
+  type MenuOptions = import('naive-ui').MenuOption;
   type ExtendMenuOptions = {
     /** 二级菜单 */
     secondMenuOptions?: SecondMenuOptions[];
@@ -40,5 +41,5 @@ declare namespace GlobalMenuOptions {
     isLocal?: boolean;
     /** 列表查询规则 */
     // formSchema?: FormSchema[];
-  } & import('naive-ui').MenuOption;
+  } & MenuOptions;
 }

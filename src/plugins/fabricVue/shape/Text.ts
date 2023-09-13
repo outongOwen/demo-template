@@ -2,11 +2,11 @@ import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Text } from 'fabric';
 import type { TextProps as FabricTextProps } from '@fabric/shapes/Text/Text';
-import { cloneDeep } from 'lodash-es';
-import type { TProps, TObjectInstance } from '../types';
+import { cloneDeep } from 'lodash';
+import type { TObjectInstance } from '../types';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindTextEvent, useWatchUpdateProps, useControls } from '../hooks';
-export type FTextProps = TProps<FabricTextProps> & {
+export type FTextProps = Partial<FabricTextProps> & {
   text: string;
 };
 export type TextInst = {
@@ -15,7 +15,9 @@ export type TextInst = {
 export const textProps = {
   config: {
     type: Object as PropType<FTextProps | Record<string, any>>,
-    default: () => {},
+    default: () => {
+      return {};
+    },
     required: true
   }
 } as const;

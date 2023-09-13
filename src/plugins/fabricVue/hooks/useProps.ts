@@ -1,6 +1,6 @@
 import { watch } from 'vue';
 import type { Canvas } from 'fabric';
-import { isEmpty } from 'lodash-es';
+import { isEmpty } from 'lodash';
 import type { FabricObject } from '../types';
 import { difference } from '../utils';
 /**

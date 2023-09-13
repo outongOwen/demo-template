@@ -1,7 +1,7 @@
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
 
 import type { AxiosResponse, AxiosInstance } from 'axios';
-import { isString, clone } from 'lodash-es';
+import { isString, clone } from 'lodash';
 import { RequestEnum, ResultEnum, ContentTypeEnum, ErrorMessageEnum } from '@/enums';
 import { setObjToUrlParams } from '@/utils';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';

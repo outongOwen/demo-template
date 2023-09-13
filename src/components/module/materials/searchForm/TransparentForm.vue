@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import type { FormInst } from 'naive-ui';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep } from 'lodash';
 import { useVModel } from '@vueuse/core';
 defineOptions({ name: 'TransparentSearchForm' });
 export interface FromModelInst {

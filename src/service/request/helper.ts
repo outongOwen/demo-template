@@ -1,4 +1,4 @@
-import { isObject, isString, isArray, cloneDeep, isEqual, mergeWith, unionWith } from 'lodash-es';
+import { isObject, isString, isArray, cloneDeep, isEqual, mergeWith, unionWith } from 'lodash';
 const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export function joinTimestamp<T extends boolean>(join: boolean, restful: T): T extends true ? string : object;

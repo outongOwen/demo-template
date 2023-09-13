@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep } from 'lodash';
 import { sliderMenuOptions } from '@/settings';
 import { useGlobalStore } from '@/store';
 import Header from '@/views/header/index.vue';
@@ -40,7 +40,7 @@ const globalStore = useGlobalStore();
 const { getTestSelect } = storeToRefs(globalStore);
 const defaultMenuKey = ref<string | number | null>(null);
 const currentMenuOption = ref<GlobalMenuOptions.ExtendMenuOptions | null>();
-const sliderMenuOptionsAuthList = reactive<GlobalMenuOptions.ExtendMenuOptions[]>([]);
+const sliderMenuOptionsAuthList = ref<any[]>([]);
 /**
  * @abstract 权限过滤
  */
@@ -64,7 +64,7 @@ const sliderMenuOptionsAuthFilter = async () => {
         return (auth.type === item.key && !item.isLocal) || item.isLocal;
       });
     });
-    sliderMenuOptionsAuthList.push(...authMenuOptions);
+    sliderMenuOptionsAuthList.value = authMenuOptions;
   } catch (error) {
     console.log(error);
   }
@@ -74,9 +74,11 @@ const handleSelectMenuOption = (_key: string | number | null, item: GlobalMenuOp
   currentMenuOption.value = item;
 };
 watchEffect(() => {
-  if (sliderMenuOptionsAuthList.length) {
-    defaultMenuKey.value = sliderMenuOptionsAuthList[0]?.key ? sliderMenuOptionsAuthList[0].key : null;
-    currentMenuOption.value = sliderMenuOptionsAuthList?.length ? cloneDeep(sliderMenuOptionsAuthList[0]) : null;
+  if (sliderMenuOptionsAuthList.value.length) {
+    defaultMenuKey.value = sliderMenuOptionsAuthList.value[0]?.key ? sliderMenuOptionsAuthList.value[0].key : null;
+    currentMenuOption.value = sliderMenuOptionsAuthList.value?.length
+      ? cloneDeep(sliderMenuOptionsAuthList.value[0])
+      : null;
   }
 });
 onMounted(() => {

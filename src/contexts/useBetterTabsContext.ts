@@ -9,11 +9,8 @@ export default function useBetterTabsContext() {
   const provideBetterTabsContext = (context: BetterTabsProps) => {
     useProvide(context);
   };
-  const injectBetterTabsContext = () => {
-    return useInject();
-  };
   return {
     provideBetterTabsContext,
-    injectBetterTabsContext
+    injectBetterTabsContext: useInject
   };
 }

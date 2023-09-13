@@ -18,6 +18,9 @@
 <script setup lang="ts">
 import GlobalTrack from '@/layouts/components/globalTrack.vue';
 import { TrackActionBar, TrackContainer } from './components';
+defineOptions({
+  name: 'TrackWrap'
+});
 </script>
 
 <style scoped></style>

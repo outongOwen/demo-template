@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
-import betterMock from 'better-mock';
-import type { MockMethod } from 'vite-plugin-mock';
-import { resultPageSuccess } from '../_utils';
+import { mock as betterMock } from 'better-mock';
+import { defineMock } from 'vite-plugin-mock-dev-server';
+import { resultPageSuccess } from './utils';
 const demoList = (() => {
-  const data = betterMock.mock({
+  const data = betterMock({
     'list|150': [
       {
         id: '@guid',
@@ -23,9 +23,9 @@ const demoList = (() => {
   });
   data.list.forEach((item: any) => {
     const url = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 192, max: 216 }),
-      height: faker.number.int({ min: 108, max: 144 }),
-      category: 'airline'
+      width: faker.number.int({ min: 1920, max: 2160 }),
+      height: faker.number.int({ min: 1080, max: 1440 }),
+      category: 'model'
     });
     item.preUrl = url; // 视频封面
     item.path = url; // 源文件
@@ -33,7 +33,7 @@ const demoList = (() => {
   return data.list;
 })();
 const audioDemoList = (() => {
-  const data = betterMock.mock({
+  const data = betterMock({
     'list|150': [
       {
         id: '@guid',
@@ -50,35 +50,39 @@ const audioDemoList = (() => {
   });
   data.list.forEach((item: any) => {
     item.preUrl = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 90, max: 192 }),
-      height: faker.number.int({ min: 70, max: 108 }),
-      category: 'model'
+      width: faker.number.int({ min: 900, max: 1920 }),
+      height: faker.number.int({ min: 700, max: 1080 }),
+      category: 'nature'
     });
     item.path = faker.image.urlLoremFlickr({
-      width: faker.number.int({ min: 192, max: 216 }),
-      height: faker.number.int({ min: 108, max: 144 }),
-      category: 'model'
+      width: faker.number.int({ min: 1920, max: 2160 }),
+      height: faker.number.int({ min: 1080, max: 1440 }),
+      category: 'nature'
     });
   });
   return data.list;
 })();
-export default [
+export default defineMock([
   {
     url: '/mock/media-editor/catalogMedium/list',
-    timeout: 100,
-    method: 'get',
-    response: ({ query }) => {
-      const { page = 1, pageSize = 20 } = query;
-      return resultPageSuccess(page, pageSize, demoList);
+    delay: 1000,
+    method: 'GET',
+    response: (req, res) => {
+      const { page = 1, pageSize = 20 } = req.query;
+      res.setHeader('Content-Type', 'application/json');
+      res.statusCode = 200;
+      res.end(JSON.stringify(resultPageSuccess(page, pageSize, demoList)));
     }
   },
   {
     url: '/mock/media-editor/catalogAudioMedium/list',
-    timeout: 100,
-    method: 'get',
-    response: ({ query }) => {
+    delay: 1000,
+    method: 'GET',
+    response: ({ query }, res) => {
       const { page = 1, pageSize = 20 } = query;
-      return resultPageSuccess(page, pageSize, audioDemoList);
+      res.setHeader('Content-Type', 'application/json');
+      res.statusCode = 200;
+      res.end(JSON.stringify(resultPageSuccess(page, pageSize, audioDemoList)));
     }
   }
-] as MockMethod[];
+]);

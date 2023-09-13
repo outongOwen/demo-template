@@ -142,7 +142,7 @@
 
 <script setup lang="ts">
 import type { SelectOption } from 'naive-ui';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep } from 'lodash';
 import { reactiveComputed, useResizeObserver, useVModels, watchOnce } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
 import { playerSettings } from '@/settings';
@@ -170,15 +170,31 @@ interface Props {
   playing: boolean;
   proportion: string;
   speed: number;
+  /** 控制按钮列表 */
   controlListOptions: ControlListOptions[];
   isFullscreen?: boolean;
 }
 interface Emits {
-  (e: 'update:proportion', value: string): void;
-  (e: 'update:speed', value: number): void;
-  (e: 'speedChange', value: number, option: any): void;
-  (e: 'proportionChange', value: string, option: any): void;
-  (e: 'cssFullscreenChange', state: boolean): void;
+  /**
+   * @description VModel 比例
+   */
+  (event: 'update:proportion', value: string): void;
+  /**
+   * @description VModel 速率
+   */
+  (event: 'update:speed', value: number): void;
+  /**
+   * @description 改变速率
+   */
+  (event: 'speedChange', value: number, option: any): void;
+  /**
+   * @description 改变比例
+   */
+  (event: 'proportionChange', value: string, option: any): void;
+  /**
+   * @description 全屏
+   */
+  (event: 'cssFullscreenChange', state: boolean): void;
 }
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();

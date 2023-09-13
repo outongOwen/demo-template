@@ -3,23 +3,28 @@ import { defineComponent, onBeforeUnmount, shallowRef, toRef, watch, watchEffect
 import { watchOnce } from '@vueuse/core';
 import { Image, util } from 'fabric';
 import type { ImageProps as FabricImageProps, ImageSource } from 'fabric';
-import { cloneDeep, isEmpty, isString } from 'lodash-es';
-import type { TProps, TObjectInstance } from '../types';
+import { cloneDeep, isEmpty, isString } from 'lodash';
+import type { TObjectInstance } from '../types';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindImageEvent, useControls } from '../hooks';
 import { difference, throwError } from '../utils';
-export type FImageProps = TProps<FabricImageProps> | Record<string, any>;
+export type FImageProps = Partial<FabricImageProps> | Record<string, any>;
 export type ImageInst = {
   instance: TObjectInstance<Image>;
 };
 export const imageProps = {
   imageSource: {
-    type: [Object, null] as PropType<ImageSource | null>,
-    default: null
+    type: [Object] as PropType<ImageSource | null>,
+    default: () => {
+      return {};
+    }
   },
   config: {
     type: [Object] as PropType<FImageProps>,
-    default: () => {}
+    default: () => {
+      return {};
+    },
+    required: true
   }
 };
 export type ImageProps = typeof imageProps;

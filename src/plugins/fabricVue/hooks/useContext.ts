@@ -26,7 +26,7 @@ export function useContext<T>(contextName = 'context', options: CreateContextOpt
     return { state };
   }
   function useInject() {
-    return inject(injectKey);
+    return inject(injectKey) as T;
   }
   return { useProvide, useInject };
 }

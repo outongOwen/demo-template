@@ -1,3 +1,4 @@
+import type { VNodeChild, Component } from 'vue';
 import { h } from 'vue';
 import type { IconifyIcon } from '@iconify/vue';
 import SvgIcon from '@/components/custom/SvgIcon.vue';
@@ -35,7 +36,7 @@ export default function useIconRender() {
    * @property color - 图标颜色
    * @property fontSize - 图标大小
    */
-  const iconRender = (config: IconConfig): (() => VNode & Component) => {
+  const iconRender = (config: IconConfig): (() => VNodeChild & Component) => {
     const { color, fontSize, icon, localIcon } = config;
 
     const style: IconStyle = {};

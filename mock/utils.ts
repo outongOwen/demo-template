@@ -1,5 +1,5 @@
 // Interface data format used to return a unified format
-import { ceil } from 'lodash-es';
+import { ceil } from 'lodash';
 import { ResultEnum } from '@/enums';
 export function resultSuccess<T = Recordable>(data: T, { msg = 'ok' } = {}): Service.Result<T> {
   return {

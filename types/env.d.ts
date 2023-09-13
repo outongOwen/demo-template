@@ -9,7 +9,7 @@ type ServiceEnvType = 'dev' | 'test' | 'prod';
 /** 后台服务的环境配置 */
 interface ServiceEnvConfig {
   /** 请求地址 */
-  url: string;
+  target: string;
   /** 匹配路径的正则字符串, 用于拦截地址转发代理(任意以 /开头 + 字符串, 单个/不起作用) */
   urlPrefix: string;
 }
@@ -25,11 +25,6 @@ interface ImportMetaEnv {
   readonly VITE_APP_DESC: string;
   /** 路由首页的路径 */
   readonly VITE_ROUTE_HOME_PATH: AuthRoute.RoutePath;
-  /**
-   * 权限路由模式:
-   * - static - 前端声明的静态
-   * - dynamic - 后端返回的动态
-   */
   /** iconify图标作为组件的前缀 */
   readonly VITE_ICON_PREFFIX: string;
   /**

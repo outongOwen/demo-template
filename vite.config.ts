@@ -9,7 +9,6 @@ export default defineConfig(configEnv => {
 
   const isOpenProxy = viteEnv.VITE_HTTP_PROXY === 'Y';
   const envConfig = getServiceEnvConfig(viteEnv);
-
   return {
     base: viteEnv.VITE_BASE_URL,
     resolve: {
@@ -31,33 +30,16 @@ export default defineConfig(configEnv => {
       host: '0.0.0.0',
       port: 8200,
       open: true,
-      proxy: createViteProxy(isOpenProxy, envConfig)
+      proxy: {
+        ...createViteProxy(isOpenProxy, envConfig)
+      }
     },
     optimizeDeps: {
       include: ['splitpanes', '@vueuse/core', 'xgplayer', 'fabric']
     },
     build: {
-      outDir: viteEnv.VITE_APP_NAME,
       reportCompressedSize: false,
       sourcemap: false,
-      chunkSizeWarningLimit: 2000,
-      rollupOptions: {
-        output: {
-          chunkFileNames: 'static/js/[name]-[hash].js',
-          entryFileNames: 'static/js/[name]-[hash].js',
-          assetFileNames: 'static/[ext]/[name]-[hash].[ext]'
-          // manualChunks(id) {
-          //   // 根据模块的路径或名称，将需要放在同一个块中的模块归为一类
-          //   if (id.includes('src/packages/publicSettingConfig/')) {
-          //     return 'publicSettingConfig';
-          //   }
-          //   if (id.includes('node_modules')) {
-          //     return 'vendor';
-          //   }
-          //   return [];
-          // }
-        }
-      },
       commonjsOptions: {
         ignoreTryCatch: false
       }

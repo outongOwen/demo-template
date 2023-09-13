@@ -8,7 +8,7 @@
   <template v-if="!options.isHide">
     <n-popselect
       v-if="options.btnType === 'Popselect'"
-      :value="selectValue as (string|number)"
+      :value="selectValue"
       :options="options.options"
       placement="bottom-start"
       size="small"
@@ -30,7 +30,7 @@
           >
             <Icon
               v-if="(typeof options.icon === 'string' || typeof currentOptions?.icon === 'string') && currentIcon"
-              :icon="(currentIcon as string)"
+              :icon="currentIcon as string"
               :class="{ 'color-#fff': options.locked }"
               :style="{ fontSize: `${iconSize}px` }"
             />
@@ -65,7 +65,7 @@
             <n-element tag="div" class="wh-full">
               <Icon
                 v-if="typeof options.icon === 'string'"
-                :icon="(options.icon as string)"
+                :icon="options.icon as string"
                 :style="{ fontSize: `${iconSize}px` }"
               />
               <component :is="options.icon" v-else :style="{ fontSize: `${iconSize}px` }" />
@@ -88,7 +88,7 @@
         >
           <Icon
             v-if="typeof options.icon === 'string'"
-            :icon="(options.icon as string)"
+            :icon="options.icon as string"
             :style="{ fontSize: `${iconSize}px` }"
           />
           <component :is="options.icon" v-else :style="{ fontSize: `${iconSize}px` }" />
@@ -132,7 +132,7 @@
               >
                 <Icon
                   v-if="(typeof options.icon === 'string' || typeof currentOptions?.icon === 'string') && currentIcon"
-                  :icon="(currentIcon as string)"
+                  :icon="currentIcon as string"
                   :style="{ fontSize: `${iconSize}px` }"
                   :class="{ 'color-#fff': options.locked }"
                 />
@@ -150,7 +150,7 @@
           <n-text class="text-12px!">{{ options.label }}</n-text>
         </n-popover>
       </template>
-      <n-space v-for="(item, index) in (options.options as SelectOption[])" :key="index">
+      <n-space v-for="(item, index) in options.options as SelectOption[]" :key="index">
         <n-button
           quaternary
           size="small"
@@ -163,7 +163,7 @@
         >
           <Icon
             v-if="typeof item.icon === 'string'"
-            :icon="(item.icon as string)"
+            :icon="item.icon as string"
             :style="{ fontSize: `${iconSize}px` }"
             class="mr5px"
           />
@@ -243,7 +243,7 @@ interface Props {
 const props = defineProps<Props>();
 const iconSize = 20;
 const sliderMaxValue = 10;
-const selectValue = ref(props.options.defaultValue);
+const selectValue = ref<any>(props.options.defaultValue);
 const sliderValue = ref<number>(props.options.defaultValue as number);
 const isFocusShow = ref(false);
 const currentOptions = computed(() => {

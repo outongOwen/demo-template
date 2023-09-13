@@ -1,16 +1,12 @@
-/**
- * @fileoverview Rect
- * @see {@link:}
- */
 import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Rect } from 'fabric';
 import type { RectProps as FabricRectProps } from '@fabric/shapes/Rect';
-import { cloneDeep } from 'lodash-es';
-import type { TProps, TObjectInstance } from '../types';
+import { cloneDeep } from 'lodash';
+import type { TObjectInstance } from '../types';
 import { useCanvasContext } from '../context';
 import { useObjectParent, useBindObjectEvent, useWatchUpdateProps, useControls } from '../hooks';
-export type FRectProps = TProps<FabricRectProps>;
+export type FRectProps = Partial<FabricRectProps>;
 export type RectInst = {
   instance: TObjectInstance<Rect>;
 };

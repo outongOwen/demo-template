@@ -1,5 +1,5 @@
 import type { BaseFilter } from '@fabric/filters/BaseFilter';
-import { isEqual, isObject } from 'lodash-es';
+import { isEqual, isObject } from 'lodash';
 import type { TFabricObjectProps } from '../types';
 /**
  * 错误拦截

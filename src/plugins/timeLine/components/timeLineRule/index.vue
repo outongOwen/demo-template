@@ -5,9 +5,13 @@
  * index.vue
 -->
 <template>
-  <div class="container"></div>
+  <div class="h42px w100% bg-emerald"></div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// const props = defineProps({
+//   // 传入的参数
+// });
+</script>
 
 <style scoped></style>

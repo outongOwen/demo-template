@@ -23,7 +23,7 @@
           <n-skeleton class="w-full h-[calc(100%-20px)]" />
         </template>
       </n-image>
-      <text class="absolute-rb pr3px">{{ item.injected.duration }}</text>
+      <text class="absolute-rb pr3px">{{ formatFrameByTime(item.injected.duration) }}</text>
     </div>
     <n-text>
       <n-ellipsis class="w100% h20px">
@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-// import { formatFrameByTime } from '@/utils';
+import { formatFrameByTime } from '@/utils';
 // interface IntersectionObserverOptions {
 //   root?: Element | Document | null | string;
 //   rootMargin?: string;

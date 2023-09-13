@@ -1,5 +1,5 @@
 import type { GlobalThemeOverrides } from 'naive-ui';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep } from 'lodash';
 import { themeSetting } from '@/settings';
 import { addColorAlpha, getColorPalette } from '@/utils';
 

@@ -2,24 +2,25 @@ import type { PropType } from 'vue';
 import { defineComponent, onBeforeUnmount, onMounted } from 'vue';
 import { Group } from 'fabric';
 // import type { GroupOwnProps as FGroupProps } from 'fabric';
-import { cloneDeep } from 'lodash-es';
-import type { GroupProps as FabricGroupProps } from '@fabric/shapes/Group';
-import type { TProps, TObjectInstance } from '../types';
+import { cloneDeep } from 'lodash';
+import type { GroupProps } from 'fabric';
+import type { TObjectInstance } from '../types';
 import { throwError } from '../utils';
 import { useBindObjectEvent, useWatchUpdateProps, useControls } from '../hooks';
 import { useCanvasContext, useGroupContext } from '../context';
-export interface FGroupProps extends TProps<FabricGroupProps> {}
+export type FGroupProps = Partial<GroupProps> | Record<string, any>;
 export type GroupInst = {
   instance: TObjectInstance<Group>;
 };
 export const groupProps = {
   config: {
-    type: Object as PropType<FGroupProps | Record<string, any>>,
-    default: () => {},
+    type: Object as PropType<FGroupProps>,
+    default: () => {
+      return {};
+    },
     required: true
   }
 } as const;
-export type GroupProps = typeof groupProps;
 export interface GroupPublicInterface {
   instance: Group;
 }

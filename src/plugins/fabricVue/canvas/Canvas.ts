@@ -16,27 +16,27 @@ export interface CanvasInst {
 export const canvasProps = {
   config: {
     type: Object as PropType<FCanvasConfig>,
-    default: () => {}
+    default: null
   },
   configuration: {
     type: Object as PropType<FCanvasConfiguration>,
-    default: () => {}
+    default: null
   },
   controlsVisibility: {
     type: Object as PropType<ControlsVisibility>,
-    default: () => {}
+    default: null
   },
   controlProps: {
     type: Object as PropType<FControlProps>,
-    default: () => {}
+    default: null
   },
   controls: {
     type: Object as PropType<TControlSet>,
-    default: () => {}
+    default: null
   },
   alignGuidelines: {
     type: Object as PropType<AlignGuidelinesOptions>,
-    default: () => {}
+    default: null
   }
 } as const;
 export type CanvasProps = typeof canvasProps;

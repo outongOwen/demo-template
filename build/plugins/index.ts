@@ -4,8 +4,8 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import unocss from '@unocss/vite';
 import progress from 'vite-plugin-progress';
 import VueDevtools from 'vite-plugin-vue-devtools';
+import mockDevServerPlugin from 'vite-plugin-mock-dev-server';
 import unplugin from './unplugin';
-import mock from './mock';
 import visualizer from './visualizer';
 import compress from './compress';
 import pwa from './pwa';
@@ -26,7 +26,12 @@ export function setupVitePlugins(viteEnv: ImportMetaEnv): (PluginOption | Plugin
     plugins.push(pwa());
   }
   if (viteEnv.VITE_USE_MOCK === 'Y') {
-    plugins.push(mock());
+    // plugins.push(mock());
+    plugins.push(
+      mockDevServerPlugin({
+        // exclude: ['_utils.ts']
+      })
+    );
   }
   return plugins;
 }

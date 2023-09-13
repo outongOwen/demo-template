@@ -1,5 +1,5 @@
 import type { PiniaPluginContext } from 'pinia';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep } from 'lodash';
 
 /**
  * setup语法的重置状态插件

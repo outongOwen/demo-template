@@ -1,6 +1,6 @@
 import { getCurrentInstance } from 'vue';
 import type { Canvas, Group } from 'fabric';
-import { some } from 'lodash-es';
+import { some } from 'lodash';
 import { useCanvasContext, useGroupContext } from '../context';
 import { throwError } from '../utils';
 interface UseObjectParentReturn {
