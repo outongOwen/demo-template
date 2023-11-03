@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { useIconRender } from '@/hooks';
-import ActionBarItem from '@/components/module/track/ActionBarItem.vue';
+import ActionBarItem from '@/components/module/track/actionBarItem.vue';
 const { iconRender } = useIconRender();
 const barItemOptions: Track.ActionBarItem[] = [
   {
