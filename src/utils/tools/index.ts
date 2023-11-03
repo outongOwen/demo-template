@@ -20,3 +20,23 @@ export function setObjToUrlParams(baseUrl: string, obj: any): string {
   parameters = parameters.replace(/&$/, '');
   return /\?$/.test(baseUrl) ? baseUrl + parameters : baseUrl.replace(/\/?$/, '?') + parameters;
 }
+
+// 取出cookie
+export function getCookie(cname: any) {
+  const name = `${cname}=`;
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    const c = ca[i].trim();
+    if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+  }
+  return '';
+}
+// 获取url参数
+export const getQueryString = (name: string): any => {
+  const reg: any = new RegExp(`(^|&)${name}=([^&]*)(&|$)`);
+  const res: any = window.location.search.substr(1).match(reg);
+  if (res !== null) {
+    return decodeURIComponent(res[2]);
+  }
+  return null;
+};
