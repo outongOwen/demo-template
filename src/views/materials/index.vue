@@ -11,6 +11,7 @@
 </template>
 
 <script setup lang="ts">
+import { getFirstOrgInfo, getUserBindList } from '@/service/api';
 import {
   VideoMaterial,
   AudioMaterial,
@@ -27,9 +28,9 @@ interface Props {
 const props = defineProps<Props>();
 const { menuOptions } = toRefs(props);
 const componentMap: Record<string, Component> = {
-  image: ImageMaterial,
+  picture: ImageMaterial,
   video: VideoMaterial,
-  audio: AudioMaterial,
+  music: AudioMaterial,
   text: TextMaterial,
   subtitle: SubtitleMaterial,
   decoration: DecorationMaterial,
@@ -44,6 +45,31 @@ const renderComponent = computed((): Component => {
   const component = componentMap[menuTypeLowerCase];
   return component;
 });
+interface OrgListType {
+  orgId: '';
+  orgName: '';
+  children?: any;
+}
+
+const OrgList = ref<OrgListType[] | null>();
+const UserList = ref<OrgListType[] | null>();
+onBeforeMount(async () => {
+  try {
+    const res = await getFirstOrgInfo({ page: 1, rows: 999 });
+    res.content.forEach((v: any) => {
+      v.isLeaf = false;
+      v.depth = 1;
+    });
+    OrgList.value = res.content;
+    const users = await getUserBindList();
+    console.log(users);
+    UserList.value = JSON.parse(JSON.stringify(users || []));
+  } catch (e) {
+    console.log(e);
+  }
+});
+provide('OrgList', OrgList);
+provide('UserList', UserList);
 watchEffect(() => {
   const { key } = menuOptions.value;
   const isExist = keepAliveIncludes.value.some(item => {

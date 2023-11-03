@@ -12,14 +12,30 @@
           <n-form-item-gi path="name">
             <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
           </n-form-item-gi>
-          <n-form-item-gi path="firstOrgId">
-            <n-select v-model:value="searchFormModel.firstOrgId" placeholder="一级" :options="generalOptions()" />
-          </n-form-item-gi>
-          <n-form-item-gi path="secondOrgId">
-            <n-select v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />
+          <!--          <n-form-item-gi path="firstOrgId">-->
+          <!--            <n-select v-model:value="searchFormModel.firstOrgId" placeholder="一级" :options="generalOptions()" />-->
+          <!--          </n-form-item-gi>-->
+          <n-form-item-gi :span="2" path="secondOrgId">
+            <n-cascader
+              v-model:value="searchFormModel.secondOrgId"
+              clearable
+              label-field="orgName"
+              value-field="orgId"
+              :options="firstOrgOptions"
+              remote
+              @load="loadSecond"
+            />
+            <!--            <n-select v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />-->
           </n-form-item-gi>
           <n-form-item-gi path="userIdFromWeb">
-            <n-select v-model:value="searchFormModel.userIdFromWeb" placeholder="三级" :options="generalOptions()" />
+            <n-select
+              v-model:value="searchFormModel.userIdFromWeb"
+              clearable
+              label-field="userName"
+              value-field="userId"
+              placeholder="三级"
+              :options="userBindList"
+            />
           </n-form-item-gi>
           <n-form-item-gi span="2" path="multipleSelectValue">
             <n-space justify="end" :wrap-item="false" class="w100%">
@@ -36,15 +52,16 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInst } from 'naive-ui';
+import type { FormInst, CascaderOption } from 'naive-ui';
 import { cloneDeep } from 'lodash';
 import { useVModel } from '@vueuse/core';
+import { getSecondOrgInfo } from '@/service/api';
 defineOptions({ name: 'AudioSearchForm' });
 export interface FromModelInst {
   name: string | null;
-  firstOrgId?: string | null;
-  secondOrgId: string | null;
-  userIdFromWeb: string | null;
+  firstOrgId?: number | null;
+  secondOrgId: number | null;
+  userIdFromWeb: number | null;
   [key: string]: unknown;
 }
 interface Props {
@@ -58,19 +75,22 @@ interface Emits {
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 const formRef = ref<FormInst>();
+const firstOrgOptions: CascaderOption[] | undefined = inject('OrgList');
+const userBindList: CascaderOption[] | undefined = inject('UserList');
 let defaultFormModel: FromModelInst;
 const searchFormModel = useVModel(props, 'formModel', emits);
-const generalOptions = () =>
-  ['groode', 'veli good', 'emazing', 'lidiculous'].map((v, i) => ({
-    label: v,
-    value: i.toString()
-  }));
 const resetForm = () => {
   Object.assign(searchFormModel.value, cloneDeep(defaultFormModel));
   emits('resetForm');
 };
 const handleSearch = (type?: string) => {
   emits('search', searchFormModel.value, type);
+};
+const loadSecond = (option: CascaderOption) => {
+  return getSecondOrgInfo({ page: 1, rows: 999, parentOrgId: option.orgId }).then(res => {
+    option.children = res.content;
+    Promise.resolve();
+  });
 };
 onMounted(() => {
   defaultFormModel = cloneDeep(searchFormModel.value);

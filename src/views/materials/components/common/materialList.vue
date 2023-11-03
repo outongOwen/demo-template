@@ -13,9 +13,11 @@
       :items="materialList"
       :update-function="pullDataWithDelay"
       :get-grid-gap="() => listConfig.gutter!"
-      :get-column-count="(elementWidth: number) => {
+      :get-column-count="
+        (elementWidth: number) => {
           return Math.floor(elementWidth / listConfig.width!);
-        }"
+        }
+      "
     >
       <template #default="{ item }">
         <component :is="renderComponent" v-if="renderComponent" :item="item" @preview="handlePreview" />
@@ -30,7 +32,7 @@
   <material-preview-modal
     v-model:showModal="showModal"
     :material-data="previewMaterial"
-    :material-type="(options.key as  PlayerType)"
+    :material-type="options.key as PlayerType"
   />
 </template>
 
@@ -107,10 +109,10 @@ const pullDataWithDelay = (): Promise<boolean> => {
 };
 const initializeList = async () => {
   try {
+    const listRes = await props.request(offset.value, listConfig.value.pageSize!);
     loaded.value = true;
     errored.value = false;
     showModal.value = false;
-    const listRes = await props.request(offset.value, listConfig.value.pageSize!);
     totalPages.value = listRes.totalPages;
     materialList.value = transformToGridList(listRes.content);
     offset.value += 1;
