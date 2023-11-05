@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { useIconRender } from '@/hooks';
+// eslint-disable-next-line import/no-unresolved
 import ActionBarItem from '@/components/module/track/ActionBarItem.vue';
 const { iconRender } = useIconRender();
 const barItemOptions: Track.ActionBarItem[] = [
@@ -16,7 +17,7 @@ const barItemOptions: Track.ActionBarItem[] = [
     defaultValue: '',
     beforeChange: (state?: boolean) => {
       if (state) return Promise.resolve(true);
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         window.$dialog?.create({
           showIcon: false,
           title: '确认打开主轨吸附？',
@@ -32,7 +33,7 @@ const barItemOptions: Track.ActionBarItem[] = [
         });
       });
     },
-    change: key => {
+    change: (key) => {
       console.log(key);
     }
   },
@@ -44,7 +45,7 @@ const barItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'link',
     checked: true,
-    change: key => {
+    change: (key) => {
       console.log(key);
     }
   },
@@ -54,7 +55,7 @@ const barItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'autoAlign',
     checked: true,
-    change: key => {
+    change: (key) => {
       console.log(key);
     }
   },
@@ -64,7 +65,7 @@ const barItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'previewAxis',
     checked: true,
-    change: key => {
+    change: (key) => {
       console.log(key);
     }
   },

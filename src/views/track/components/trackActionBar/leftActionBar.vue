@@ -6,15 +6,19 @@
 -->
 <template>
   <ActionBarItem v-for="(item, index) in barItemProps" :key="index" :options="item" />
+  <mediaCropper v-show="showModal" v-model:showModal="showModal"></mediaCropper>
 </template>
 
 <script setup lang="ts">
 import { reactiveComputed } from '@vueuse/core';
 import { useIconRender } from '@/hooks';
 import ActionBarItem from '@/components/module/track/ActionBarItem.vue';
+import mediaCropper from './mediaCropper.vue';
+const showModal = ref(false);
 const { iconRender } = useIconRender();
 // TODO 补充选中新状态
 const selectMaterialType = ref('Video');
+
 const defaultBarItemOptions: Track.ActionBarItem[] = [
   {
     label: '切换指正状态',
@@ -104,7 +108,7 @@ const defaultBarItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'delete',
     disabled: true,
-    change: key => {
+    change: (key) => {
       console.log(key);
     }
   }
@@ -124,8 +128,9 @@ const videoBarItemOptions: Track.ActionBarItem[] = [
     label: '裁剪',
     btnType: 'Button',
     key: 'crop',
-    change: key => {
+    change: (key) => {
       console.log(key);
+      showModal.value = true;
     }
   },
   {
@@ -134,7 +139,7 @@ const videoBarItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'mirror',
     isHide: false,
-    change: key => {
+    change: (key) => {
       console.log(key);
     }
   },
@@ -144,7 +149,7 @@ const videoBarItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'freezeFrame',
     isHide: false,
-    change: key => {
+    change: (key) => {
       console.log(key);
     }
   }
@@ -158,3 +163,4 @@ const barItemProps = reactiveComputed(() => {
 </script>
 
 <style scoped></style>
+../../../../components/module/cropper/index.vue
