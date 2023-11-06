@@ -12,6 +12,12 @@ module.exports = {
       rules: {
         'no-undef': 'off' // use tsc to check the ts code of the vue
       }
+    },
+    {
+      files: ['*.ts', '*.vue'],
+      rules: {
+        'no-console': 'warn'
+      }
     }
   ],
   settings: {

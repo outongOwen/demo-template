@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { mock as betterMock } from 'better-mock';
 import { defineMock } from 'vite-plugin-mock-dev-server';
 import { resultPageSuccess } from './utils';
-const demoList = (() => {
+const mockImageDemoList = () => {
   const data = betterMock({
     'list|150': [
       {
@@ -25,14 +25,14 @@ const demoList = (() => {
     const url = faker.image.urlLoremFlickr({
       width: faker.number.int({ min: 1920, max: 2160 }),
       height: faker.number.int({ min: 1080, max: 1440 }),
-      category: 'model'
+      category: 'ai'
     });
     item.preUrl = url; // 视频封面
     item.path = url; // 源文件
   });
   return data.list;
-})();
-const audioDemoList = (() => {
+};
+const mockAudioDemoList = () => {
   const data = betterMock({
     'list|150': [
       {
@@ -61,7 +61,7 @@ const audioDemoList = (() => {
     });
   });
   return data.list;
-})();
+};
 export default defineMock([
   {
     url: '/mock/media-editor/catalogMedium/list',
@@ -71,7 +71,7 @@ export default defineMock([
       const { page = 1, pageSize = 20 } = req.query;
       res.setHeader('Content-Type', 'application/json');
       res.statusCode = 200;
-      res.end(JSON.stringify(resultPageSuccess(page, pageSize, demoList)));
+      res.end(JSON.stringify(resultPageSuccess(page, pageSize, mockImageDemoList())));
     }
   },
   {
@@ -82,7 +82,7 @@ export default defineMock([
       const { page = 1, pageSize = 20 } = query;
       res.setHeader('Content-Type', 'application/json');
       res.statusCode = 200;
-      res.end(JSON.stringify(resultPageSuccess(page, pageSize, audioDemoList)));
+      res.end(JSON.stringify(resultPageSuccess(page, pageSize, mockAudioDemoList())));
     }
   }
 ]);

@@ -6,27 +6,55 @@
  * TimeLine
 -->
 <template>
-  <div class="flex wh-full">
-    <div class="w130px h100% mt42px of-hidden">
-      <time-line-bar :scroll-y="scrollTop" />
-    </div>
-    <n-divider vertical class="h100%! mx0!" />
-    <div class="h-full w-[calc(100%-130px)] relative">
-      <TimeLine @scroll="handleTimeLineScroll" />
-    </div>
-  </div>
+  <TimeLine
+    ref="timeLineRef"
+    class="wh-full time-line"
+    :editor-data="editorData"
+    :effects="effects"
+    :side-bars="sideBars"
+    show-side-bar
+    :main-row="true"
+    main-row-id="main"
+    :sort-rule="sortRuleEditorData"
+  />
 </template>
 
 <script setup lang="ts">
-import TimeLine from '@/plugins/timeLine/components/timeLine/index.vue';
-// import type { ScrollReturn } from '@/plugins/timeLine/components/timeLine/index.vue';
-import TimeLineBar from '../timeLineBar/index.vue';
+import { useThemeVars } from 'naive-ui';
+import type { TimelineRow } from '@/plugins/timeLine';
+import { TimeLine } from '@/plugins/timeLine';
+import { mockData, effects, sideBars } from './mock';
 defineOptions({
-  name: 'TrackContainer'
+  name: 'TrackTimeLine'
 });
-const scrollTop = ref(0);
-const handleTimeLineScroll = (e: Event) => {
-  const target = e.target as HTMLElement;
-  scrollTop.value = target.scrollTop;
+const themeVars = useThemeVars();
+const editorData = ref(mockData.reverse());
+const sortRuleEditorData = (timeLineData: TimelineRow[]) => {
+  // 将type为audio的数据排在最后面
+  timeLineData.sort((a, b) => {
+    if (a.type === 'audio') {
+      return 1;
+    }
+    if (b.type === 'audio') {
+      return -1;
+    }
+    return 0;
+  });
 };
 </script>
+<style lang="scss" scoped>
+.dark .time-line {
+  :deep(.timeLine-inner-wrap) {
+    .timeLine-divider {
+      background-color: v-bind('themeVars.dividerColor');
+    }
+  }
+}
+.time-line {
+  :deep(.timeLine-inner-wrap) {
+    .timeLine-divider {
+      background-color: v-bind('themeVars.dividerColor');
+    }
+  }
+}
+</style>

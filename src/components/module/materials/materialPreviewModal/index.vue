@@ -30,17 +30,17 @@
         <div class="w100% h-[calc(100%-48px)] flex p20px box-border">
           <!-- 素材展示区域 -->
           <div class="w-75% h100% relative flex-center relative bg-[rgba(0,0,0,0.6)]">
-            <template v-if="playerType === 'Video'">
+            <template v-if="previewType === 'Video'">
               <div id="preview-container" class="wh-full relative" />
             </template>
-            <template v-if="playerType === 'Audio'">
+            <template v-if="previewType === 'Audio'">
               <div id="preview-container" class="wh-full relative">
                 <canvas ref="musicAnalyzeRef" class="absolute-center z9" />
               </div>
               <div class="absolute-center z9" />
               <icon-mdi:music class="absolute-transform-center text-100px color-[rgba(255,255,255,0.6)]" />
             </template>
-            <template v-if="playerType === 'Image' || playerType === 'Transparent'">
+            <template v-if="previewType === 'Image' || previewType === 'Transparent'">
               <n-image
                 :src="materialData.path"
                 :preview-src="materialData.path"
@@ -91,32 +91,28 @@ import MusicPreset, { Analyze } from 'xgplayer-music';
 import Mp4Plugin from 'xgplayer-mp4';
 import { useThemeStore } from '@/store';
 defineOptions({ name: 'MaterialPreviewModal', inheritAttrs: false });
-export type PlayerType = 'Video' | 'Audio' | 'Image' | 'Transparent';
+export type PreviewType = 'Video' | 'Audio' | 'Image' | 'Transparent';
 interface Props {
   showModal: boolean;
   materialData: any;
-  materialType: PlayerType;
+  previewType: PreviewType;
 }
 interface Emits {
   (e: 'update:showModal'): void;
 }
-const props = withDefaults(defineProps<Props>(), {
-  showModal: false
-});
+const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 const themeStore = useThemeStore();
-const isShowModal = useVModel(props, 'showModal', emits);
-const { materialData, materialType } = toRefs(props);
+const isShowModal = useVModel(props, 'showModal', emits, {
+  defaultValue: false
+});
+const { materialData, previewType } = toRefs(props);
 const isShowPreviewInfoLoading = ref<boolean>(true);
 const musicAnalyzeRef = ref<HTMLElement | null>();
 let xgPlayer: Player;
 /**
  * #TODO 临时解决方案，后续需要根据素材类型来判断
  */
-const playerType = computed((): PlayerType => {
-  // const { materialType } = materialData.value;
-  return materialType.value;
-});
 const createVideoPlayer = () => {
   return new Player({
     id: 'preview-container',
@@ -189,14 +185,14 @@ const createAnalyze = () => {
   });
 };
 const handleModalAfterEnter = () => {
-  if (playerType.value === 'Video') {
+  if (previewType.value === 'Video') {
     xgPlayer = createVideoPlayer();
   }
-  if (playerType.value === 'Audio') {
+  if (previewType.value === 'Audio') {
     xgPlayer = createMusicPlayer();
     createAnalyze();
   }
-  if (playerType.value === 'Video' || playerType.value === 'Audio') {
+  if (previewType.value === 'Video' || previewType.value === 'Audio') {
     xgPlayer.once('ready', () => {
       isShowPreviewInfoLoading.value = false;
     });

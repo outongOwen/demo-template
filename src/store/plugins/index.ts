@@ -8,7 +8,6 @@ import { cloneDeep } from 'lodash';
  */
 export function resetSetupStore(context: PiniaPluginContext) {
   const setupSyntaxIds = ['setup-store'];
-
   if (setupSyntaxIds.includes(context.store.$id)) {
     const { $state } = context.store;
 

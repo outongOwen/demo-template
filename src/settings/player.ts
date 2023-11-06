@@ -44,8 +44,8 @@ const defaultCanvasControlsSettings: Player.CanvasControlsSetting = {
 };
 const defaultCanvasAlignGuidelinesSettings: Player.CanvasAlignGuidelinesSetting = {
   autoAdsorb: true,
-  aligningLineMargin: 5,
-  aligningLineWidth: 1,
+  aligningLineMargin: 10,
+  aligningLineWidth: 3,
   aligningLineColor: '#fff',
   isOpenLineSign: true,
   isOpenAlignGuidelines: true,

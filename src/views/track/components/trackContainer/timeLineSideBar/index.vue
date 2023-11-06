@@ -1,0 +1,102 @@
+<template>
+  <n-space class="wh-full" :size="8" align="center">
+    <n-button
+      v-if="getSideBarOptionBySideBarId?.deleted"
+      quaternary
+      :focusable="false"
+      size="tiny"
+      @click="handleSetDeleteRow"
+      @mouseenter="() => (isMoveEnter = true)"
+      @mouseleave="() => (isMoveEnter = false)"
+    >
+      <template #icon>
+        <n-icon size="20">
+          <Icon :icon="isMoveEnter ? 'material-symbols:delete-sharp' : (getSideBarOptionBySideBarId.icon as string)" />
+        </n-icon>
+      </template>
+    </n-button>
+    <n-button
+      v-if="getSideBarOptionBySideBarId?.locked"
+      quaternary
+      :focusable="false"
+      size="tiny"
+      @click="handleSetLockRow"
+    >
+      <template #icon>
+        <n-icon size="20">
+          <Icon :icon="timeLineRow.locked ? 'carbon:locked' : 'carbon:unlocked'" />
+        </n-icon>
+      </template>
+    </n-button>
+    <n-button
+      v-if="getSideBarOptionBySideBarId?.hided"
+      quaternary
+      :focusable="false"
+      size="tiny"
+      @click="handleSetHideRow"
+    >
+      <template #icon>
+        <n-icon size="20">
+          <Icon :icon="timeLineRow.hided ? 'ci:hide' : 'ci:show'" />
+        </n-icon>
+      </template>
+    </n-button>
+    <n-button
+      v-if="getSideBarOptionBySideBarId?.muted"
+      quaternary
+      :focusable="false"
+      size="tiny"
+      @click="handleSetMuteRow"
+    >
+      <template #icon>
+        <n-icon size="20">
+          <Icon :icon="timeLineRow.muted ? 'charm:sound-mute' : 'charm:sound-down'" />
+        </n-icon>
+      </template>
+    </n-button>
+  </n-space>
+</template>
+
+<script setup lang="ts">
+/**
+ * #NOTE 1.限制行高度
+ */
+import { Icon } from '@iconify/vue';
+import type { TimelineRow } from '@/plugins/timeLine';
+import { timeLineSideBarOptions, defaultTimeLineSideBarOptionItem } from './index';
+interface Props {
+  timeLineRow: TimelineRow;
+  setDeleteRow?: (row: TimelineRow) => void;
+  setMuteRow?: (row: TimelineRow) => void;
+  setHideRow?: (row: TimelineRow) => void;
+  setLockRow?: (row: TimelineRow) => void;
+}
+defineOptions({
+  name: 'TimeLineSideBar'
+});
+const props = defineProps<Props>();
+const { timeLineRow } = toRefs(props);
+const { setDeleteRow, setMuteRow, setHideRow, setLockRow } = props;
+const isMoveEnter = ref<boolean>(false);
+// 根据轨道行ID获取轨道行侧边栏配置项
+const getSideBarOptionBySideBarId = computed(() => {
+  if (timeLineRow.value.sideBarId && timeLineSideBarOptions[timeLineRow.value.sideBarId]) {
+    return timeLineSideBarOptions[timeLineRow.value.sideBarId];
+  }
+  return defaultTimeLineSideBarOptionItem;
+});
+const handleSetDeleteRow = () => {
+  setDeleteRow && setDeleteRow(timeLineRow.value);
+};
+const handleSetMuteRow = () => {
+  setMuteRow && setMuteRow(timeLineRow.value);
+};
+const handleSetLockRow = () => {
+  setLockRow && setLockRow(timeLineRow.value);
+};
+const handleSetHideRow = () => {
+  setHideRow && setHideRow(timeLineRow.value);
+};
+</script>
+
+<style scoped></style>
