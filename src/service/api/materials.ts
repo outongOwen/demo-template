@@ -1,3 +1,4 @@
+import type { CascaderOption } from 'naive-ui';
 import { defineHttp } from '@/service/request';
 
 enum Api {
@@ -43,7 +44,7 @@ export const getSecondOrgInfo = (params: any) => {
 };
 // 获取用户信息
 export const getUserBindList = (params?: any) => {
-  return defineHttp.get<Record<string, any>>(
+  return defineHttp.get<CascaderOption[]>(
     {
       url: Api.GET_USER_BIND_LIST,
       params

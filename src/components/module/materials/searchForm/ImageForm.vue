@@ -53,6 +53,7 @@ import type { FormInst, CascaderOption } from 'naive-ui';
 import { cloneDeep } from 'lodash';
 import { useVModel } from '@vueuse/core';
 import { getSecondOrgInfo } from '@/service/api';
+import { provideFirstOrgList, provideFullUserList } from '@/views/materials/hooks';
 defineOptions({ name: 'VideoSearchForm' });
 export interface FromModelInst {
   name: string | null;
@@ -72,8 +73,10 @@ interface Emits {
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 const formRef = ref<FormInst>();
-const firstOrgOptions: CascaderOption[] | undefined = inject('OrgList');
-const userBindList: CascaderOption[] | undefined = inject('UserList');
+const { injectFirstOrgContext } = provideFirstOrgList();
+const { injectFullUserContext } = provideFullUserList();
+const firstOrgOptions = injectFirstOrgContext();
+const userBindList = injectFullUserContext();
 let defaultFormModel: FromModelInst;
 const searchFormModel = useVModel(props, 'formModel', emits);
 const resetForm = () => {
