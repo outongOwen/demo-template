@@ -19,7 +19,6 @@
     "update-pkg": "soy ncu",
     "release": "soy release",
     "tsx": "tsx",
-    "logo": "tsx ./scripts/logo.ts",
     "prepare": "soy init-simple-git-hooks"
   },
   "dependencies": {

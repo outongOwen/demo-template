@@ -8,7 +8,7 @@
   @apply layout-divider;
 }
 .splitpanes__splitter:before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
@@ -31,12 +31,12 @@
   top: -2px;
   bottom: -2px;
 }
-.splitpanes--vertical>.splitpanes__splitter{
+.splitpanes--vertical > .splitpanes__splitter {
   min-width: 5px;
   /* @apply important-bg-primary;
   opacity: 0; */
 }
-.splitpanes--horizontal>.splitpanes__splitter{
+.splitpanes--horizontal > .splitpanes__splitter {
   min-height: 5px;
   /* @apply important-bg-primary;
   opacity: 0; */
