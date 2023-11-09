@@ -11,6 +11,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Ref } from 'vue';
+import type { CascaderOption } from 'naive-ui';
 import { getFirstOrgInfo, getUserBindList } from '@/service/api';
 import {
   VideoMaterial,
@@ -46,9 +48,11 @@ const renderComponent = computed((): Component => {
   const component = componentMap[menuTypeLowerCase];
   return component;
 });
+const OrgList = ref([]) as Ref<CascaderOption[]>;
+const UserList = ref([]) as Ref<CascaderOption[]>;
 
-let OrgList;
-let UserList;
+const { provideFirstOrgContext } = provideFirstOrgList();
+const { provideFullUserContext } = provideFullUserList();
 onBeforeMount(async () => {
   try {
     const res = await getFirstOrgInfo({ page: 1, rows: 999 });
@@ -56,14 +60,12 @@ onBeforeMount(async () => {
       v.isLeaf = false;
       v.depth = 1;
     });
-    OrgList = res.content;
-    UserList = await getUserBindList();
+    OrgList.value = res.content;
+    UserList.value = await getUserBindList();
   } catch (e) {
     console.log(e);
   }
 });
-const { provideFirstOrgContext } = provideFirstOrgList();
-const { provideFullUserContext } = provideFullUserList();
 provideFirstOrgContext(OrgList);
 provideFullUserContext(UserList);
 watchEffect(() => {

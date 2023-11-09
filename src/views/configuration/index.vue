@@ -6,7 +6,7 @@
 -->
 <template>
   <global-configuration>
-    <configuration-body />
+    <configuration-body :active-type="props.activeType" />
   </global-configuration>
 </template>
 
@@ -14,6 +14,11 @@
 import { GlobalConfiguration } from '@/layouts';
 import { ConfigurationBody } from './components';
 defineOptions({ name: 'ConfigurationModules' });
+interface Props {
+  activeType: any;
+}
+const props = defineProps<Props>();
+console.log(props.activeType);
 </script>
 
 <style scoped></style>

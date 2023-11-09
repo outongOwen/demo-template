@@ -12,7 +12,7 @@
     </template>
     <template #centerLeftArea>
       <materials v-if="currentMenuOption" :menu-options="currentMenuOption" />
-      <Configuration v-if="getTestSelect" />
+      <Configuration v-if="getTestSelect" :active-type="currentMenuOption" />
     </template>
     <template #centerRightArea>
       <Player />

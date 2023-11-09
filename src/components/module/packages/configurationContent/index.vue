@@ -6,7 +6,7 @@
 -->
 <template>
   <configuration-content-layout>
-    <template v-if="hideRadioGroup" #topBtn>
+    <template v-if="!hideRadioGroup" #topBtn>
       <radio-button-group v-model:value="valueVModel" theme="dark" :options="options" />
     </template>
     <template #default>
