@@ -6,7 +6,7 @@
 -->
 <template>
   <Transition>
-    <div class="wh-full relative">
+    <div v-if="globalStore.getTestSelect" class="wh-full relative">
       <component :is="AudioConfig" />
       <div class="absolute-rt right-3px top-3px select-unset" @click.stop="handleCloseConfiguration">
         <n-button tertiary text size="tiny">

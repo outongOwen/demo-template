@@ -1,4 +1,8 @@
-@mixin scrollbar($color: rgba(255, 255, 255, 0.2), $hover: rgba(255, 255, 255, 0.3), $size: 5px) {
+@mixin scrollbar(
+  $color: rgba(255, 255, 255, 0.2),
+  $hover: rgba(255, 255, 255, 0.3),
+  $size: 5px
+) {
   scrollbar-width: thin;
   scrollbar-color: $color transparent;
   &::-webkit-scrollbar-thumb {
@@ -10,7 +14,9 @@
   &::-webkit-scrollbar {
     width: $size;
     height: $size;
+    // position: relative;
   }
+
   &::-webkit-scrollbar-track-piece {
     border-radius: 0;
   }

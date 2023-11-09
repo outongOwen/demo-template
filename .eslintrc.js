@@ -12,6 +12,19 @@ module.exports = {
       rules: {
         'no-undef': 'off' // use tsc to check the ts code of the vue
       }
+    },
+    {
+      files: ['*.ts', '*.js', '*.vue'],
+      rules: {
+        'no-console': 'warn',
+        'no-unused-expressions': 'off',
+        '@typescript-eslint/ban-ts-comment': 'off',
+        'class-methods-use-this': 'off',
+        'no-underscore-dangle': 'off',
+        'import/no-unresolved': ['error', { ignore: ['^node_modules/'] }],
+        'no-plusplus': 'off',
+        'no-warning-comments': 'off'
+      }
     }
   ],
   settings: {
@@ -132,14 +145,6 @@ module.exports = {
         ],
         pathGroupsExcludedImportTypes: ['vue', 'vue-router', 'pinia', 'naive-ui', 'fabric@6.0.0-beta10']
       }
-    ],
-    'no-unused-expressions': 'off',
-    '@typescript-eslint/ban-ts-comment': 'off',
-    'class-methods-use-this': 'off',
-    'no-underscore-dangle': 'off',
-    'import/no-unresolved': ['error', { ignore: ['^node_modules/'] }],
-    'no-plusplus': 'off',
-    'no-warning-comments': 'off'
-    // 'import/no-unresolved': 'off'
+    ]
   }
 };

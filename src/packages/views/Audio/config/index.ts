@@ -1,8 +1,10 @@
 import type { BetterTabsOptions } from '@/components/custom/BetterTabs.vue';
 import EffectConfig from './components/effectConfig/index.vue';
 import { BaseConfig } from './components';
-
-export const tabsOptions: BetterTabsOptions[] = [
+interface ExtendBetterTabsOptions extends BetterTabsOptions {
+  hideRadioGroup?: boolean;
+}
+export const tabsOptions: ExtendBetterTabsOptions[] = [
   {
     name: 'BaseSettings',
     label: '基础设置',
