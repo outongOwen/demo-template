@@ -7,8 +7,8 @@
 -->
 <template>
   <div class="timeLine-editor">
-    <!-- <TimeLineRule /> -->
-    <TimeLineCursor />
+    <TimeLineRule />
+    <!-- <TimeLineCursor /> -->
     <!-- <TimeLineEditorArea v-bind="$attrs" /> -->
   </div>
 </template>
@@ -18,9 +18,9 @@ export default {
 };
 </script>
 <script setup lang="ts">
-// import TimeLineRule from '../timeLineRule/index.vue';
+import TimeLineRule from '../timeLineRule/index.vue';
 // import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
-import TimeLineCursor from '../timeLineCursor/index.vue';
+// import TimeLineCursor from '../timeLineCursor/index.vue';
 </script>
 <style lang="scss" scoped>
 .timeLine-editor {
