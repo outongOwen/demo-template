@@ -1,8 +1,8 @@
 import type { GlobalThemeOverrides } from 'naive-ui';
+// import { useThemeVars } from 'naive-ui';
 import { cloneDeep } from 'lodash';
 import { themeSetting } from '@/settings';
 import { addColorAlpha, getColorPalette } from '@/utils';
-
 /** 初始化主题配置 */
 export function initThemeSettings() {
   const themeColor = themeSetting.themeColor;
@@ -61,6 +61,7 @@ export function getNaiveThemeOverrides(colors: Record<ColorType, string>, _darkM
   const colorLoading = primary;
   return {
     common: {
+      // ...themeVars.value,
       ...themeColors,
       popoverColor: _darkMode ? '#282828' : '#fff',
       modalColor: _darkMode ? '#282828' : '#fff'

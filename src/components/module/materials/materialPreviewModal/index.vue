@@ -30,17 +30,17 @@
         <div class="w100% h-[calc(100%-48px)] flex p20px box-border">
           <!-- 素材展示区域 -->
           <div class="w-75% h100% relative flex-center relative bg-[rgba(0,0,0,0.6)]">
-            <template v-if="playerType === 'Video'">
+            <template v-if="playerType === 'video'">
               <div id="preview-container" class="wh-full relative" />
             </template>
-            <template v-if="playerType === 'Audio'">
+            <template v-if="playerType === 'music'">
               <div id="preview-container" class="wh-full relative">
                 <canvas ref="musicAnalyzeRef" class="absolute-center z9" />
               </div>
               <div class="absolute-center z9" />
               <icon-mdi:music class="absolute-transform-center text-100px color-[rgba(255,255,255,0.6)]" />
             </template>
-            <template v-if="playerType === 'Image' || playerType === 'Transparent'">
+            <template v-if="playerType === 'picture' || playerType === 'transparent'">
               <n-image
                 :src="materialData.path"
                 :preview-src="materialData.path"
@@ -91,7 +91,7 @@ import MusicPreset, { Analyze } from 'xgplayer-music';
 import Mp4Plugin from 'xgplayer-mp4';
 import { useThemeStore } from '@/store';
 defineOptions({ name: 'MaterialPreviewModal', inheritAttrs: false });
-export type PlayerType = 'Video' | 'Audio' | 'Image' | 'Transparent';
+export type PlayerType = 'video' | 'music' | 'picture' | 'transparent';
 interface Props {
   showModal: boolean;
   materialData: any;
@@ -120,10 +120,10 @@ const playerType = computed((): PlayerType => {
 const createVideoPlayer = () => {
   return new Player({
     id: 'preview-container',
-    url: materialData.value.sourcePath,
+    url: materialData.value.preUrl,
     fluid: true,
     ignores: ['playbackrate', 'cssfullscreen'],
-    poster: materialData.value.preUrl,
+    poster: materialData.value.keyFrameUrl,
     plugins: [Mp4Plugin],
     mp4plugin: {
       maxBufferLength: 30,
@@ -189,14 +189,14 @@ const createAnalyze = () => {
   });
 };
 const handleModalAfterEnter = () => {
-  if (playerType.value === 'Video') {
+  if (playerType.value === 'video') {
     xgPlayer = createVideoPlayer();
   }
-  if (playerType.value === 'Audio') {
+  if (playerType.value === 'music') {
     xgPlayer = createMusicPlayer();
     createAnalyze();
   }
-  if (playerType.value === 'Video' || playerType.value === 'Audio') {
+  if (playerType.value === 'video' || playerType.value === 'music') {
     xgPlayer.once('ready', () => {
       isShowPreviewInfoLoading.value = false;
     });

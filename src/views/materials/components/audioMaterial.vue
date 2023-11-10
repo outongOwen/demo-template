@@ -34,7 +34,7 @@ import AudioItem from '@/components/module/materials/materialItem/AudioItem.vue'
 import AudioSearchForm from '@/components/module/materials/searchForm/AudioForm.vue';
 import SecondMenuRadioButton from '@/components/custom/RadioButtonGroup.vue';
 import type { FromModelInst } from '@/components/module/materials/searchForm/AudioForm.vue';
-import { getCatalogAudioMediumList } from '@/service/api';
+import { getCatalogMediumList } from '@/service/api';
 import { MaterialGirdList } from './common';
 defineOptions({ name: 'AudioMaterial' });
 interface QueryCondition extends FromModelInst {
@@ -49,10 +49,10 @@ const searchFormModel = ref<FromModelInst>({
   name: '',
   firstOrgId: null,
   secondOrgId: null,
-  userIdFromWeb: new URLSearchParams(window.location.search).get('userId')
+  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
-const keyField = ref<string>('key');
+const keyField = ref<string>('id');
 const curSecondMenuKey = ref<string>('');
 const secondMenuOptions = computed((): GlobalMenuOptions.SecondMenuOptions[] => {
   return options.value?.secondMenuOptions ? options.value?.secondMenuOptions : [];
@@ -72,18 +72,19 @@ const handleSecondChecked = () => {
   materialListRef.value?.refreshList();
 };
 const handleSearch = (_value: FromModelInst, type?: string) => {
-  type === 'onlyMe' && (searchFormModel.value.userIdFromWeb = '1');
+  type === 'onlyMe' &&
+    (searchFormModel.value.userIdFromWeb = Number(new URLSearchParams(window?.location?.search)?.get('userId')));
   materialListRef.value?.refreshList();
 };
 const handleResetSearch = () => {
-  searchFormModel.value.userIdFromWeb = '1';
+  searchFormModel.value.userIdFromWeb = Number(new URLSearchParams(window?.location?.search)?.get('userId'));
   materialListRef.value?.refreshList();
 };
 const requestList = async (offset: number, pageSize: number): Promise<any> => {
   try {
-    const result = await getCatalogAudioMediumList({
+    const result = await getCatalogMediumList({
       page: offset,
-      pageSize,
+      rows: pageSize,
       ...queryCondition.value
     });
     return Promise.resolve(result);

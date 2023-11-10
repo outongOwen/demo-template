@@ -19,7 +19,6 @@ async function setupApp() {
 
   // vue router
   await setupRouter(app);
-
   // mount app
   app.mount('#app');
 }

@@ -15,7 +15,7 @@
       @update:value="handleValueUpdate"
     >
       <n-tab-pane v-for="item in tabsOptions" :key="item.name" :name="item.name" :tab="item.label">
-        <div :style="{ height: `${tabPaneHeight}px` }">
+        <div :style="{ height: `${tabPaneHeight}px` }" class="overflow-scroll">
           <component :is="item.renderComponent" v-if="item?.renderComponent" :item="item" />
         </div>
       </n-tab-pane>

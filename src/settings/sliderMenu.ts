@@ -11,7 +11,7 @@ const createDefaultAreaConfig = (secondMenu = true, searchForm = true, materialB
 const defaultSliderMenuOptions: GlobalMenuOptions.ExtendMenuOptions[] = [
   {
     label: '视频',
-    key: 'Video',
+    key: 'video',
     icon: iconRender({ icon: 'material-symbols:video-camera-back-sharp' }),
     areaConfig: createDefaultAreaConfig(),
     searchModel: {
@@ -25,7 +25,7 @@ const defaultSliderMenuOptions: GlobalMenuOptions.ExtendMenuOptions[] = [
   },
   {
     label: '图片',
-    key: 'Image',
+    key: 'picture',
     icon: iconRender({ icon: 'material-symbols:photo-camera-back-sharp' }),
     areaConfig: createDefaultAreaConfig()
     // secondMenuOptions: [
@@ -65,13 +65,13 @@ const defaultSliderMenuOptions: GlobalMenuOptions.ExtendMenuOptions[] = [
   },
   {
     label: '透明',
-    key: 'Transparent',
+    key: 'transparent',
     icon: iconRender({ icon: 'material-symbols:opacity-sharp' }),
     areaConfig: createDefaultAreaConfig()
   },
   {
     label: '配乐',
-    key: 'Audio',
+    key: 'music',
     icon: iconRender({ icon: 'mdi:music' }),
     areaConfig: createDefaultAreaConfig(),
     listSchema: {

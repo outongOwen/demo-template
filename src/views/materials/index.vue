@@ -11,6 +11,9 @@
 </template>
 
 <script setup lang="ts">
+import type { Ref } from 'vue';
+import type { CascaderOption } from 'naive-ui';
+import { getFirstOrgInfo, getUserBindList } from '@/service/api';
 import {
   VideoMaterial,
   AudioMaterial,
@@ -20,6 +23,7 @@ import {
   TextMaterial,
   SubtitleMaterial
 } from './components';
+import { provideFirstOrgList, provideFullUserList } from './hooks/index';
 defineOptions({ name: 'MaterialsModules' });
 interface Props {
   menuOptions: GlobalMenuOptions.ExtendMenuOptions;
@@ -27,9 +31,9 @@ interface Props {
 const props = defineProps<Props>();
 const { menuOptions } = toRefs(props);
 const componentMap: Record<string, Component> = {
-  image: ImageMaterial,
+  picture: ImageMaterial,
   video: VideoMaterial,
-  audio: AudioMaterial,
+  music: AudioMaterial,
   text: TextMaterial,
   subtitle: SubtitleMaterial,
   decoration: DecorationMaterial,
@@ -44,6 +48,26 @@ const renderComponent = computed((): Component => {
   const component = componentMap[menuTypeLowerCase];
   return component;
 });
+const OrgList = ref([]) as Ref<CascaderOption[]>;
+const UserList = ref([]) as Ref<CascaderOption[]>;
+
+const { provideFirstOrgContext } = provideFirstOrgList();
+const { provideFullUserContext } = provideFullUserList();
+onBeforeMount(async () => {
+  try {
+    const res = await getFirstOrgInfo({ page: 1, rows: 999 });
+    res.content.forEach((v: any) => {
+      v.isLeaf = false;
+      v.depth = 1;
+    });
+    OrgList.value = res.content;
+    UserList.value = await getUserBindList();
+  } catch (e) {
+    console.log(e);
+  }
+});
+provideFirstOrgContext(OrgList);
+provideFullUserContext(UserList);
 watchEffect(() => {
   const { key } = menuOptions.value;
   const isExist = keepAliveIncludes.value.some(item => {

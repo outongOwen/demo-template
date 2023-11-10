@@ -1,4 +1,3 @@
-import VueDefineOption from 'unplugin-vue-define-options';
 import Icons from 'unplugin-icons/vite';
 import AutoImport from 'unplugin-auto-import/vite';
 import IconsResolver from 'unplugin-icons/resolver';
@@ -18,7 +17,6 @@ export default function unplugin(viteEnv: ImportMetaEnv) {
   const collectionName = VITE_ICON_LOCAL_PREFFIX.replace(`${VITE_ICON_PREFFIX}-`, '');
 
   return [
-    VueDefineOption.vite(),
     AutoImport({
       dts: 'types/auto-imports.d.ts',
       imports: ['vue', 'vue-router']

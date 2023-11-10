@@ -4,8 +4,7 @@
 
 <script setup lang="ts">
 import { useIconRender } from '@/hooks';
-// eslint-disable-next-line import/no-unresolved
-import ActionBarItem from '@/components/module/track/ActionBarItem.vue';
+import ActionBarItem from '@/components/module/track/actionBarItem.vue';
 const { iconRender } = useIconRender();
 const barItemOptions: Track.ActionBarItem[] = [
   {

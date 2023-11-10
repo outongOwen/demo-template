@@ -2,7 +2,7 @@ import type { VNodeChild, CSSProperties, Component } from 'vue';
 import type { ITimelineEngine } from '../core/engine';
 import type { Emitter } from '../core/emitter';
 import type { EventTypes } from '../core/events';
-import type { TimelineEffect, TimelineAction, TimelineRow } from '../types';
+import type { TimelineEffect, TimelineAction, TimelineRow, TimelineSideBar } from '../types';
 
 export interface EditData {
   /**
@@ -10,9 +10,30 @@ export interface EditData {
    */
   editorData: TimelineRow[];
   /**
-   * @description 时间轴动作效果map
+   * @description 时间轴动作效果配置
    */
-  effects: Record<string, TimelineEffect>;
+  effects?: Record<string, TimelineEffect>;
+  /**
+   * @description 时间轴侧边栏配置
+   */
+  sideBars?: Record<string, TimelineSideBar>;
+  /**
+   * @description 侧边栏宽度
+   */
+  sideBarWidth?: number;
+  /**
+   * @description 刻度区域高度
+   */
+  timeAreaHeight?: number;
+  /**
+   * @description 是否开启主时间线
+   */
+  mainRow?: boolean;
+  /**
+   * @description 主时间线id  (mainRow为true时必传)
+   * @abstract 有且只有一个
+   */
+  mainRowId?: string;
   /**
    * @description 单个刻度标记范畴（>0）
    * @default 1
@@ -47,12 +68,17 @@ export interface EditData {
    * @description 每个编辑行默认高度（>0, 单位：px）
    * @default 32
    */
+
   rowHeight?: number;
   /**
    * @description 是否启动网格移动吸附
    * @default false
    */
   gridSnap?: boolean;
+  /**
+   * @description 是否开启侧边栏
+   */
+  showSideBar?: boolean | undefined;
   /**
    * @description 启动拖拽辅助线吸附
    * @default false
@@ -71,7 +97,12 @@ export interface EditData {
   /**
    * @description timeline运行器，不传则使用内置运行器
    */
+
   engine?: ITimelineEngine;
+  /**
+   * @description 时间线行排序规则
+   */
+  sortRule?: (editorData: TimelineRow[]) => void;
   /**
    * @description 自定义action区域渲染
    */

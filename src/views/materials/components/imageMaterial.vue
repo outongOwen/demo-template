@@ -49,10 +49,10 @@ const searchFormModel = ref<FromModelInst>({
   name: '',
   firstOrgId: null,
   secondOrgId: null,
-  userIdFromWeb: new URLSearchParams(window.location.search).get('userId')
+  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
-const keyField = ref<string>('key');
+const keyField = ref<string>('id');
 const curSecondMenuKey = ref<string>('');
 const secondMenuOptions = computed((): GlobalMenuOptions.SecondMenuOptions[] => {
   return options.value?.secondMenuOptions ? options.value?.secondMenuOptions : [];
@@ -73,11 +73,11 @@ const handleSecondChecked = () => {
 };
 const handleSearch = (_value: FromModelInst, type?: string) => {
   type === 'onlyMe' &&
-    (searchFormModel.value.userIdFromWeb = new URLSearchParams(window.location.search).get('userId'));
+    (searchFormModel.value.userIdFromWeb = Number(new URLSearchParams(window?.location?.search)?.get('userId')));
   materialListRef.value?.refreshList();
 };
 const handleResetSearch = () => {
-  searchFormModel.value.userIdFromWeb = new URLSearchParams(window.location.search).get('userId');
+  searchFormModel.value.userIdFromWeb = Number(new URLSearchParams(window?.location?.search)?.get('userId'));
   materialListRef.value?.refreshList();
 };
 const requestList = async (offset: number, pageSize: number): Promise<any> => {

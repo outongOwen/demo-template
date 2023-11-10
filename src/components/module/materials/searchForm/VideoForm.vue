@@ -12,20 +12,36 @@
           <n-form-item-gi path="name">
             <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
           </n-form-item-gi>
-          <n-form-item-gi path="firstOrgId">
-            <n-select v-model:value="searchFormModel.firstOrgId" placeholder="一级" :options="generalOptions()" />
-          </n-form-item-gi>
-          <n-form-item-gi path="secondOrgId">
-            <n-select v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />
+          <!--          <n-form-item-gi path="firstOrgId">-->
+          <!--            <n-select clearable v-model:value="searchFormModel.firstOrgId" label-field="orgName" value-field="orgId" placeholder="一级" :options="firstOrgOptions" />-->
+          <!--          </n-form-item-gi>-->
+          <n-form-item-gi :span="2" path="secondOrgId">
+            <n-cascader
+              v-model:value="searchFormModel.secondOrgId"
+              clearable
+              label-field="orgName"
+              value-field="orgId"
+              :options="firstOrgOptions"
+              remote
+              @load="loadSecond"
+            />
+            <!--            <n-select clearable v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />-->
           </n-form-item-gi>
           <n-form-item-gi path="userIdFromWeb">
-            <n-select v-model:value="searchFormModel.userIdFromWeb" placeholder="三级" :options="generalOptions()" />
+            <n-select
+              v-model:value="searchFormModel.userIdFromWeb"
+              clearable
+              label-field="userName"
+              value-field="userId"
+              placeholder="三级"
+              :options="userBindList"
+            />
           </n-form-item-gi>
           <n-form-item-gi span="2" path="multipleSelectValue">
             <n-space justify="end" :wrap-item="false" class="w100%">
               <n-button @click="resetForm">重置</n-button>
-              <n-button type="primary" secondary @click="() => handleSearch()">只看我</n-button>
-              <n-button type="primary" @click="() => handleSearch('onlyMe')">搜索</n-button>
+              <n-button type="primary" secondary @click="() => handleSearch('onlyMe')">只看我</n-button>
+              <n-button type="primary" @click="() => handleSearch()">搜索</n-button>
             </n-space>
           </n-form-item-gi>
         </n-grid>
@@ -36,15 +52,18 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInst } from 'naive-ui';
+import type { FormInst, CascaderOption } from 'naive-ui';
 import { cloneDeep } from 'lodash';
 import { useVModel } from '@vueuse/core';
+import { getSecondOrgInfo } from '@/service/api';
+import { provideFirstOrgList, provideFullUserList } from '@/views/materials/hooks';
 defineOptions({ name: 'VideoSearchForm' });
 export interface FromModelInst {
   name: string | null;
-  firstOrgId?: string | null;
-  secondOrgId: string | null;
-  userIdFromWeb: string | null;
+  firstOrgId?: number | null;
+  secondOrgId: number | null;
+  userIdFromWeb: number | null;
+  value?: any;
   [key: string]: unknown;
 }
 interface Props {
@@ -55,20 +74,27 @@ interface Emits {
   (e: 'search', value: FromModelInst, type?: string): void;
   (e: 'resetForm'): void;
 }
+
+const { injectFirstOrgContext } = provideFirstOrgList();
+const { injectFullUserContext } = provideFullUserList();
+const firstOrgOptions = injectFirstOrgContext();
+const userBindList = injectFullUserContext();
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 const formRef = ref<FormInst>();
 let defaultFormModel: FromModelInst;
 const searchFormModel = useVModel(props, 'formModel', emits);
-const generalOptions = () =>
-  ['groode', 'veli good', 'emazing', 'lidiculous'].map((v, i) => ({
-    label: v,
-    value: i.toString()
-  }));
 const resetForm = () => {
   Object.assign(searchFormModel.value, cloneDeep(defaultFormModel));
   emits('resetForm');
 };
+const loadSecond = (option: CascaderOption) => {
+  return getSecondOrgInfo({ page: 1, rows: 999, parentOrgId: option.orgId }).then(res => {
+    option.children = res.content;
+    Promise.resolve();
+  });
+};
+
 const handleSearch = (type?: string) => {
   emits('search', searchFormModel.value, type);
 };

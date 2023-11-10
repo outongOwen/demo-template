@@ -37,6 +37,7 @@
       >
         <slot :item="item">
           <component :is="item.renderComponent" v-if="item.renderComponent" :item="item" />
+          <!-- {{ item.renderComponent }} -->
         </slot>
       </div>
     </div>

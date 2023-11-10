@@ -105,7 +105,6 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
    */
   setPlayRate(rate: number): boolean {
     if (rate <= 0) {
-      console.error('Error: rate cannot be less than 0!');
       return false;
     }
     const result = this.emit('beforeSetPlayRate', { rate, engine: this });
@@ -192,7 +191,6 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
 
     this._timerId = requestAnimationFrame((time: number) => {
       this._prev = time;
-      console.log(time, '23213213213');
       this._tick({ now: time, autoEnd, to: toTime });
     });
     return true;
@@ -255,7 +253,6 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
     // 计算当前时间
     let currentTime = this.getTime() + (Math.min(1000, now - this._prev!) / 1000) * this._playRate;
     this._prev = now;
-    console.log(currentTime, 'currentTimecurrentTimecurrentTime');
     // 设置当前时间
     if (to && to <= currentTime) currentTime = to;
     this.setTime(currentTime, true);
@@ -275,8 +272,6 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
 
     if (this.isPaused) return;
     this._timerId = requestAnimationFrame(time => {
-      console.log(time, 'time_+_+_+_+');
-      console.log(performance.now(), 'time_+_+_+_+');
       this._tick({ now: time, autoEnd, to });
     });
   }

@@ -18,7 +18,7 @@ export default function subscribeThemeStore() {
       () => theme.naiveThemeOverrides,
       newValue => {
         if (newValue.common) {
-          addThemeCssVarsToHtml(newValue.common);
+          addThemeCssVarsToHtml({ ...newValue.common });
         }
       },
       { immediate: true }

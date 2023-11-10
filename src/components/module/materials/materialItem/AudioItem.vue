@@ -17,12 +17,12 @@
         <icon-mdi:music class="text-25px" />
       </div>
       <n-ellipsis class="w-[calc(100%-25px)]" line-clamp="1">
-        {{ item.injected.name }}
+        {{ item.injected.title }}
       </n-ellipsis>
     </div>
     <n-text class="w100% h20px">
       <n-ellipsis>
-        {{ formatFrameByTime(item.injected.duration) }}
+        {{ formatFrameByTime(Number(item.injected.programLength)) }}
       </n-ellipsis>
     </n-text>
   </div>

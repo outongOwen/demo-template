@@ -5,25 +5,21 @@
  * index.vue
 -->
 <template>
-  <div ref="timeLineRuleRef" class="h102px w100%">
-    <canvas ref="ruleRef" height="42"></canvas>
-    <!-- <div class="h-40px bg-amber rounded-5px mb-20px" :style="{ width: `${state.videoWidth}px` }"></div> -->
-    <!-- <div class="w-10% inline-block">
-      <n-slider v-model:value="curScale" :step="0.01" :max="1" @update:value="changeScale" />
-      <label for="slider">缩放{{ curScale }}</label>
-    </div> -->
-    <!-- <div class="inline-block">
-      <n-button @click="changeTime">更新时长{{ state.trackDuration }}</n-button>
-      <n-button @click="changeTrackPx">更新轨道长度{{ state.pxPerFullScreen }}</n-button>
-    </div> -->
+  <div ref="timeLineRuleRef" class="w100% color-#fff pr-8px" :style="{ height: timeAreaHeight + 'px' }">
+    <canvas ref="ruleRef"></canvas>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useTimeLineContext } from '../../contexts';
 // eslint-disable prettier/prettier
 // 约定：带cell单词的代表小格子，grid代表一大格子。
 import { fpsRules, DURATION_BOUNDARY, MAX_WIDTH_PER_BIG_GRID, MIN_WIDTH_PER_BIG_GRID } from './const.js';
 import { formatTime } from './util.js';
+
+const { injectTimeLineContext } = useTimeLineContext();
+const timeLineContext = injectTimeLineContext();
+const { timeAreaHeight } = toRefs(timeLineContext);
 defineOptions({
   name: 'TimeLineRule'
 });
@@ -309,5 +305,4 @@ onMounted(() => {
    */
 });
 </script>
-
 <style scoped></style>

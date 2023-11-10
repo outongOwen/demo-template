@@ -12,7 +12,7 @@
     </template>
     <template #centerLeftArea>
       <materials v-if="currentMenuOption" :menu-options="currentMenuOption" />
-      <Configuration v-if="getTestSelect" />
+      <Configuration v-if="getTestSelect" :active-type="currentMenuOption" />
     </template>
     <template #centerRightArea>
       <Player />
@@ -40,7 +40,7 @@ const globalStore = useGlobalStore();
 const { getTestSelect } = storeToRefs(globalStore);
 const defaultMenuKey = ref<string | number | null>(null);
 const currentMenuOption = ref<GlobalMenuOptions.ExtendMenuOptions | null>();
-const sliderMenuOptionsAuthList = ref<any[]>([]);
+const sliderMenuOptionsAuthList = ref<GlobalMenuOptions.ExtendMenuOptions[]>([]);
 /**
  * @abstract 权限过滤
  */
@@ -64,7 +64,7 @@ const sliderMenuOptionsAuthFilter = async () => {
         return (auth.type === item.key && !item.isLocal) || item.isLocal;
       });
     });
-    sliderMenuOptionsAuthList.value = authMenuOptions;
+    sliderMenuOptionsAuthList.value = authMenuOptions as any;
   } catch (error) {
     console.log(error);
   }

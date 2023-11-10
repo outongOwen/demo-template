@@ -35,7 +35,8 @@ declare namespace Service {
   interface Result<T = any> {
     code: number | string;
     msg: string;
-    data: T;
+    data?: T;
+    result?: T;
     success: boolean;
   }
   // 多部分/表单数据：上载文件

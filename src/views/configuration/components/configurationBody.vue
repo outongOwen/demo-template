@@ -6,9 +6,9 @@
 -->
 <template>
   <Transition>
-    <div class="wh-full relative">
-      <component :is="AudioConfig" />
-      <div class="absolute-rt right-3px top-3px select-unset" @click.stop="handleCloseConfiguration">
+    <div v-if="globalStore.getTestSelect" class="wh-full relative">
+      <component :is="UseConfig" />
+      <div class="absolute-rt right-3px top-3px select-unset" @click.stop.passive="handleCloseConfiguration">
         <n-button tertiary text size="tiny">
           <template #icon>
             <n-icon :size="25">
@@ -24,8 +24,24 @@
 <script setup lang="ts">
 import { useGlobalStore } from '@/store';
 // import type { TabsOptions } from '@/components/custom/BetterTabs.vue';
-import AudioConfig from '@/packages/views/Audio/config/index.vue';
+import { VideoConfig, AudioConfig, ImageConfig } from '@/packages/views/index';
+
+const componentMap: Record<string, Component> = {
+  video: VideoConfig,
+  music: AudioConfig,
+  picture: ImageConfig
+};
 defineOptions({ name: 'ConfigurationBody' });
+
+const props = defineProps(['activeType']);
+let UseConfig = {};
+watchEffect(() => {
+  const { activeType } = props;
+  if (activeType) {
+    const name = activeType.key.toLowerCase();
+    UseConfig = componentMap[name];
+  }
+});
 const globalStore = useGlobalStore();
 const handleCloseConfiguration = () => {
   globalStore.setTestSelect(false);

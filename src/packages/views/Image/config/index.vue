@@ -5,9 +5,11 @@
  * index.vue
 -->
 <template>
-  <div class="container"></div>
+  <better-tabs v-model:value="selectedTab" :tabs-options="tabsOptions" type="card" />
 </template>
 
-<script setup lang="ts"></script>
-
-<style scoped></style>
+<script setup lang="ts">
+import { tabsOptions } from './index';
+defineOptions({ name: 'ImageConfig' });
+const selectedTab = ref<string | number>('baseConfig');
+</script>

@@ -11,7 +11,7 @@
     </div>
 
     <n-divider class="my-0!" />
-    <div class="w-full h-[calc(100%-50px)]">
+    <div class="w-full h-[calc(100%-50px)] of-hidden">
       <!-- <div class="w130px h100% mt42px">
         <slot name="trackBar" />
       </div> -->

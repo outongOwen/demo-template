@@ -92,7 +92,6 @@ const defaultBarItemOptions: Track.ActionBarItem[] = [
       console.log(key);
     }
   },
-
   {
     icon: 'carbon:copy',
     label: '复制',
