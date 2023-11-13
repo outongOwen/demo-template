@@ -62,15 +62,14 @@ const imageSource = shallowRef<HTMLVideoElement | null>(null);
 const applyToVideoByFitMode = (videoWidth: number, videoHeight: number) => {
   const videoFit = fitMode.value;
   if (videoFit === 'contain') {
-    const minSize = Math.min(config.value.width, config.value.height);
-    const maxVideoSize = Math.max(videoWidth, videoHeight);
-    const scale = minSize / maxVideoSize;
+    let scale = 1;
+    if (config.value.width / config.value.height > videoWidth / videoHeight) {
+      scale = config.value.width / videoWidth;
+    } else {
+      scale = config.value.height / videoHeight;
+    }
     videoConfig.scaleX = scale;
     videoConfig.scaleY = scale;
-    // config.value.scaleX = scale;
-    // config.value.scaleY = scale;
-    // config.value.width = videoWidth * scale;
-    // config.value.height = videoHeight * scale;
   }
   if (videoFit === 'fill') {
     const scaleX = config.value.width / videoWidth;
@@ -132,7 +131,7 @@ const handleVideoCanplay = () => {
 const initVideo = () => {
   videoElement.src = src.value;
   videoElement.crossOrigin = 'anonymous';
-  videoElement.currentTime = 100.00001;
+  videoElement.currentTime = 0.00001;
   imageSource.value = null;
 };
 /**
@@ -141,10 +140,10 @@ const initVideo = () => {
 useEventListener(videoElement, 'loadeddata', handleVideoLoadeddata);
 useEventListener(videoElement, 'canplay', handleVideoCanplay);
 // useEventListener(videoElement, 'seeked', handleVideoSeeked);
-useEventListener(videoElement, 'error', e => {
+useEventListener(videoElement, 'error', (e) => {
   console.error(e);
 });
-watch(src, srcValue => {
+watch(src, (srcValue) => {
   if (srcValue && imageSource.value) {
     imageRef.value?.instance.canvas?.discardActiveObject();
     handleVideoPause();

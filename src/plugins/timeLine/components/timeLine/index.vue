@@ -82,16 +82,19 @@ onMounted(() => {
 .timeLine-container {
   width: 100%;
   height: 100%;
+
   .timeLine-inner-wrap {
     width: 100%;
     height: 100%;
     display: flex;
     position: relative;
+
     .timeLine-divider {
       height: 100%;
       width: 1px;
       background-color: #000;
     }
+
     .timeLine-track-wrap {
       height: 100%;
       position: relative;
