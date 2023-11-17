@@ -144,7 +144,7 @@ const limitSize = reactive({
   minHeight: 100,
   maxWidth: 200,
   maxHeight: 200
-});
+}) as any;
 const canvasCropInfo = ref({
   left: 0,
   top: 0,

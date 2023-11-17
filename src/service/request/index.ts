@@ -97,7 +97,11 @@ const transform: AxiosTransform = {
       config.url = `${apiUrl}${config.url}`;
     }
     const params = config.params || {};
-    params.accessToken = accessToken;
+    if (config.method === 'GET'){
+      params.accessToken = accessToken;
+    } else {
+      config.url += ('?accessToken='+accessToken);
+    }
     const data = config.data || false;
     formatDate && data && !isString(data) && formatRequestDate(data);
     if (config.method?.toUpperCase() === RequestEnum.GET) {

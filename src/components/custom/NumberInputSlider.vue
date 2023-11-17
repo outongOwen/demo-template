@@ -6,11 +6,10 @@
 -->
 <template>
   <div class="flex w100% items-center">
-    <n-slider v-bind="$attrs" :tooltip="tooltip" @update:value="sliderUpdateCallback" />
+    <n-slider v-bind="$attrs" :format-tooltip="formatTooltip" :tooltip="tooltip" @update:value="sliderUpdateCallback" />
     <n-input-number
       v-bind="$attrs"
-      class="ml10px"
-      :style="{ width: numberInputWidth + 'px', 'min-width': numberInputWidth + 'px' }"
+      :style="{ width: numberInputWidth + 'px', 'min-width': numberInputWidth + 'px', 'margin-left': numberSpaceWidth + 'px' }"
       @blur="numberInputBlurCallback"
       @update:value="numberInputUpdateCallback"
     >
@@ -25,19 +24,23 @@
 defineOptions({ name: 'NumberInputSlider' });
 interface Props {
   tooltip?: boolean;
+  numberSpaceWidth?: number;
   numberInputWidth?: number;
   sliderUpdateCallback?: (...arg: any[]) => void;
   numberInputUpdateCallback?: (...arg: any[]) => void;
   numberInputBlurCallback?: (...arg: any[]) => void;
+  formatTooltip?: (value: number) => string|number;
 }
 const props = withDefaults(defineProps<Props>(), {
   tooltip: true,
+  numberSpaceWidth: 10,
   numberInputWidth: 90,
   sliderUpdateCallback: () => {},
   numberInputUpdateCallback: () => {},
-  numberInputBlurCallback: () => {}
+  numberInputBlurCallback: () => {},
+  formatTooltip: (v:any) => v
 });
-const { tooltip, sliderUpdateCallback, numberInputUpdateCallback, numberInputBlurCallback } = toRefs(props);
+const { formatTooltip, numberSpaceWidth, tooltip, sliderUpdateCallback, numberInputUpdateCallback, numberInputBlurCallback } = toRefs(props);
 </script>
 
 <style scoped></style>

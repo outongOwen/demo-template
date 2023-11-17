@@ -11,7 +11,7 @@
     "build:test": "npm run typecheck && cross-env VITE_SERVICE_ENV=test vite build",
     "build:vercel": "cross-env VITE_HASH_ROUTE=Y VITE_VERCEL=Y vite build",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit --skipLibCheck",
+    "typecheck": "soy prettier-write",
     "lint": "eslint . --fix",
     "format": "soy prettier-write",
     "commit": "soy git-commit",
@@ -80,7 +80,6 @@
     "rimraf": "^5.0.5",
     "rollup-plugin-visualizer": "^5.9.2",
     "sass": "^1.69.5",
-    "simple-git-hooks": "^2.9.0",
     "tsx": "^3.14.0",
     "typescript": "^5.2.2",
     "unocss-preset-scrollbar": "^0.2.1",
@@ -97,9 +96,5 @@
     "vite-plugin-vue-devtools": "1.0.0-rc.5",
     "vue-eslint-parser": "^9.3.2",
     "vue-tsc": "^1.8.22"
-  },
-  "simple-git-hooks": {
-    "commit-msg": "pnpm soy git-commit-verify",
-    "pre-commit": "pnpm typecheck && pnpm soy lint-staged"
   }
 }

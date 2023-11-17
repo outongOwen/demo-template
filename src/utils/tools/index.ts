@@ -40,3 +40,13 @@ export const getQueryString = (name: string): any => {
   }
   return null;
 };
+
+// 将Json转query
+export const jsonToQuery = (data: any) => {
+  const strArr = []
+  for (const k in data) {
+    const str = `${k}=${data[k]}`
+    strArr.push(str)
+  }
+  return strArr.join('&')
+}

@@ -12,10 +12,12 @@
     <n-space class="!flex-nowrap" :wrap-item="false">
       <right-action-bar />
     </n-space>
+    <mainForm></mainForm>
   </div>
 </template>
 
 <script setup lang="ts">
+import mainForm from '../../../distributeForm/mainForm.vue'
 import LeftActionBar from './leftActionBar.vue';
 import RightActionBar from './rightActionBar.vue';
 defineOptions({

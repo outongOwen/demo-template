@@ -12,8 +12,8 @@
 
 <script setup lang="ts">
 import { useTimeLineContext } from '../../contexts';
-// eslint-disable prettier/prettier
 // 约定：带cell单词的代表小格子，grid代表一大格子。
+// eslint-disable prettier/prettier
 import { fpsRules, DURATION_BOUNDARY, MAX_WIDTH_PER_BIG_GRID, MIN_WIDTH_PER_BIG_GRID } from './const.js';
 import { formatTime } from './util.js';
 
@@ -138,6 +138,8 @@ const baseRule = ref({
 const ruleLists: {
   msPerCell: number;
   cellCount: any;
+  gridValue?: number;
+  unit?: string;
 }[] = reactive([]);
 /**
  * 根据帧率以及轨道时长，得到缩放到最大的时候的刻度规则
@@ -289,6 +291,7 @@ const changeTrackPx = () => {
   drawRule(params); // 使用缓存的刻度进行绘制
 }; */
 onMounted(() => {
+  console.log(updateScale)
   ctx.value = ruleRef.value.getContext('2d');
   getCurFpsRule();
   updateTimeRule();

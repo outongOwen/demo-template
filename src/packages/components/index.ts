@@ -5,4 +5,5 @@ import FeatSettings from './FeatSettings/index.vue';
 import VideoOperate from './VideoOperate/index.vue';
 import RotateSetting from './RotateSettings/index.vue';
 import MoveSetting from './MoveSettings/index.vue';
-export { VolumeSettings, FeatSettings, AudioSettings, TextSettings, VideoOperate, RotateSetting, MoveSetting };
+import TextStyleSetting from './TextStyleSettings/index.vue';
+export { TextStyleSetting, VolumeSettings, FeatSettings, AudioSettings, TextSettings, VideoOperate, RotateSetting, MoveSetting };
