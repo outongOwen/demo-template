@@ -1,6 +1,6 @@
 <template>
   <div>
-    <n-modal :close-on-esc="false" :mask-closable="false" v-model:show="showModal">
+    <n-modal v-model:show="showModal" :close-on-esc="false" :mask-closable="false">
       <div class="bg-dark">
         <div class="h-40px text-center lh-40px">裁剪</div>
         <n-divider class="important-m-0" />
@@ -16,7 +16,7 @@
           <n-space vertical class="w-282px p-24px">
             <div>
               <span class="w-60px">比例：</span>
-              <n-select size="small" v-model:value="cropInfo.ratio" :options="ratioOptions" />
+              <n-select v-model:value="cropInfo.ratio" size="small" :options="ratioOptions" />
             </div>
             <div>
               <span class="w-50px flex-shrink-0">位置：</span>
@@ -106,7 +106,7 @@ const mediaInfo = reactive({
   type: 'video',
   width: 854, // 预览视频或者图片宽高，图片不做预处理，所以对图片来说是真实的宽高
   height: 480,
-  url: 'http://video.mam.miguvideo.com/mnt2/clipcloud/wylocal/trans/2023/10/12/15/46/mgclip_652796bbc087b0021ef6789e_20231012154612_1.mp4',
+  url: 'http://36.155.98.104:18901/mnt1/clipcloud/wylocal/trans/2023/11/22/09/28/mgclip_655d590f8f27b93b1f37d573_20231122092801_1.mp4',
   originWidth: 1280, // 真实视频的宽高
   originHeight: 720,
   cropX: 100,
@@ -282,10 +282,10 @@ const cancel = () => {
 };
 const confirm = () => {
   message.success('获取crop信息及宽高比');
-  console.log(
-    `真实裁剪的信息：${JSON.stringify(cropInfo.value)}`,
-    `画布中预览视频裁剪的信息：${JSON.stringify(canvasCropInfo.value)}`
-  );
+  // console.log(
+  //   `真实裁剪的信息：${JSON.stringify(cropInfo.value)}`,
+  //   `画布中预览视频裁剪的信息：${JSON.stringify(canvasCropInfo.value)}`
+  // );
   emit('update:showModal', false);
 };
 </script>

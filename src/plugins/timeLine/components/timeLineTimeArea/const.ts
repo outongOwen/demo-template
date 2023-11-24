@@ -1,4 +1,4 @@
-export const fpsRules = {
+export const fpsRules: any = {
   24: [
     { gridValue: 2, cellCount: 2, unit: 'f' },
     { gridValue: 3, cellCount: 3, unit: 'f' },

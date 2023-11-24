@@ -107,7 +107,7 @@ const defaultBarItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'delete',
     disabled: true,
-    change: (key) => {
+    change: key => {
       console.log(key);
     }
   }
@@ -127,7 +127,7 @@ const videoBarItemOptions: Track.ActionBarItem[] = [
     label: '裁剪',
     btnType: 'Button',
     key: 'crop',
-    change: (key) => {
+    change: key => {
       console.log(key);
       showModal.value = true;
     }
@@ -138,7 +138,7 @@ const videoBarItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'mirror',
     isHide: false,
-    change: (key) => {
+    change: key => {
       console.log(key);
     }
   },
@@ -148,7 +148,7 @@ const videoBarItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'freezeFrame',
     isHide: false,
-    change: (key) => {
+    change: key => {
       console.log(key);
     }
   }
