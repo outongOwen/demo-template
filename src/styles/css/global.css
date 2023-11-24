@@ -1,0 +1,9 @@
+@import "./transition.css";
+@import "./reset.css";
+@import "./splitpanes.css";
+
+html,
+body,
+#app {
+  height: 100%;
+}
