@@ -16,17 +16,18 @@
 import ConfigurationContent from '@/components/module/packages/configurationContent/index.vue';
 import type { BetterTabsOptions } from '@/components/custom/BetterTabs.vue';
 import { baseConfigOptions } from './index';
-defineOptions({ name: 'ImageBaseConfig' });
+defineOptions({ name: 'TextBaseConfig' });
 interface ExtendBetterTabsOptions extends BetterTabsOptions {
   hideRadioGroup?: boolean;
 }
 
+console.log(baseConfigOptions);
 interface Props {
   item?: ExtendBetterTabsOptions;
 }
 const props = defineProps<Props>();
 const { item: tabItem } = toRefs(props);
-const currentTabKey = ref<string>('Rotate');
+const currentTabKey = ref<string>('Style');
 </script>
 
 <style scoped></style>

@@ -2,16 +2,18 @@
   <n-form ::model="materialData" size="small" inline>
     <n-grid cols="1">
       <n-form-item-gi path="scaleX" label="旋转">
-        <NumberInputSlider :marks="marks" v-model:value="materialData.rotate" :max="360" :number-space-width="20" :number-input-width="120" />
+        <NumberInputSlider
+          v-model:value="materialData.rotate"
+          :marks="marks"
+          :max="360"
+          :number-space-width="20"
+          :number-input-width="120"
+        />
       </n-form-item-gi>
       <n-form-item-gi path="scaleX" label="翻转">
         <n-space>
-          <n-button type="primary">
-            左右翻转
-          </n-button>
-          <n-button type="primary">
-            上下翻转
-          </n-button>
+          <n-button type="primary">左右翻转</n-button>
+          <n-button type="primary">上下翻转</n-button>
           <n-switch v-model:value="materialData.turnHorizontal">
             <template #checked>左右翻转</template>
             <template #unchecked>左右翻转</template>
@@ -44,15 +46,15 @@ interface Props {
     fontStyle?: string;
   };
 }
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 const { materialData } = toRefs(props);
 const marks = {
   0: '默认',
   90: '90度',
   180: '180度',
   270: '270度',
-  360: '360度',
-}
+  360: '360度'
+};
 </script>
 
 <style scoped></style>

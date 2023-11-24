@@ -2,12 +2,24 @@
   <n-form ::model="materialData" size="small" inline>
     <n-grid cols="1">
       <n-form-item-gi path="scaleX" label="水平偏移">
-        <NumberInputSlider :format-tooltip="formatTooltip"  v-model:value="materialData.offsetLeft" :step="0.1" :min="-100" :number-input-width="120">
+        <NumberInputSlider
+          v-model:value="materialData.offsetLeft"
+          :format-tooltip="formatTooltip"
+          :step="0.1"
+          :min="-100"
+          :number-input-width="120"
+        >
           <template #suffix>%</template>
         </NumberInputSlider>
       </n-form-item-gi>
       <n-form-item-gi path="scaleX" label="垂直偏移">
-        <NumberInputSlider :format-tooltip="formatTooltip"  v-model:value="materialData.offsetTop" :step="0.1" :min="-100" :number-input-width="120">
+        <NumberInputSlider
+          v-model:value="materialData.offsetTop"
+          :format-tooltip="formatTooltip"
+          :step="0.1"
+          :min="-100"
+          :number-input-width="120"
+        >
           <template #suffix>%</template>
         </NumberInputSlider>
       </n-form-item-gi>
@@ -26,7 +38,7 @@ interface Props {
     rotate: number;
   };
 }
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 const { materialData } = toRefs(props);
-const formatTooltip = (val: any) => `${val}%`
+const formatTooltip = (val: any) => `${val}%`;
 </script>

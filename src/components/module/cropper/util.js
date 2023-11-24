@@ -92,8 +92,8 @@ export function isString(obj) {
  * alert(sum); // 6
  */
 export function forEachArray(arr, iteratee, context) {
-  var index = 0;
-  var len = arr.length;
+  let index = 0;
+  const len = arr.length;
 
   context = context || null;
 
@@ -130,7 +130,7 @@ export /**
  * alert(sum); // 6
  */
 function forEachOwnProperties(obj, iteratee, context) {
-  var key;
+  let key;
 
   context = context || null;
 

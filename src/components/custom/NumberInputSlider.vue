@@ -9,7 +9,11 @@
     <n-slider v-bind="$attrs" :format-tooltip="formatTooltip" :tooltip="tooltip" @update:value="sliderUpdateCallback" />
     <n-input-number
       v-bind="$attrs"
-      :style="{ width: numberInputWidth + 'px', 'min-width': numberInputWidth + 'px', 'margin-left': numberSpaceWidth + 'px' }"
+      :style="{
+        width: numberInputWidth + 'px',
+        'min-width': numberInputWidth + 'px',
+        'margin-left': numberSpaceWidth + 'px'
+      }"
       @blur="numberInputBlurCallback"
       @update:value="numberInputUpdateCallback"
     >
@@ -29,7 +33,7 @@ interface Props {
   sliderUpdateCallback?: (...arg: any[]) => void;
   numberInputUpdateCallback?: (...arg: any[]) => void;
   numberInputBlurCallback?: (...arg: any[]) => void;
-  formatTooltip?: (value: number) => string|number;
+  formatTooltip?: (value: number) => string | number;
 }
 const props = withDefaults(defineProps<Props>(), {
   tooltip: true,
@@ -38,9 +42,16 @@ const props = withDefaults(defineProps<Props>(), {
   sliderUpdateCallback: () => {},
   numberInputUpdateCallback: () => {},
   numberInputBlurCallback: () => {},
-  formatTooltip: (v:any) => v
+  formatTooltip: (v: any) => v
 });
-const { formatTooltip, numberSpaceWidth, tooltip, sliderUpdateCallback, numberInputUpdateCallback, numberInputBlurCallback } = toRefs(props);
+const {
+  formatTooltip,
+  numberSpaceWidth,
+  tooltip,
+  sliderUpdateCallback,
+  numberInputUpdateCallback,
+  numberInputBlurCallback
+} = toRefs(props);
 </script>
 
 <style scoped></style>

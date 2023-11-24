@@ -1,27 +1,34 @@
-import { RotateSetting, MoveSetting } from '@/packages/components';
+import { RotateSetting, TextStyleSetting } from '@/packages/components';
 import type { ConfigTabOptions } from '@/components/module/packages/configurationContent/index.vue';
 // const text = ref<string>('hello world');
 const materialData = reactive({
   turnHorizontal: false,
   turnVertical: false,
+  fontFamily: '',
+  color: '',
+  fontSize: 16,
+  strokeSwitch: false,
+  stroke: '',
+  strokeWidth: 5,
   rotate: 0,
-  offsetLeft: 0,
-  offsetTop: 0
+  textAlign: 'center',
+  fontWeight: 'normal',
+  fontStyle: ''
 });
 export const baseConfigOptions: ConfigTabOptions[] = [
+  {
+    key: 'Style',
+    label: '样式',
+    renderComponent: () =>
+      h(TextStyleSetting, {
+        materialData
+      })
+  },
   {
     key: 'Rotate',
     label: '旋转',
     renderComponent: () =>
       h(RotateSetting, {
-        materialData
-      })
-  },
-  {
-    key: 'Move',
-    label: '移动',
-    renderComponent: () =>
-      h(MoveSetting, {
         materialData
       })
   }

@@ -372,8 +372,8 @@ class Cropzone extends Rect {
     const canvasWidth = this.canvas.getWidth();
     const canvasHeight = this.canvas.getHeight();
     const min = Math.min(canvasWidth, canvasHeight);
-    let limitWidth = 100,
-      limitHeight = 100;
+    let limitHeight = 100;
+    let limitWidth = 100;
     if (this.presetRatio) {
       if (this.presetRatio > 1) {
         limitHeight = min * this.options.limitPercent;
@@ -453,7 +453,7 @@ class Cropzone extends Rect {
 
     const maxScaleFactor = Math.min(maxWidth / width, maxHeight / height);
     if (maxScaleFactor <= 1) {
-      [width, height] = [width, height].map((v) => v * maxScaleFactor);
+      [width, height] = [width, height].map(v => v * maxScaleFactor);
     }
 
     return {

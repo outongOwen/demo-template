@@ -9,7 +9,6 @@
     <n-grid cols="1">
       <n-form-item-gi path="scaleX" label="音量">
         <NumberInputSlider v-model:value="materialData.volume" :step="1" :max="100" :min="0" :number-input-width="105">
-          <!-- :slider-update-callback="(value)=>handleUpdateValue(value,'scaleX')!" -->
           <template #suffix> % </template>
         </NumberInputSlider>
       </n-form-item-gi>

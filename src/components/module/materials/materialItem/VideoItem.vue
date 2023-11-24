@@ -97,8 +97,9 @@ const rePretreatment = computed(() => {
     props.item.injected.preStatus === '1' || (props.item.injected.preStatus === '5' && !props.item.injected.preUrl)
   );
 });
+const status = ref(false)
 const doSomeThing = () => {
-  console.log(props.item.injected);
+  status.value = true
 };
 </script>
 <style scoped>

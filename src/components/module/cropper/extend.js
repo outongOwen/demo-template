@@ -18,8 +18,11 @@
  */
 export function extend(target, objects) {
   // eslint-disable-line no-unused-vars
-  var hasOwnProp = Object.prototype.hasOwnProperty;
-  var source, prop, i, len;
+  const hasOwnProp = Object.prototype.hasOwnProperty;
+  let i;
+  let len;
+  let prop;
+  let source;
 
   for (i = 1, len = arguments.length; i < len; i += 1) {
     source = arguments[i];

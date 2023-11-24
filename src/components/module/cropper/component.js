@@ -11,13 +11,13 @@ class Component {
      * Component name
      * @type {string}
      */
-    this.name = name
+    this.name = name;
 
     /**
      * Graphics instance
      * @type {Graphics}
      */
-    this.graphics = graphics
+    this.graphics = graphics;
   }
 
   /**
@@ -25,9 +25,9 @@ class Component {
    * @returns {Object} return value
    */
   fire(...args) {
-    const context = this.graphics
+    const context = this.graphics;
 
-    return this.graphics.fire.apply(context, args)
+    return this.graphics.fire.apply(context, args);
   }
 
   /**
@@ -36,7 +36,7 @@ class Component {
    * @param {fabric.Image} oImage - Fabric image instance
    */
   setCanvasImage(name, oImage) {
-    this.graphics.setCanvasImage(name, oImage)
+    this.graphics.setCanvasImage(name, oImage);
   }
 
   /**
@@ -44,7 +44,7 @@ class Component {
    * @returns {HTMLCanvasElement}
    */
   getCanvasElement() {
-    return this.graphics.getCanvasElement()
+    return this.graphics.getCanvasElement();
   }
 
   /**
@@ -52,7 +52,7 @@ class Component {
    * @returns {fabric.Canvas}
    */
   getCanvas() {
-    return this.graphics
+    return this.graphics;
   }
 
   /**
@@ -60,7 +60,7 @@ class Component {
    * @returns {fabric.Image}
    */
   getCanvasImage() {
-    return this.graphics.getCanvasImage()
+    return this.graphics.getCanvasImage();
   }
 
   /**
@@ -68,7 +68,7 @@ class Component {
    * @returns {string}
    */
   getImageName() {
-    return this.graphics.getImageName()
+    return this.graphics.getImageName();
   }
 
   /**
@@ -76,7 +76,7 @@ class Component {
    * @returns {ImageEditor}
    */
   getEditor() {
-    return this.graphics.getEditor()
+    return this.graphics.getEditor();
   }
 
   /**
@@ -84,7 +84,7 @@ class Component {
    * @returns {string}
    */
   getName() {
-    return this.name
+    return this.name;
   }
 
   /**
@@ -93,7 +93,7 @@ class Component {
    * @param {boolean} [withRendering] - If true, The changed image will be reflected in the canvas
    */
   setImageProperties(setting, withRendering) {
-    this.graphics.setImageProperties(setting, withRendering)
+    this.graphics.setImageProperties(setting, withRendering);
   }
 
   /**
@@ -101,7 +101,7 @@ class Component {
    * @param {Object} dimension - Canvas css dimension
    */
   setCanvasCssDimension(dimension) {
-    this.graphics.setCanvasCssDimension(dimension)
+    this.graphics.setCanvasCssDimension(dimension);
   }
 
   /**
@@ -109,19 +109,19 @@ class Component {
    * @param {Object} dimension - Canvas backstore dimension
    */
   setCanvasBackstoreDimension(dimension) {
-    this.graphics.setCanvasBackstoreDimension(dimension)
+    this.graphics.setCanvasBackstoreDimension(dimension);
   }
 
   /**
    * Adjust canvas dimension with scaling image
    */
   adjustCanvasDimension() {
-    this.graphics.adjustCanvasDimension()
+    this.graphics.adjustCanvasDimension();
   }
 
   adjustCanvasDimensionBase() {
-    this.graphics.adjustCanvasDimensionBase()
+    this.graphics.adjustCanvasDimensionBase();
   }
 }
 
-export default Component
+export default Component;

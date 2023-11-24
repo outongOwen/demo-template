@@ -32,9 +32,6 @@ const { height: dividerHeight } = useElementBounding(dividerRef);
 const configAreaHeight = computed((): number => {
   return topBtnHeight.value + dividerHeight.value;
 });
-watchEffect(() => {
-  console.log(topBtnHeight.value, dividerHeight.value);
-});
 </script>
 
 <style scoped></style>

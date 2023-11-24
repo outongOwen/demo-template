@@ -1,10 +1,8 @@
 <template>
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
-
-    <div class="font-900 c-#1890FF text-16px m-b-10px m-l--10px">视频ID关联选取</div>
-
+    <div class="font-900 c-#1890FF text-16px m-b-10px">视频ID关联选取</div>
     <n-grid x-gap="12" :cols="2">
-      <n-form-item-gi label="视频ID" prop="videoId">
+      <n-form-item-gi label="视频ID：" prop="videoId">
         <n-input
           disabled
           type="text"
@@ -18,7 +16,7 @@
           </template>
         </n-input>
       </n-form-item-gi>
-      <n-form-item-gi label="视频标题">
+      <n-form-item-gi label="视频标题：">
         <n-tooltip
           class="item"
           trigger="hover"
@@ -76,7 +74,7 @@ const setVideoId = () => {
       content: '将取消选择的视频ID,解除与视频ID的关联。请重新选择视频ID?',
       positiveText: '确定',
       negativeText: '取消',
-      zIndex: 3500,
+      style: 'z-index: 3500',
       onPositiveClick: () => {
         formData.value.title = ''
         formData.value.videoId = ''
