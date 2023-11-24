@@ -11,18 +11,24 @@
 </template>
 
 <script setup lang="ts">
+import { useResizeObserver } from '@vueuse/core';
+import { consola } from 'consola';
+import { useGlobalStore } from '@/store';
 import { useTimeLineContext } from '../../contexts';
-// 约定：带cell单词的代表小格子，grid代表一大格子。
 // eslint-disable prettier/prettier
-import { fpsRules, DURATION_BOUNDARY, MAX_WIDTH_PER_BIG_GRID, MIN_WIDTH_PER_BIG_GRID } from './const.js';
-import { formatTime } from './util.js';
+// 约定：带cell单词的代表小格子，grid代表一大格子。
+import { fpsRules, DURATION_BOUNDARY, MAX_WIDTH_PER_BIG_GRID, MIN_WIDTH_PER_BIG_GRID } from './const';
+import { formatTime } from './util';
+
+defineOptions({
+  name: 'TimeLineRule'
+});
 
 const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
 const { timeAreaHeight } = toRefs(timeLineContext);
-defineOptions({
-  name: 'TimeLineRule'
-});
+const globalStore = useGlobalStore();
+consola.log('globalStore: ', globalStore);
 const props = defineProps({
   fps: {
     // 配置帧率
@@ -135,12 +141,7 @@ const baseRule = ref({
   cellCount: 0,
   unit: ''
 });
-const ruleLists: {
-  msPerCell: number;
-  cellCount: any;
-  gridValue?: number;
-  unit?: string;
-}[] = reactive([]);
+const ruleLists: any = reactive([]);
 /**
  * 根据帧率以及轨道时长，得到缩放到最大的时候的刻度规则
  */
@@ -164,12 +165,12 @@ const getRuleListAndSlideKey = () => {
   state.scaleCount = Math.log2(state.trackDuration / state.msPerFullScreen) + 1;
 
   const scaleCountInt = Math.ceil(state.scaleCount); // 可点击的缩放次数取整
-  // console.error('scaleCountInt: ', scaleCountInt, state.scaleCount);
+  // consola.error('scaleCountInt: ', scaleCountInt, state.scaleCount);
   // 这里根据屏幕大小、轨道时间，可以知道缩放的范围，从0-n进行缩放；知道放大到最大的时候，最小一格是多少像素，多少时间。反过来进行缩小。假如n = 10,如果n = 9,代表 2^9 / 2^10 = 1/2 代表轨道缩小1倍. currentMsPerPx = msPerPx*2;  currentMsPerPx = msPerPx/(Math.pow(2, sliderValue)/ Math.pow(2, scaleCountInt))
 
   // 根据n 来计算 轨道上每次缩放显示的刻度
   let sliderSSCount = scaleCountInt - ruleLists.length + 1; // s应该显示的刻度数量
-  console.log('sliderSSCount: ', sliderSSCount);
+  consola.log('sliderSSCount: ', sliderSSCount);
 
   // const arrs = [1, 2, 3, 5, 10, 30, 1 * 60, 2 * 60, 3 * 60, 5 * 60, 10 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 3 * 60 * 60, 5 * 60 * 60, 10 * 60 * 60, 30 * 60 * 60] // 单位s
   const secondEnums = [1, 2, 3, 5, 10, 20, 30];
@@ -184,8 +185,8 @@ const getRuleListAndSlideKey = () => {
     item.msPerCell = (item.gridValue * 1000) / 10;
     ruleLists.push(item);
   }
-  console.log('ruleLists--->', ruleLists);
-  console.log('state.scaleCount: ', state.scaleCount);
+  consola.log('ruleLists--->', ruleLists);
+  consola.log('state.scaleCount: ', state.scaleCount);
 
   for (let i = 0; i < Math.ceil(state.scaleCount); i++) {
     state.slideKey.push(Math.floor(Math.round(100 - (1 / state.scaleCount) * i * 100)) / 100);
@@ -193,7 +194,7 @@ const getRuleListAndSlideKey = () => {
   if (state.scaleCount !== Math.ceil(state.scaleCount)) {
     state.slideKey.push(0);
   }
-  console.log('state.slideKey: ', state.slideKey);
+  consola.log('state.slideKey: ', state.slideKey);
 };
 
 /**
@@ -217,7 +218,7 @@ const getRuleScope = () => {
     });
     maxValue = minValue - 0.01 < 0 ? 0 : minValue;
   });
-  console.error('ar---->r', state.ruleScope);
+  consola.error('ar---->r', state.ruleScope);
 };
 
 /**
@@ -255,10 +256,10 @@ const updateScale = () => {
   if (index < 0) {
     index = state.currentRule.unit === 'f' ? 0 : ruleLists.length - 1;
   }
-  console.log('index: ', index);
+  consola.log('index: ', index);
   const pw = Math.log2((state.pxPerMsInBaseRule * ruleLists[index].msPerCell) / state.cacheDrawParams.cellWidth);
   let val = 1 - pw * (1 / state.scaleCount);
-  console.error('pw: ', pw, val);
+  consola.error('pw: ', pw, val);
   if (val > 1) {
     val = 1;
   } else if (val < 0) {
@@ -275,23 +276,26 @@ const updateTimeRule = () => {
   getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
   getRuleScope(); // 得到刻度列表对应的缩放范围
 };
-/* const changeTime = () => {
-  state.trackDuration = state.trackDuration > 10 * 60 * 1000 ? 5 * 60 * 1000 : 20 * 60 * 1000;
-  updateTimeRule();
-  updateScale(); // 更新slider上的缩放值
-  const params = { ...state.cacheDrawParams, pxPerFullScreen: state.pxPerFullScreen };
-  drawRule(params); // 使用缓存的刻度进行绘制
-};
-const changeTrackPx = () => {
-  // 这里模拟浏览器缩放后，对轨道绘制的影响，放在window.onreszie中
+// 监听globalStore中duration变化，如果有变化，更新刻度规则
+/* watch(
+  () => globalStore,
+  () => {
+    state.trackDuration = state.trackDuration > 10 * 60 * 1000 ? 5 * 60 * 1000 : 20 * 60 * 1000;
+    updateTimeRule();
+    updateScale(); // 更新slider上的缩放值
+    const params = { ...state.cacheDrawParams, pxPerFullScreen: state.pxPerFullScreen };
+    drawRule(params); // 使用缓存的刻度进行绘制
+  }
+); */
+useResizeObserver(timeLineRuleRef, () => {
+  // 浏览器缩放，更新刻度规则
   caclCanvasSize(); // 轨道dom尺寸变化，影响绘制
   updateTimeRule(); // 获取最新的刻度规则
   updateScale(); // 更新slider上的缩放值
   const params = { ...state.cacheDrawParams, pxPerFullScreen: state.pxPerFullScreen };
   drawRule(params); // 使用缓存的刻度进行绘制
-}; */
+});
 onMounted(() => {
-  console.log(updateScale)
   ctx.value = ruleRef.value.getContext('2d');
   getCurFpsRule();
   updateTimeRule();

@@ -51,9 +51,9 @@ export function getAllEnum(that: any, isCmam = false) {
       handler(arr: any) {
         // 如果匹配不到，就匹配默认值；
         let defaultItem = arr.find((item: any) => {
-          return item.name == '全网精编'
+          return item.label == '全网精编'
         })
-        vue.formData.value.assetSource = defaultItem.code
+        vue.formData.assetSource = defaultItem.code
       },
     },
     //视频语言
@@ -96,8 +96,8 @@ export function getAllEnum(that: any, isCmam = false) {
       type: 'watermarkPathList',
       handler(arg: any) {
         arg.forEach((item: any) => {
-          if (item.watermarkName === '2019片头片尾')
-            vue.formData.value.watermarkPath = item.watermarkPath
+          if (item.label === '2019片头片尾')
+            vue.formData.watermarkPath = item.watermarkPath
         })
       },
     },
@@ -141,18 +141,23 @@ async function getContentEnumList(
   }else{
     arr = data.map((item: any) => {
       return {
-        code: item.itemCode,
-        name: item.itemName,
+        value: item.itemCode || item.watermarkPath,
+        label: item.itemName || item.watermarkName,
       }
     })
   }
-  setListToVue(type, arr, isCmam)
   callBack && callBack(arr)
+  try{
+    setListToVue(type, arr, isCmam)
+  }catch (e){
+    console.log(e)
+    console.log(type)
+  }
 }
 function setListToVue(code: string, arr: any[], isCmam: boolean) {
   let key = (isCmam ? 'Cmam' : 'Normal') + code
-  vue.listObject.value[key] = arr;
-  vue.enumOptionsList.value[code] = arr;
+  vue.listObject[key] = arr;
+  vue.enumOptionsList[code] =arr;
 }
 
 // 获取cpid
@@ -162,8 +167,8 @@ async function getCpIdList(isCmam: boolean) {
   let arr =
     data.map((item: any) => {
       return {
-        name: `${item.value}（${item.name}）`,
-        code: item.value,
+        label: `${item.value}（${item.name}）`,
+        value: item.value,
         copyright: item.copyright,
       }
     }) || []
@@ -174,15 +179,17 @@ async function getCpIdList(isCmam: boolean) {
 async function getOperationFlagList(isCmam: boolean) {
   let urlCode = isCmam ? 'cmam_operation_flag' : 'operation_flag'
   const data: any = await getDistributeEnum({ urlCode: urlCode })
-  setListToVue('operationFlagList', data || [], isCmam)
+  setListToVue('operationFlagList', data.map((v: any)=>({label:v,value:v})) || [], isCmam)
 }
 
 async function getContentFormList(isCmam: boolean) {
   let urlCode = isCmam ? 'cmam_content_form_asset_source' : 'content_form_list'
   const data: any = await getDistributeEnum({ urlCode: urlCode })
+  const list = data.content || data.cmamForm || [];
+  Object.keys(list).map((v: string)=> ({value: v,label:list[v]}))
   setListToVue(
     'contentForm',
-    data.content || data.cmamForm || [],
+    Object.keys(list).map((v: string)=> ({value: v,label:list[v]})),
     isCmam
   )
 }

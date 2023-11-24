@@ -1,6 +1,6 @@
 <template>
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
-    <div class="font-900 c-#1890FF text-16px m-b-10px m-l--10px">分发设置</div>
+    <div class="font-900 c-#1890FF text-16px m-b-10px">分发设置</div>
     <n-grid x-gap="12" :cols="2">
       <n-form-item-gi label="分发平台："  v-show="formData.isDistribution">
         <div>

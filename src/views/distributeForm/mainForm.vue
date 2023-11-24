@@ -5,40 +5,32 @@
     :showIcon="false"
     v-model:show="showModal"
     :mask-closable="false"
-    style="width: 1080px"
+    style="width: 1080px;"
     :block-scroll="false">
     <template #header>
       <div class="text-18px h-30px flex items-center justify-between">
         视频分发
       </div>
     </template>
-    <div>
-      <n-divider />
+    <n-divider />
+    <n-scrollbar class="max-h-70vh p-r-20px">
       <div class="flex justify-start m-b-20px">
         <div class="w-120px p-r-20px text-right">是否分发：</div>
         <n-switch v-model:value="formData.isDistribution" />
       </div>
       <platformItem></platformItem>
-    </div>
+      <mapInitForm></mapInitForm>
+    </n-scrollbar>
   </n-modal>
 </template>
 
 <script setup lang="ts">
 import platformItem from './components/platformItem.vue'
+import mapInitForm from './components/mapInitForm.vue'
 import { getProvideFormData } from './hooks/index'
-import {getAllEnum} from "./hooks/getAllList";
 import {primaryClassifyPri, totalStrategyPri} from "@/views/distributeForm/hooks/provide";
 defineOptions({name: "mainForm"})
-const formData = ref({
-  isDistribution: false,
-  platformListValue: [-1],
-  childValue: '',
-  groupId: '',
-  taskId: '',
-  videoId: '',
-  title: '',
-  secondClassCode: [],
-});
+const formData = ref<{[key:string]: any}>({});
 const totalStrategyIdList = ref([]);
 const primaryClassifyData = ref([]);
 const { provideFormData } = getProvideFormData()
@@ -48,23 +40,7 @@ provideTotalStrategy(totalStrategyIdList)
 const { providePrimaryClassify } = primaryClassifyPri()
 providePrimaryClassify(primaryClassifyData)
 const showModal = ref(false)
-const listObject = ref({}) as any[];
-const enumOptionsList = ref({}) as any[];
-const ListCode: Array<string> = [
-  'categoryOpt',
-  'assetSource',
-  'lang',
-  'captionLang',
-  'contentFormList',
-  'cpIdList',
-  'operationFlagList',
-  'contentTypeList',
-  'watermarkPathList',
-  'cpLogoPathList',
-]
 onMounted(()=>{
-  console.log(ListCode)
-  getAllEnum({formData,listObject,enumOptionsList})
   showModal.value = true
 })
 </script>

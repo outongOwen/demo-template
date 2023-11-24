@@ -41,6 +41,7 @@ const { getTestSelect } = storeToRefs(globalStore);
 const defaultMenuKey = ref<string | number | null>(null);
 const currentMenuOption = ref<GlobalMenuOptions.ExtendMenuOptions | null>();
 const sliderMenuOptionsAuthList = ref<GlobalMenuOptions.ExtendMenuOptions[]>([]);
+
 /**
  * @abstract 权限过滤
  */
@@ -64,6 +65,16 @@ const sliderMenuOptionsAuthFilter = async () => {
         return (auth.type === item.key && !item.isLocal) || item.isLocal;
       });
     });
+    // 判断是否具备3v3权限
+    let is3V3Auth = false
+    authMenuOptions.forEach((item: any) => {
+      if (item.id === '100000') {
+        is3V3Auth = item.children.some((citem: any) => {
+          return citem.id === '100500'
+        })
+      }
+    });
+    globalStore.setIs3v3Status(is3V3Auth)
     sliderMenuOptionsAuthList.value = authMenuOptions as any;
   } catch (error) {
     console.log(error);

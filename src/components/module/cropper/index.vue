@@ -7,16 +7,8 @@
       }"
       :align-guidelines="{ isOpenAlignGuidelines: false }"
     >
-      <FabricVideo
-        v-if="props.mediaInfo.type == 'video'"
-        :src="props.mediaInfo.url"
-        :config="videoConfig"
-      />
-      <Image
-        v-if="props.mediaInfo.type == 'image'"
-        :image-source="imageSrc"
-        :config="imageConfig"
-      />
+      <FabricVideo v-if="props.mediaInfo.type == 'video'" :src="props.mediaInfo.url" :config="videoConfig" />
+      <Image v-if="props.mediaInfo.type == 'image'" :image-source="imageSrc" :config="imageConfig" />
     </Canvas>
   </div>
 </template>
