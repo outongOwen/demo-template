@@ -5,3 +5,4 @@ interface Window {
   $notification?: import('naive-ui').NotificationProviderInst;
 }
 declare type Recordable<T = any> = Record<string, T>;
+declare module '*.js';
