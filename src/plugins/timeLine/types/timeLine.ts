@@ -18,22 +18,69 @@ export interface EditData {
    */
   sideBars?: Record<string, TimelineSideBar>;
   /**
+   * @description 时间轴行排序规则
+   * @abstract 用于对行进行排序，不传则按照默认顺序排序
+   * @abstract 重点提醒：如果传入该属性，那么所有行的type都必须在该数组中存在，否则会报错
+   * @abstract 该属性会影响拖拽时的范围计算，如果不传则拖拽范围为全部行，如果传入该属性，则会严格按照类型行的范围进行拖拽（主轴除外）
+   * @abstract 如果开启主轴，主轴可以全局拖拽，不受该属性影响
+   * @example ['type1', 'type2', 'type3']
+   */
+  rowSortTypes?: string[];
+  /**
+   * @description 时间轴背景色
+   * @abstract 可以通过外部背景色继承也可以配置该属性进行背景色统一配置
+   */
+
+  background?: string;
+  /**
+   * @description 时间轴容器左侧偏移距离
+   * @type{number}
+   * @default 5
+   */
+  leftOffset?: number;
+  /**
    * @description 侧边栏宽度
+   * @default 150
    */
   sideBarWidth?: number;
   /**
+   * @description 每个编辑行默认高度（>0, 单位：px）
+   * @default 32
+   */
+  rowHeight?: number;
+  /**
+   * @description  编辑行默认行间距
+   * @default 10
+   */
+  rowSpacing?: number;
+  /**
+   *@description  时间轴背景色
+   */
+  rowBackground?: string;
+  /**
+   * @description 时间轴激活背景色
+   */
+  rowActiveBackground?: string;
+  /**
    * @description 刻度区域高度
+   * @default 50
    */
   timeAreaHeight?: number;
   /**
-   * @description 是否开启主时间线
+   * @description 是否开启主时间轴
    */
   mainRow?: boolean;
   /**
-   * @description 主时间线id  (mainRow为true时必传)
+   * @description 主时间轴id  (mainRow为true时必传)
    * @abstract 有且只有一个
    */
   mainRowId?: string;
+
+  /**
+   * @description 主时间轴背景色
+   */
+  mainRowBackground?: string;
+
   /**
    * @description 单个刻度标记范畴（>0）
    * @default 1
@@ -64,12 +111,7 @@ export interface EditData {
    * @default 20
    */
   startLeft?: number;
-  /**
-   * @description 每个编辑行默认高度（>0, 单位：px）
-   * @default 32
-   */
 
-  rowHeight?: number;
   /**
    * @description 是否启动网格移动吸附
    * @default false
@@ -99,10 +141,6 @@ export interface EditData {
    */
 
   engine?: ITimelineEngine;
-  /**
-   * @description 时间线行排序规则
-   */
-  sortRule?: (editorData: TimelineRow[]) => void;
   /**
    * @description 自定义action区域渲染
    */

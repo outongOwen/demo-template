@@ -1,6 +1,6 @@
 /**
  * @interface TimeLineRule
- * @description 时间线刻度配置
+ * @description 时间轴刻度配置
  *
  */
 // export const default

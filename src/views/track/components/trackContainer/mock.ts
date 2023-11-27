@@ -14,31 +14,46 @@ export const mockData: TimelineRow[] = [
         end: 100,
         type: 'video',
         effectId: 'video'
-      },
-      {
-        id: '2',
-        start: 200,
-        end: 300,
-        effectId: 'video',
-        type: 'video'
-      },
-      {
-        id: '3',
-        start: 400,
-        end: 500,
-        effectId: 'video',
-        type: 'video'
       }
+      // {
+      //   id: '2',
+      //   start: 200,
+      //   end: 300,
+      //   effectId: 'video',
+      //   type: 'video'
+      // },
+      // {
+      //   id: '3',
+      //   start: 400,
+      //   end: 500,
+      //   effectId: 'video',
+      //   type: 'video'
+      // }
     ]
   },
   {
     id: 'fff',
     name: '轨道2',
-    type: 'image',
-    sideBarId: 'image',
+    type: 'video',
+    sideBarId: 'video',
     rowHeight: 70,
-    actions: []
+    actions: [
+      {
+        id: '12222',
+        start: 0,
+        end: 100,
+        type: 'video',
+        effectId: 'video'
+      }
+    ]
   },
+  // {
+  //   id: 'fffddd',
+  //   name: '轨道2',
+  //   type: 'video',
+  //   sideBarId: 'video',
+  //   actions: []
+  // },
   {
     id: 'ggg',
     name: '轨道3',
@@ -54,41 +69,50 @@ export const mockData: TimelineRow[] = [
     actions: []
   },
   {
-    id: 'DDD',
-    name: '轨道5',
-    sideBarId: 'video',
-    type: 'video',
-    actions: []
-  },
-  {
     id: 'ffff12213213',
     name: '主轨道',
     sideBarId: 'main',
     type: 'main',
     rowHeight: 80,
-    actions: []
-  },
-  {
-    id: 'EEE',
-    name: '轨道6',
-    sideBarId: 'audio',
-    type: 'audio',
-    actions: []
-  },
-  {
-    id: 'FFF',
-    name: '轨道7',
-    sideBarId: 'text',
-    type: 'text',
-    actions: []
-  },
-  {
-    id: 'GGG',
-    name: '轨道8',
-    sideBarId: 'audio',
-    type: 'audio',
+    classNames: ['timeLine-main-row'],
     actions: []
   }
+  // {
+  //   id: 'DDD',
+  //   name: '轨道5',
+  //   sideBarId: 'video',
+  //   type: 'video',
+  //   actions: []
+  // },
+  // {
+  //   id: 'EEE',
+  //   name: '轨道6',
+  //   sideBarId: 'audio',
+  //   type: 'audio',
+  //   actions: []
+  // },
+  // {
+  //   id: '112223',
+  //   name: '轨道6.5',
+  //   sideBarId: 'audio',
+  //   type: 'audio',
+  //   actions: []
+  // },
+  // {
+  //   id: 'FFF',
+  //   name: '轨道7',
+  //   sideBarId: 'text',
+  //   type: 'text',
+  //   rowHeight: 30,
+  //   actions: []
+  // },
+  // {
+  //   id: 'GGG',
+  //   name: '轨道8',
+  //   sideBarId: 'audio',
+  //   type: 'audio',
+  //   actions: []
+  // }
 ];
 
 export const effects: Record<string, TimelineEffect> = {};
@@ -101,12 +125,6 @@ export const sideBars: Record<string, TimelineSideBar> = {
   },
   video: {
     id: 'video',
-    render: () => {
-      return h(TimeLineSideBar);
-    }
-  },
-  image: {
-    id: 'image',
     render: () => {
       return h(TimeLineSideBar);
     }

@@ -19,7 +19,7 @@ export const defaultTimeLineSideBarOptionItem: TimeLineSideBarOptionItem = {
   muted: false
 };
 /**
- * @abstract 根据时间线行属性配置侧边栏
+ * @abstract 根据时间轴行属性配置侧边栏
  */
 
 export const timeLineSideBarOptions: Record<string, TimeLineSideBarOptionItem> = {

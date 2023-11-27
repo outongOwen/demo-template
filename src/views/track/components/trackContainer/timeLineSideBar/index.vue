@@ -1,11 +1,11 @@
 <template>
-  <n-space class="wh-full" :size="8" align="center">
+  <n-space class="wh-full flex-nowrap! px-10px" :size="8" align="center">
     <n-button
       v-if="getSideBarOptionBySideBarId?.deleted"
       quaternary
       :focusable="false"
       size="tiny"
-      @click="handleSetDeleteRow"
+      @click="handleRowDeleteOperation"
       @mouseenter="() => (isMoveEnter = true)"
       @mouseleave="() => (isMoveEnter = false)"
     >
@@ -58,25 +58,18 @@
 </template>
 
 <script setup lang="ts">
-/**
- * #NOTE 1.限制行高度
- */
 import { Icon } from '@iconify/vue';
 import type { TimelineRow } from '@/plugins/timeLine';
 import { timeLineSideBarOptions, defaultTimeLineSideBarOptionItem } from './index';
 interface Props {
   timeLineRow: TimelineRow;
-  setDeleteRow?: (row: TimelineRow) => void;
-  setMuteRow?: (row: TimelineRow) => void;
-  setHideRow?: (row: TimelineRow) => void;
-  setLockRow?: (row: TimelineRow) => void;
+  sideBarRef?: Record<string, any> | null;
 }
 defineOptions({
   name: 'TimeLineSideBar'
 });
 const props = defineProps<Props>();
-const { timeLineRow } = toRefs(props);
-const { setDeleteRow, setMuteRow, setHideRow, setLockRow } = props;
+const { timeLineRow, sideBarRef } = toRefs(props);
 const isMoveEnter = ref<boolean>(false);
 // 根据轨道行ID获取轨道行侧边栏配置项
 const getSideBarOptionBySideBarId = computed(() => {
@@ -85,17 +78,21 @@ const getSideBarOptionBySideBarId = computed(() => {
   }
   return defaultTimeLineSideBarOptionItem;
 });
-const handleSetDeleteRow = () => {
-  setDeleteRow && setDeleteRow(timeLineRow.value);
+const handleRowDeleteOperation = () => {
+  if (timeLineRow.value.type === 'main') {
+    sideBarRef?.value?.clearRow && sideBarRef.value.clearRow(timeLineRow.value);
+  } else {
+    sideBarRef?.value?.deleteRow && sideBarRef.value.deleteRow(timeLineRow.value);
+  }
 };
 const handleSetMuteRow = () => {
-  setMuteRow && setMuteRow(timeLineRow.value);
+  sideBarRef?.value?.setMuteRow && sideBarRef.value.setMuteRow(timeLineRow.value);
 };
 const handleSetLockRow = () => {
-  setLockRow && setLockRow(timeLineRow.value);
+  sideBarRef?.value?.setLockRow && sideBarRef.value.setLockRow(timeLineRow.value);
 };
 const handleSetHideRow = () => {
-  setHideRow && setHideRow(timeLineRow.value);
+  sideBarRef?.value?.setHideRow && sideBarRef.value.setHideRow(timeLineRow.value);
 };
 </script>
 
