@@ -49,7 +49,7 @@ export interface RowRndProps {
   adsorptionDistance?: number;
 }
 /**
- * 时间线行基本参数
+ * 时间轴行基本参数
  * @export
  * @interface TimelineRow
  */
@@ -62,9 +62,9 @@ export interface TimelineRow {
   type: string;
   /** 行的动作列表 */
   actions: TimelineAction[];
-  /** 包含 */
+  /** 包含action类型 */
   includes?: string[];
-  /** 排除 */
+  /** 排除action类型 */
   excludes?: string[];
   /** 侧边栏ID */
   sideBarId?: string;

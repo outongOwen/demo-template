@@ -19,29 +19,37 @@
       <ul
         ref="sideBarUlRef"
         class="sideBar-ul"
+        :class="{
+          'add-cover': isOutRange
+        }"
         :style="{
-          transform: `translateY(-${scrollTop}px)`
+          top: -scrollTop + 'px',
+          rowGap: rowSpacing + 'px'
         }"
       >
         <li
           v-for="item in editorData"
-          :id="setMainRowId(item)"
           :key="item.id"
+          :ref="el => getMainRowRef(el as HTMLElement, item)"
+          :id="setMainRowId(item)"
           :style="{
             height: item?.rowHeight ? item.rowHeight + 'px' : rowHeight + 'px'
           }"
           class="sideBar-ul-li"
         >
-          <component
-            :is="renderSideBarComponent(item)"
-            v-if="item.sideBarId"
-            :key="item.id"
-            :time-line-row="item"
-            :set-delete-row="setDeleteRow"
-            :set-mute-row="setMuteRow"
-            :set-hide-row="setHideRow"
-            :set-lock-row="setLockRow"
-          ></component>
+          <slot :item-row="item" :side-bar-ref="currentInstance?.exposed">
+            <component
+              :is="renderSideBarComponent(item)"
+              v-if="item.sideBarId"
+              :key="item.id"
+              :time-line-row="item"
+              :side-bar-ref="currentInstance?.exposed"
+              :set-delete-row="setDeleteRow"
+              :set-mute-row="setMuteRow"
+              :set-hide-row="setHideRow"
+              :set-lock-row="setLockRow"
+            ></component>
+          </slot>
         </li>
       </ul>
     </div>
@@ -49,9 +57,11 @@
 </template>
 <script setup lang="ts">
 import type { VNodeChild } from 'vue';
-import { useResizeObserver, useIntersectionObserver } from '@vueuse/core';
-import { useTimeLineContext } from '../../contexts';
+import { toReactive, useResizeObserver } from '@vueuse/core';
+import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
+import { useMainRow } from '../../hooks';
 import type { TimelineRow } from '../../types';
+
 interface Props {
   scrollTop?: number;
 }
@@ -63,18 +73,30 @@ const props = withDefaults(defineProps<Props>(), {
 });
 const { scrollTop } = toRefs(props);
 const { injectTimeLineContext } = useTimeLineContext();
+const { injectTimeLineStateContext } = useTimeLineStateContext();
+const timeLineStateContext = injectTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
-const sideBarListRef = ref<HTMLElement>();
-const sideBarUlRef = ref<HTMLElement>();
-const isExceed = ref<boolean>(false);
-const mainRowEl = ref<HTMLElement>();
-const mainRowElId = ref<string>('');
-const { sideBarWidth, editorData, rowHeight, sideBars, timeAreaHeight, mainRowId, mainRow } = toRefs(timeLineContext);
+const { hasMainRow } = toReactive(timeLineStateContext);
+const isOutRange = ref(false);
+const mainRowRef = ref<HTMLElement | null>();
+const sideBarListRef = ref<HTMLElement | null>();
+const sideBarUlRef = ref<HTMLElement | null>();
+const { sideBarWidth, editorData, rowHeight, sideBars, timeAreaHeight, rowSpacing, mainRowId } =
+  toReactive(timeLineContext);
+
+const getMainRowRef = (el: HTMLElement | null, rowItem: TimelineRow) => {
+  if (el && hasMainRow && rowItem.type === mainRowId) {
+    mainRowRef.value = el;
+  }
+};
+// 获取当前组件实例
+const currentInstance = getCurrentInstance();
+const { checkMainRowBottom } = useMainRow(mainRowRef);
 // 删除行
-const setDeleteRow = (row: TimelineRow) => {
+const deleteRow = (row: TimelineRow) => {
   console.log('删除行', row);
-  const rowIndex = editorData.value.findIndex(item => item.id === row.id);
-  editorData.value.splice(rowIndex, 1);
+  const rowIndex = editorData.findIndex(item => item.id === row.id);
+  editorData.splice(rowIndex, 1);
 };
 //  隐藏行
 const setHideRow = (row: TimelineRow) => {
@@ -149,6 +171,22 @@ useResizeObserver([sideBarListRef, sideBarUlRef], () => {
 
 <style scoped lang="scss">
 .timeLine-sideBar-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
+  // margin-right: 5px;
+  border-right: 1px solid #000;
+  .pos-center {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .add-cover {
+    margin: 20px 0;
+  }
+  .sideBar-list {
+    height: 100%;
   display: flex;
   flex-direction: column;
   height: 100%;

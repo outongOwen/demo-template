@@ -29,7 +29,7 @@
             </pane>
           </splitpanes>
         </pane>
-        <pane max-size="70" min-size="20">
+        <pane max-size="70" min-size="25">
           <slot name="trackArea"></slot>
         </pane>
       </splitpanes>

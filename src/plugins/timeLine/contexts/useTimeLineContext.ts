@@ -2,13 +2,14 @@ import { useContext } from '../hooks';
 import type { TimelineEditorProps } from '../types';
 export interface TimeLineContextProps extends TimelineEditorProps {}
 const { useInject, useProvide } = useContext<TimeLineContextProps>('TimeLineContext', {
-  native: false
+  native: true
 });
 export default function useTimeLineContext() {
   const provideTimeLineContext = (context: TimeLineContextProps) => {
-    useProvide(context);
+    const { state } = useProvide(context);
+    return state;
   };
-  const injectTimeLineContext = () => {
+  const injectTimeLineContext = (): TimeLineContextProps => {
     return useInject();
   };
   return {

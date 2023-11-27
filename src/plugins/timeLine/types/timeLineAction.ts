@@ -14,7 +14,7 @@ export interface TimelineAction {
   end: number;
   /** 动作所对应的effectId */
   effectId: string;
-  /** 动作是否被选中 */
+  /** 动作是否可以选中 */
   selected?: boolean;
   /** 动作是否可伸缩 */
   flexible?: boolean;
@@ -26,4 +26,22 @@ export interface TimelineAction {
   minStart?: number;
   /** 动作最大结束时间限制 */
   maxEnd?: number;
+}
+
+/**
+ * 动作行基本参数
+ * @export
+ * @interface TimelineRow
+ */
+export interface TimelineRow {
+  /** 动作行id */
+  id: string;
+  /** 行的动作列表 */
+  actions: TimelineAction[];
+  /** 自定义行高 */
+  rowHeight?: number;
+  /** 行是否选中 */
+  selected?: boolean;
+  /** 行的扩展类名 */
+  classNames?: string[];
 }

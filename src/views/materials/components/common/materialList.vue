@@ -13,11 +13,9 @@
       :items="materialList"
       :update-function="pullDataWithDelay"
       :get-grid-gap="() => listConfig.gutter!"
-      :get-column-count="
-        (elementWidth: number) => {
+      :get-column-count="(elementWidth: number) => {
           return Math.floor(elementWidth / listConfig.width!);
-        }
-      "
+        }"
     >
       <template #default="{ item }">
         <component :is="renderComponent" v-if="renderComponent" :item="item" @preview="handlePreview" />
@@ -30,9 +28,10 @@
     <n-spin v-if="loaded && !errored" class="absolute-center wh-full" description="加载中..."></n-spin>
   </div>
   <material-preview-modal
+    v-if="previewType"
     v-model:showModal="showModal"
     :material-data="previewMaterial"
-    :material-type="options.key as PlayerType"
+    :preview-type="previewType"
   />
 </template>
 
@@ -40,8 +39,8 @@
 import { useResizeObserver } from '@vueuse/core';
 import type { Item as GridItem } from '@/components/custom/VirtualGrid.vue';
 import VirtualGrid from '@/components/custom/VirtualGrid.vue';
+import type { PreviewType } from '@/components/module/materials/materialPreviewModal/index.vue';
 import MaterialPreviewModal from '@/components/module/materials/materialPreviewModal/index.vue';
-import type { PlayerType } from '@/components/module/materials/materialPreviewModal/index.vue';
 defineOptions({ name: 'MaterialList' });
 interface ExposeAPI {
   refreshList: () => void;
@@ -70,6 +69,12 @@ const listConfig = computed((): GlobalMenuOptions.ListSchema => {
   const config = { width: 160, height: 110, gutter: 10, pageSize: 50 };
   const listSchema = options.value.listSchema || {};
   return { ...config, ...listSchema };
+});
+const previewType = computed((): PreviewType | undefined => {
+  const previewTypes = ['Video', 'Audio', 'Image', 'Transparent'];
+  return options.value.key && previewTypes.includes(options.value.key as string)
+    ? (options.value.key as PreviewType)
+    : undefined;
 });
 useResizeObserver(virtualGridContainerRef, () => {
   virtualGridRef.value?.resetGrid();

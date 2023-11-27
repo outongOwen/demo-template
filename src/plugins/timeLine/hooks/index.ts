@@ -1,2 +1,3 @@
 import useContext from './useContext';
-export { useContext };
+import useMainRow from './useMainRow';
+export { useContext, useMainRow };

@@ -1,7 +1,7 @@
 import { mockRequest } from '@/service/request';
 
 enum Api {
-  GET_MENU_LIST = '/mock/media-editor/menu/list',
+  GET_MENU_LIST = '/media-editor/menu/list',
   GET_CATALOG_MEDIUM_LIST = '/media-editor/catalogMedium/list',
   GET_CATALOG_AUDIO_MEDIUM_LIST = '/media-editor/catalogAudioMedium/list'
 }

@@ -20,7 +20,7 @@ export default function useContext<T>(contextName = 'context', options: CreateCo
   const injectKey: InjectionKey<T> = Symbol(contextName);
   function useProvide(context: T) {
     const { readonly = true, native = false } = options;
-    const state = reactive(context as never);
+    const state = reactive(context as T extends Record<string, any> ? T : Record<string, any>);
     const provideData = readonly ? defineReadonly(state) : context;
     provide(injectKey, native ? context : (provideData as T | Readonly<T>));
     return { state };
