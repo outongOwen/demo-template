@@ -5,15 +5,12 @@
  * index.vue
 -->
 <template>
-  <div
-    ref="sideBarListRef"
-    class="timeLine-sideBar-container"
-    :style="{ width: sideBarWidth + 'px', paddingTop: timeAreaHeight + 'px' }"
-  >
+  <div class="timeLine-sideBar-container" :style="{ width: sideBarWidth + 'px', paddingTop: timeAreaHeight! + 'px' }">
     <div
+      ref="sideBarListRef"
       class="sideBar-list"
       :class="{
-        'pos-center': !isExceed
+        'pos-center': !isOutRange
       }"
     >
       <ul
@@ -31,7 +28,6 @@
           v-for="item in editorData"
           :key="item.id"
           :ref="el => getMainRowRef(el as HTMLElement, item)"
-          :id="setMainRowId(item)"
           :style="{
             height: item?.rowHeight ? item.rowHeight + 'px' : rowHeight + 'px'
           }"
@@ -44,15 +40,12 @@
               :key="item.id"
               :time-line-row="item"
               :side-bar-ref="currentInstance?.exposed"
-              :set-delete-row="setDeleteRow"
-              :set-mute-row="setMuteRow"
-              :set-hide-row="setHideRow"
-              :set-lock-row="setLockRow"
             ></component>
           </slot>
         </li>
       </ul>
     </div>
+    <div class="timeLine-divider" />
   </div>
 </template>
 <script setup lang="ts">
@@ -113,59 +106,24 @@ const setMuteRow = (row: TimelineRow) => {
   row.muted = !row.muted;
   console.log(row, '静音');
 };
-
+// 清空行
+const clearRow = (row: TimelineRow) => {
+  console.log('清空行', row);
+  row.actions = [];
+};
 const renderSideBarComponent = (item: TimelineRow): VNodeChild | Component | null => {
-  return (
-    (sideBars?.value?.[item.sideBarId!]?.render &&
-      sideBars?.value?.[item.sideBarId!]?.render!(item, {
-        setDeleteRow,
-        setMuteRow,
-        setHideRow,
-        setLockRow
-      })) ??
-    null
-  );
+  return (sideBars?.[item.sideBarId!]?.render && sideBars?.[item.sideBarId!]?.render!(item, {})) ?? null;
 };
-// 设置主时间线元素ID
-const setMainRowId = (item: TimelineRow): string => {
-  // 通过editorData找到主时间线
-  if (mainRow?.value && mainRowId?.value && item.type === mainRowId.value) {
-    const mainRowElementId = `main-row-${item.id}`;
-    mainRowElId.value = mainRowElementId;
-    return mainRowElementId;
-  }
-  return '';
-};
-const { isActive, pause, resume } = useIntersectionObserver(
-  mainRowEl,
-  ([{ isIntersecting }]) => {
-    console.log(isIntersecting, 'isIntersectingisIntersectingisIntersecting');
-  },
-  {
-    immediate: false,
-    threshold: 0.9
-  }
-);
-watch(
-  mainRowElId,
-  (newId: string) => {
-    if (!newId) return;
-    nextTick(() => {
-      document.getElementById(mainRowElId.value) && (mainRowEl.value = document.getElementById(mainRowElId.value!)!);
-      if (mainRowEl.value) {
-        if (isActive.value) {
-          pause();
-        }
-        resume();
-      }
-    });
-  },
-  {
-    immediate: true
-  }
-);
 useResizeObserver([sideBarListRef, sideBarUlRef], () => {
-  isExceed.value = sideBarUlRef.value!.clientHeight >= sideBarListRef.value!.clientHeight;
+  isOutRange.value = sideBarUlRef.value!.clientHeight + 40 >= sideBarListRef.value!.clientHeight;
+  checkMainRowBottom();
+});
+defineExpose({
+  deleteRow,
+  setHideRow,
+  setLockRow,
+  setMuteRow,
+  clearRow
 });
 </script>
 
@@ -187,28 +145,15 @@ useResizeObserver([sideBarListRef, sideBarUlRef], () => {
   }
   .sideBar-list {
     height: 100%;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding-bottom: 8px;
-  .pos-center {
-    position: relative;
-    top: 50%;
-    transform: translate(0, -50%);
-  }
-  .sideBar-list {
     overflow: hidden;
     .sideBar-ul {
       width: 100%;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      position: relative;
       .sideBar-ul-li {
         overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding-right: 10px;
-        padding-left: 10px;
       }
     }
   }

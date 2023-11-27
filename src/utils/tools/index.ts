@@ -43,10 +43,11 @@ export const getQueryString = (name: string): any => {
 
 // 将Json转query
 export const jsonToQuery = (data: any) => {
-  const strArr = []
+  const strArr: any = [];
+  // eslint-disable-next-line guard-for-in
   for (const k in data) {
-    const str = `${k}=${data[k]}`
-    strArr.push(str)
+    const str = `${k}=${data[k]}`;
+    strArr.push(str);
   }
-  return strArr.join('&')
-}
+  return strArr.join('&');
+};

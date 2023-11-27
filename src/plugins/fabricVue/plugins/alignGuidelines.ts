@@ -430,7 +430,7 @@ export class AlignGuidelines {
         objectKeys(objCoordsByMovingDistance).forEach(activeObjPoint => {
           const newCoords = canvasObjects[i].angle !== 0 ? this.omitCoords(objCoords, 'horizontal') : objCoords;
           function calcHorizontalLineCoords(
-            objPoint: keyof ACoordsExtendsCenter,
+            objPoint: keyof ACoordsExtendsCenter | any,
             activeObjCoords: ACoordsExtendsCenter
           ) {
             let x1: number;
@@ -464,7 +464,10 @@ export class AlignGuidelines {
         });
         objectKeys(objCoordsByMovingDistance).forEach(activeObjPoint => {
           const newCoords = canvasObjects[i].angle !== 0 ? this.omitCoords(objCoords, 'vertical') : objCoords;
-          function calcVerticalLineCoords(objPoint: keyof ACoordsExtendsCenter, activeObjCoords: ACoordsExtendsCenter) {
+          function calcVerticalLineCoords(
+            objPoint: keyof ACoordsExtendsCenter | any,
+            activeObjCoords: ACoordsExtendsCenter
+          ) {
             let y1: number;
             let y2: number;
             if (objPoint === 'c') {

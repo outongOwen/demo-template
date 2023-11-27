@@ -58,18 +58,12 @@
 </template>
 
 <script setup lang="ts">
-/**
- * #NOTE 1.限制行高度
- */
 import { Icon } from '@iconify/vue';
 import type { TimelineRow } from '@/plugins/timeLine';
 import { timeLineSideBarOptions, defaultTimeLineSideBarOptionItem } from './index';
 interface Props {
   timeLineRow: TimelineRow;
-  setDeleteRow?: (row: TimelineRow) => void;
-  setMuteRow?: (row: TimelineRow) => void;
-  setHideRow?: (row: TimelineRow) => void;
-  setLockRow?: (row: TimelineRow) => void;
+  sideBarRef?: Record<string, any> | null;
 }
 defineOptions({
   name: 'TimeLineSideBar'

@@ -27,21 +27,3 @@ export interface TimelineAction {
   /** 动作最大结束时间限制 */
   maxEnd?: number;
 }
-
-/**
- * 动作行基本参数
- * @export
- * @interface TimelineRow
- */
-export interface TimelineRow {
-  /** 动作行id */
-  id: string;
-  /** 行的动作列表 */
-  actions: TimelineAction[];
-  /** 自定义行高 */
-  rowHeight?: number;
-  /** 行是否选中 */
-  selected?: boolean;
-  /** 行的扩展类名 */
-  classNames?: string[];
-}

@@ -91,28 +91,32 @@ import MusicPreset, { Analyze } from 'xgplayer-music';
 import Mp4Plugin from 'xgplayer-mp4';
 import { useThemeStore } from '@/store';
 defineOptions({ name: 'MaterialPreviewModal', inheritAttrs: false });
-export type PreviewType = 'video' | 'music' | 'picture' | 'transparent';
+export type PlayerType = 'video' | 'music' | 'picture' | 'transparent';
 interface Props {
   showModal: boolean;
   materialData: any;
-  previewType: PreviewType;
+  materialType: PlayerType;
 }
 interface Emits {
   (e: 'update:showModal'): void;
 }
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showModal: false
+});
 const emits = defineEmits<Emits>();
 const themeStore = useThemeStore();
-const isShowModal = useVModel(props, 'showModal', emits, {
-  defaultValue: false
-});
-const { materialData, previewType } = toRefs(props);
+const isShowModal = useVModel(props, 'showModal', emits);
+const { materialData, materialType } = toRefs(props);
 const isShowPreviewInfoLoading = ref<boolean>(true);
 const musicAnalyzeRef = ref<HTMLElement | null>();
 let xgPlayer: Player;
 /**
  * #TODO 临时解决方案，后续需要根据素材类型来判断
  */
+const playerType = computed((): PlayerType => {
+  // const { materialType } = materialData.value;
+  return materialType.value;
+});
 const createVideoPlayer = () => {
   return new Player({
     id: 'preview-container',
