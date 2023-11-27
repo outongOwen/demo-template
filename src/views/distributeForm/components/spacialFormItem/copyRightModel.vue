@@ -5,6 +5,7 @@
     preset="dialog"
     :showIcon="false"
     :z-index="3000"
+    :on-close="closeFn"
     style="width: 1280px"
   >
     <div class="h-40vh">
