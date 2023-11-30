@@ -359,3 +359,14 @@ export interface TimelineEditorProps extends EditData {
    */
   onChange?: (editorData: TimelineRow[]) => void | boolean;
 }
+
+/**
+ * @description 时间线暴露数据和方法
+ */
+export interface TimeLineContext {
+  // 时间线引擎
+  timeLineEngine?: ITimelineEngine;
+  // 设置轨道缩放
+  setScaleTimeRuler: (number) => void;
+  sliderKey: any;
+}

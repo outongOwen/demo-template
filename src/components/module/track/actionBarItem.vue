@@ -206,10 +206,10 @@
       <n-element tag="div" class="h100% w130px flex-center scale-70">
         <n-slider
           :value="sliderValue"
-          :max="sliderMaxValue"
+          :max="state.sliderMaxValue"
           :tooltip="false"
           :min="0"
-          :step="0.1"
+          :step="0.01"
           :to="false"
           :disabled="options.disabled"
           @update:value="handleSliderChange"
@@ -242,7 +242,13 @@ interface Props {
 }
 const props = defineProps<Props>();
 const iconSize = 20;
-const sliderMaxValue = 10;
+const state: { sliderMaxValue: number; sliderIndex: number; sliderKey: any } = reactive({
+  sliderMaxValue: 10,
+  sliderIndex: 0,
+  sliderKey: []
+});
+state.sliderMaxValue = props.options.sliderMaxValue || state.sliderMaxValue;
+state.sliderKey = props.options.sliderKey;
 const selectValue = ref<any>(props.options.defaultValue);
 const sliderValue = ref<number>(props.options.defaultValue as number);
 const isFocusShow = ref(false);
@@ -326,16 +332,19 @@ const handleChecked = async () => {
  */
 const handleSliderChange = (value: number) => {
   sliderValue.value = value;
+  state.sliderIndex = state.sliderKey.findIndex(item => {
+    return sliderValue.value <= item;
+  });
   props.options.change && props.options.change(sliderValue.value);
 };
 const handleMinusClick = () => {
   if (sliderValue.value === 0) return;
-  (sliderValue.value as number) -= 1;
+  (sliderValue.value as number) = state.sliderKey[--state.sliderIndex];
   props.options.change && props.options.change(sliderValue.value);
 };
 const handleAddClick = () => {
-  if (sliderValue.value === sliderMaxValue) return;
-  (sliderValue.value as number) += 1;
+  if (sliderValue.value === state.sliderMaxValue) return;
+  (sliderValue.value as number) = state.sliderKey[++state.sliderIndex];
   props.options.change && props.options.change(sliderValue.value);
 };
 </script>

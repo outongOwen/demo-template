@@ -39,7 +39,7 @@ import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
 import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
-import type { TimelineEditorProps, TimelineRow } from '../../types';
+import type { TimelineEditorProps, TimelineRow, TimeLineContext } from '../../types';
 import { sortTimeLineByType } from './index';
 defineOptions({
   name: 'TimeLine'
@@ -69,6 +69,9 @@ const timeLineStateContext = provideTimeLineStateContext(
     selectedActionIds: [],
     selectedActionRefs: new Map(),
     timeLineEditorRef: null,
+    msPerPx: 0,
+    scale: 0,
+    scaleSliderKey: [],
     setSelectedActionId: (selectId, push = false) => {
       if (!selectId) {
         timeLineStateContext.selectedActionIds = [];
@@ -93,7 +96,18 @@ const timeLineStateContext = provideTimeLineStateContext(
         }
         timeLineStateContext.selectedActionIds = selectId;
       }
-    }
+    },
+    setMsPerPx: (msPerPx: number) => {
+      timeLineStateContext.msPerPx = msPerPx;
+    },
+    setScale: (scale: number) => {
+      timeLineStateContext.scale = scale;
+    },
+    setScaleSliderKey: (scaleSliderKey: Array<number>) => {
+      timeLineStateContext.scaleSliderKey = scaleSliderKey;
+    },
+    // eslint-disable-next-line no-empty-function
+    changeScale: () => {}
   })
 );
 const { showSideBar, sideBarWidth, editorData, mainRow, mainRowId, background, rowSortTypes } = toRefs(props);
@@ -157,6 +171,9 @@ watch(
     immediate: true
   }
 );
+const setScaleTimeRuler = (num: number) => {
+  timeLineStateContext.changeScale(num);
+};
 onMounted(() => {
   // // console.log(editorContainerEl.value);
   // interact('.timeLine-editor-area-inner').dropzone({
@@ -165,6 +182,10 @@ onMounted(() => {
   //     console.log(event.target, 'area----ondropmove');
   //   }
   // });
+});
+defineExpose<TimeLineContext>({
+  setScaleTimeRuler,
+  sliderKey: toRef(timeLineStateContext, 'scaleSliderKey')
 });
 </script>
 <style lang="scss" scoped>

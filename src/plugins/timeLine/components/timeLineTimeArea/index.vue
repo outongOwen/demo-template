@@ -5,7 +5,7 @@
  * index.vue
 -->
 <template>
-  <div ref="timeLineRuleRef" class="w100% color-#fff pr-8px" :style="{ height: timeAreaHeight + 'px' }">
+  <div ref="timeLineRuleRef" class="w100% color-#fff pr-8px pl-10px" :style="{ height: timeAreaHeight + 'px' }">
     <canvas ref="ruleRef"></canvas>
   </div>
 </template>
@@ -14,18 +14,19 @@
 import { useResizeObserver } from '@vueuse/core';
 import { consola } from 'consola';
 import { useGlobalStore } from '@/store';
-import { useTimeLineContext } from '../../contexts';
+import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 // eslint-disable prettier/prettier
 // 约定：带cell单词的代表小格子，grid代表一大格子。
 import { fpsRules, DURATION_BOUNDARY, MAX_WIDTH_PER_BIG_GRID, MIN_WIDTH_PER_BIG_GRID } from './const';
 import { formatTime } from './util';
 
 defineOptions({
-  name: 'TimeLineRule'
+  name: 'TimeLineTimeArea'
 });
-
+const { injectTimeLineStateContext } = useTimeLineStateContext();
 const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
+const timelineStateContext = injectTimeLineStateContext();
 const { timeAreaHeight } = toRefs(timeLineContext);
 const globalStore = useGlobalStore();
 consola.log('globalStore: ', globalStore);
@@ -34,11 +35,17 @@ const props = defineProps({
     // 配置帧率
     type: Number,
     default: 25
+  },
+  scrollLeft: {
+    // 滚动距离px, 通过它和 msPerPx，得到刻度绘制的开始时间
+    type: Number,
+    default: 0
   }
 });
 const ruleRef = ref(); // canvasDom
 const timeLineRuleRef = ref(); // 刻度尺容器ref
 const ctx = ref(); // canvas上下文对象
+
 const state: any = reactive({
   curFpsRule: [],
   ruleStartTime: 0,
@@ -58,6 +65,12 @@ const state: any = reactive({
   videoWidth: 100,
   prePxPerFullScreen: 100
 });
+const ruleStartTime = computed(() => {
+  return props.scrollLeft * state.cacheDrawParams.msPerPx;
+});
+interface TimeLineTimeRule {
+  renderRule: (number) => void;
+}
 
 /**
  * 根据帧率获取当前帧率下的帧级刻度规则
@@ -85,7 +98,7 @@ const drawRule = ({
   cellCount = 10,
   msPerPx = 40,
   pxPerFullScreen = 1000,
-  start = 0,
+  start = ruleStartTime.value,
   referencePoint = 0
 }) => {
   const duration = pxPerFullScreen * msPerPx; // 计算出当前要绘制多少ms刻度
@@ -170,7 +183,7 @@ const getRuleListAndSlideKey = () => {
 
   // 根据n 来计算 轨道上每次缩放显示的刻度
   let sliderSSCount = scaleCountInt - ruleLists.length + 1; // s应该显示的刻度数量
-  consola.log('sliderSSCount: ', sliderSSCount);
+  // consola.log('sliderSSCount: ', sliderSSCount);
 
   // const arrs = [1, 2, 3, 5, 10, 30, 1 * 60, 2 * 60, 3 * 60, 5 * 60, 10 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 3 * 60 * 60, 5 * 60 * 60, 10 * 60 * 60, 30 * 60 * 60] // 单位s
   const secondEnums = [1, 2, 3, 5, 10, 20, 30];
@@ -185,14 +198,14 @@ const getRuleListAndSlideKey = () => {
     item.msPerCell = (item.gridValue * 1000) / 10;
     ruleLists.push(item);
   }
-  consola.log('ruleLists--->', ruleLists);
-  consola.log('state.scaleCount: ', state.scaleCount);
+  // consola.log('ruleLists--->', ruleLists);
+  // consola.log('state.scaleCount: ', state.scaleCount);
 
   for (let i = 0; i < Math.ceil(state.scaleCount); i++) {
-    state.slideKey.push(Math.floor(Math.round(100 - (1 / state.scaleCount) * i * 100)) / 100);
+    state.slideKey.unshift(Math.floor(Math.round(100 - (1 / state.scaleCount) * i * 100)) / 100);
   }
   if (state.scaleCount !== Math.ceil(state.scaleCount)) {
-    state.slideKey.push(0);
+    state.slideKey.unshift(0);
   }
   consola.log('state.slideKey: ', state.slideKey);
 };
@@ -218,7 +231,7 @@ const getRuleScope = () => {
     });
     maxValue = minValue - 0.01 < 0 ? 0 : minValue;
   });
-  consola.error('ar---->r', state.ruleScope);
+  // consola.error('ar---->r', state.ruleScope);
 };
 
 /**
@@ -240,6 +253,7 @@ const changeScale = (val: number) => {
   drawRule({ cellWidth, cellCount, msPerPx, pxPerFullScreen: state.pxPerFullScreen });
   state.videoWidth = (state.trackDuration / ruleLists[index].msPerCell) * cellWidth; // 更新视频宽度
 };
+timelineStateContext.changeScale = changeScale;
 const caclCanvasSize = () => {
   const { width, height } = timeLineRuleRef.value.getBoundingClientRect();
   // 设置画布宽高为外层元素宽高
@@ -256,10 +270,10 @@ const updateScale = () => {
   if (index < 0) {
     index = state.currentRule.unit === 'f' ? 0 : ruleLists.length - 1;
   }
-  consola.log('index: ', index);
+  // consola.log('index: ', index);
   const pw = Math.log2((state.pxPerMsInBaseRule * ruleLists[index].msPerCell) / state.cacheDrawParams.cellWidth);
   let val = 1 - pw * (1 / state.scaleCount);
-  consola.error('pw: ', pw, val);
+  // consola.error('pw: ', pw, val);
   if (val > 1) {
     val = 1;
   } else if (val < 0) {
@@ -287,6 +301,11 @@ const updateTimeRule = () => {
     drawRule(params); // 使用缓存的刻度进行绘制
   }
 ); */
+watchEffect(() => {
+  timelineStateContext.setMsPerPx(state.cacheDrawParams.msPerPx);
+  // console.error('state.cacheDrawParams.msPerPx: ', state.cacheDrawParams.msPerPx);
+  timelineStateContext.setScaleSliderKey(state.slideKey);
+});
 useResizeObserver(timeLineRuleRef, () => {
   // 浏览器缩放，更新刻度规则
   caclCanvasSize(); // 轨道dom尺寸变化，影响绘制
@@ -299,17 +318,20 @@ onMounted(() => {
   ctx.value = ruleRef.value.getContext('2d');
   getCurFpsRule();
   updateTimeRule();
-  changeScale(curScale.value); // 刚进入的时候，默认缩放0，
+  changeScale(0); // 刚进入的时候，默认缩放0，
   /**
    * 轨道绘制中考虑如下功能
    * 1、轨道时长更新的时候，当前刻度状态不变，只是改变的slider上scale的值，
    * 2、轨道长度改变的时候，当前刻度状态不变，只改变slider上scale的值。
-   * 目前对上面2点的处理是：缓存之前绘制的刻度，更新轨道时长和长度的时候，计算出最新的规则，然后反推之前轨道的缩放对应最新规则的缩放值。等待下一次主动操作缩放的时候，使用最新的规则即可。所以传出去的 msPerPx，应该是缓存的mePerPx.
+   * 目前对上面2点的处理是：缓存之前绘制的刻度，更新轨道时长和长度的时候，计算出最新的规则，然后反推之前轨道的缩放对应最新规则的缩放值。等待下一次主动操作缩放的时候，使用最新的规则即可。所以传出去的 msPerPx，应该是缓存的msPerPx.
    */
   /**
    * 和外面的数据交互
    * 需要通知外部 ms/px， 以及通过绘制的开始结束时间，得到开始前后有多少px
    */
+});
+defineExpose<TimeLineTimeRule>({
+  renderRule: changeScale
 });
 </script>
 <style scoped></style>

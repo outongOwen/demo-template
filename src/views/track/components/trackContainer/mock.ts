@@ -10,8 +10,10 @@ export const mockData: TimelineRow[] = [
     actions: [
       {
         id: '1',
-        start: 0,
+        start: 1000,
         end: 100,
+        trimStart: 0,
+        trimEnd: 6 * 1000,
         type: 'video',
         effectId: 'video'
       }
@@ -42,6 +44,8 @@ export const mockData: TimelineRow[] = [
         id: '12222',
         start: 0,
         end: 100,
+        trimStart: 0,
+        trimEnd: 6 * 1000,
         type: 'video',
         effectId: 'video'
       }

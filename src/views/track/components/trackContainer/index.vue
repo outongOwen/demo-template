@@ -29,7 +29,9 @@
 <script setup lang="ts">
 import { useThemeVars } from 'naive-ui';
 // import type { TimelineRow } from '@/plugins/timeLine';
+import { useTimeLineStore } from '@/store';
 import { TimeLine } from '@/plugins/timeLine';
+import type { TimeLineContext } from '@/plugins/timeLine';
 import { mockData, effects, sideBars } from './mock';
 import TimeLineSideBar from './timeLineSideBar/index.vue';
 // import BlankPlaceholder from './blankPlaceholder/index.vue';
@@ -38,7 +40,11 @@ defineOptions({
 });
 const themeVars = useThemeVars();
 const editorData = ref(mockData);
-const timeLineRef = ref<InstanceType<typeof TimeLine>>();
+const timeLineRef = ref<TimeLineContext | null>();
+const timeLineStore = useTimeLineStore();
+onMounted(() => {
+  timeLineStore.setTimeLineRefs(timeLineRef.value!);
+});
 </script>
 <style lang="scss" scoped>
 .dark .time-line {

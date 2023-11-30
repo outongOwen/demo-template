@@ -12,6 +12,10 @@ export interface TimelineAction {
   start: number;
   /** 动作结束时间 */
   end: number;
+  /** 相对于自身的开始时间 */
+  trimStart: number;
+  /** 相对于自身的开始时间 */
+  trimEnd: number;
   /** 动作所对应的effectId */
   effectId: string;
   /** 动作是否可以选中 */
