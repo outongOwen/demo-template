@@ -3,12 +3,15 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { useTimeLineStore } from '@/store';
 import { useIconRender } from '@/hooks';
 import ActionBarItem from '@/components/module/track/ActionBarItem.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
+const { getScaleInfo } = storeToRefs(timeLineStore);
 const sliderKey = ref<any>([]);
+const sliderValue = ref<any>(0);
 const barItemOptions: Track.ActionBarItem[] = [
   {
     icon: 'mdi-magnet',
@@ -83,21 +86,22 @@ const barItemOptions: Track.ActionBarItem[] = [
   {
     label: '',
     btnType: 'Slider',
-    defaultValue: 0,
+    defaultValue: sliderValue,
     disabled: false,
     sliderMaxValue: 1,
     sliderKey,
-    change: (key: any) => {
-      console.log(key);
-      timeLineStore.geTimeLineRefs?.setScaleTimeRuler(key);
+    change: (key: number) => {
+      // console.log(key);
+      timeLineStore.setScaleInfo({ scale: key });
     }
   }
 ];
 watch(
-  () => timeLineStore.geTimeLineRefs && timeLineStore.geTimeLineRefs.sliderKey,
+  () => getScaleInfo.value && getScaleInfo.value.sliderKeys,
   val => {
     if (val) {
       sliderKey.value = val;
+      sliderValue.value = getScaleInfo.value.scale;
     }
   }
 );

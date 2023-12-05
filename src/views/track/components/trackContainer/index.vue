@@ -16,6 +16,11 @@
     :main-row="true"
     main-row-id="main"
     :row-sort-types="['text', 'video', 'main', 'audio']"
+    :side-bar-width="sideBarWidth"
+    :scale-height="40"
+    :scale-small-cell-width="getScaleInfo.scaleSmallCellWidth"
+    :scale-large-cell-width="getScaleInfo.scaleLargeCellWidth"
+    :scale-small-cell-ms="getScaleInfo.scaleSmallCellMs"
   >
     <template #sidebar="{ itemRow, sideBarRef }">
       <TimeLineSideBar :time-line-row="itemRow" :side-bar-ref="sideBarRef" />
@@ -29,9 +34,10 @@
 <script setup lang="ts">
 import { useThemeVars } from 'naive-ui';
 // import type { TimelineRow } from '@/plugins/timeLine';
+import type { MaybeElementRef } from '@vueuse/core';
 import { useTimeLineStore } from '@/store';
 import { TimeLine } from '@/plugins/timeLine';
-import type { TimeLineContext } from '@/plugins/timeLine';
+import useTrackScale from './timeLineScale/useTrackScale';
 import { mockData, effects, sideBars } from './mock';
 import TimeLineSideBar from './timeLineSideBar/index.vue';
 // import BlankPlaceholder from './blankPlaceholder/index.vue';
@@ -40,10 +46,14 @@ defineOptions({
 });
 const themeVars = useThemeVars();
 const editorData = ref(mockData);
-const timeLineRef = ref<TimeLineContext | null>();
+const timeLineRef = ref<null>();
 const timeLineStore = useTimeLineStore();
+const sideBarWidth = ref(150);
+const { getScaleInfo } = timeLineStore;
 onMounted(() => {
-  timeLineStore.setTimeLineRefs(timeLineRef.value!);
+  // TODO ts
+  const timeLineDom = document.getElementsByClassName('time-line')[0] as MaybeElementRef;
+  useTrackScale(timeLineDom, sideBarWidth.value, 25);
 });
 </script>
 <style lang="scss" scoped>

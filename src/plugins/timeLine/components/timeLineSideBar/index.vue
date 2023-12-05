@@ -5,7 +5,7 @@
  * index.vue
 -->
 <template>
-  <div class="timeLine-sideBar-container" :style="{ width: sideBarWidth + 'px', paddingTop: timeAreaHeight! + 'px' }">
+  <div class="timeLine-sideBar-container" :style="{ width: sideBarWidth + 'px', paddingTop: scaleHeight! + 'px' }">
     <div
       ref="sideBarListRef"
       class="sideBar-list"
@@ -50,7 +50,7 @@
 </template>
 <script setup lang="ts">
 import type { VNodeChild } from 'vue';
-import { toReactive, useResizeObserver } from '@vueuse/core';
+import { useResizeObserver } from '@vueuse/core';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 import { useMainRow } from '../../hooks';
 import type { TimelineRow } from '../../types';
@@ -69,16 +69,15 @@ const { injectTimeLineContext } = useTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
-const { hasMainRow } = toReactive(timeLineStateContext);
 const isOutRange = ref(false);
 const mainRowRef = ref<HTMLElement | null>();
 const sideBarListRef = ref<HTMLElement | null>();
 const sideBarUlRef = ref<HTMLElement | null>();
-const { sideBarWidth, editorData, rowHeight, sideBars, timeAreaHeight, rowSpacing, mainRowId } =
-  toReactive(timeLineContext);
+const { sideBarWidth, editorData, rowHeight, sideBars, scaleHeight, rowSpacing, mainRowId }: any =
+  toRefs(timeLineContext);
 
 const getMainRowRef = (el: HTMLElement | null, rowItem: TimelineRow) => {
-  if (el && hasMainRow && rowItem.type === mainRowId) {
+  if (el && timeLineStateContext.hasMainRow.value && rowItem.type === mainRowId) {
     mainRowRef.value = el;
   }
 };

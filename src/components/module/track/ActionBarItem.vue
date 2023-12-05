@@ -326,7 +326,14 @@ const handleChecked = async () => {
     props.options.change && props.options.change(props.options.key, selectValue.value === props.options.key);
   }
 };
-
+watch(
+  () => sliderValue.value,
+  () => {
+    state.sliderIndex = state.sliderKey.findIndex(item => {
+      return sliderValue.value <= item;
+    });
+  }
+);
 /**
  * Slider
  */

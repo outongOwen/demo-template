@@ -2,6 +2,13 @@
   <div
     ref="actionRef"
     class="timeLine-editor-action"
+    :data-type="actionItem.type"
+    :data-width="(actionItem.end - actionItem.start) / scaleUnit!"
+    :data-left="actionItem.start / scaleUnit!"
+    :style="{
+      width: `${(actionItem.end - actionItem.start) / scaleUnit!}px`,
+      left: `${actionItem.start / scaleUnit!}px`
+    }"
     @click.stop="handleClick"
     @mousedown="handleMouseDown"
     @mouseup="handleMouseUp"
@@ -20,9 +27,10 @@
 </template>
 
 <script setup lang="ts">
-import type { TimelineAction } from '../../../types';
+import type { TimelineAction, TimelineRow } from '../../../types';
 import timeLineActionHook from './index';
 interface Props {
+  rowItem: TimelineRow;
   actionItem: TimelineAction;
 }
 defineOptions({
@@ -33,16 +41,20 @@ const { actionItem } = toRefs(props);
 const actionRef = ref<HTMLElement>();
 const {
   isSelected,
-  initInteractResizable,
+  // initInteractResizable,
   initInteractDraggable,
   handleClick,
   handleMouseUp,
   handleMouseDown,
-  selectedActionIds
+  selectedActionIds,
+  scaleSmallCellWidth,
+  scaleSmallCellMs
 } = timeLineActionHook(actionRef, actionItem);
-
+const scaleUnit = computed(() => {
+  return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
+});
 onMounted(() => {
-  initInteractResizable();
+  // initInteractResizable();
   initInteractDraggable();
 });
 </script>

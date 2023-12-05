@@ -1,18 +1,25 @@
 import { defineStore } from 'pinia';
-import type { TimeLineStateType } from './index.type';
+import type { TimeLineStateType, ScaleInfo } from './index.type';
 
 export const useTimeLineStore = defineStore('useTimeLineStore', {
   state: (): TimeLineStateType => ({
-    timeLineRefs: null
+    scaleInfo: {
+      sliderKeys: [],
+      scale: 0,
+      scaleSmallCellWidth: 20, // px
+      scaleLargeCellWidth: 100, // px
+      scaleSmallCellMs: 40 // ms
+    }
   }),
   getters: {
-    geTimeLineRefs(): TimeLineStateType['timeLineRefs'] {
-      return this.timeLineRefs;
+    getScaleInfo(): TimeLineStateType['scaleInfo'] {
+      // console.warn('getScaleInfo------>', this.scaleInfo);
+      return this.scaleInfo;
     }
   },
   actions: {
-    setTimeLineRefs(timeLineRefs: TimeLineStateType['timeLineRefs']) {
-      this.timeLineRefs = timeLineRefs;
+    setScaleInfo(scaleInfo: ScaleInfo) {
+      Object.assign(this.scaleInfo, scaleInfo);
     }
   }
 });

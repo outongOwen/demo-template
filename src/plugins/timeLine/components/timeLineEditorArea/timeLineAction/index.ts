@@ -4,11 +4,24 @@ import { unrefElement } from '@vueuse/core';
 import type { DragEvent } from '@interactjs/types';
 import type { MaybeComputedElementRef, MaybeRef } from '@vueuse/core';
 import type { TimelineAction } from '../../../types';
-import { useTimeLineStateContext } from '../../../contexts';
-export default (actionRef: MaybeComputedElementRef, actionItem: MaybeRef<TimelineAction>) => {
+import { useTimeLineStateContext, useTimeLineContext } from '../../../contexts';
+
+export default (
+  actionRef: MaybeComputedElementRef,
+  actionItem: MaybeRef<TimelineAction>
+  // rowItem: MaybeRef<TimelineRow>
+) => {
   const { injectTimeLineStateContext } = useTimeLineStateContext();
+  const { injectTimeLineContext } = useTimeLineContext();
   const timeLineStateContext = injectTimeLineStateContext();
-  const { selectedActionIds, selectedActionRefs } = toRefs(timeLineStateContext);
+  const timeLineContext = injectTimeLineContext();
+  // const deltaX = ref(0); // 拖拽距离
+  // const isAdsorption = ref(false); // 是否吸附
+  const { selectedActionIds, selectedActionRefs } = timeLineStateContext;
+  const { scaleSmallCellMs, scaleSmallCellWidth } = toRefs(timeLineContext);
+  watchEffect(() => {
+    console.log('selectedActionIds', selectedActionIds.value);
+  });
   const isSelected = computed(() => {
     return selectedActionIds.value.includes(unref(actionItem).id);
   });
@@ -35,7 +48,7 @@ export default (actionRef: MaybeComputedElementRef, actionItem: MaybeRef<Timelin
   const handleMouseDown = () => {
     const el = unrefElement(actionRef);
     if (!el) return;
-    el.style.zIndex = '999';
+    el.style.zIndex = '';
   };
 
   // 鼠标移动抬起
@@ -49,52 +62,74 @@ export default (actionRef: MaybeComputedElementRef, actionItem: MaybeRef<Timelin
     const target = event.target;
     if (!target) return;
     // keep the dragged position in the data-x/data-y attributes
+    const { x: dataX = '0', y: dataY = '0' } = target.dataset;
+    const x = (parseFloat(dataX!) || 0) + event.dx;
+    const y = (parseFloat(dataY!) || 0) + event.dy;
 
     if (selectedActionIds.value.length) {
       // translate the element
       selectedActionIds.value.forEach(id => {
         const el = selectedActionRefs.value.get(id);
         if (!el) return;
-        const { x: dataX = '0', y: dataY = '0' } = el.dataset;
-        const x = (parseFloat(dataX!) || 0) + event.dx;
-        const y = (parseFloat(dataY!) || 0) + event.dy;
         el.style.transform = `translate(${x}px, ${y}px)`;
         Object.assign(el.dataset, { x, y });
       });
     } else {
-      const { x: dataX = '0', y: dataY = '0' } = target.dataset;
-      const x = (parseFloat(dataX!) || 0) + event.dx;
-      const y = (parseFloat(dataY!) || 0) + event.dy;
       target.style.transform = `translate(${x}px, ${y}px)`;
       // update the posiion attributes
       Object.assign(target.dataset, { x, y });
     }
   };
+  /* const handleResizeStart = (e: ResizeEvent) => {
+    const target = e.target;
+    const dir = e.edges?.left ? 'left' : 'right';
+    const { left, width } = target.dataset;
+    const preLeft = parseFloat(left!);
+    const preWidth = parseFloat(width!);
+    deltaX.value = 0;
+    isAdsorption.value = false;
+  }; */
+  /* const handleResize = (e: ResizeEvent) => {
+    const target = e.target;
+    const dir = e.edges?.left ? 'left' : 'right';
+    const { left = '0', width = '0' } = target.dataset;
+    const preLeft = parseFloat(left!);
+    const preWidth = parseFloat(width!);
+    deltaX.value += dir === 'left' ? e.deltaRect!.left : e.deltaRect!.right;
+    if (dir === 'left') {
+      target.style.left = `${preLeft + deltaX.value}px`;
+      target.style.width = `${preWidth - deltaX.value}px`;
+      Object.assign(target.dataset, { left, width });
+    }
+    if (dir === 'right') {
+      // console.log(scaleSmallCellMs, 'scaleSmallCellMsscaleUnit');
+      // console.log(deltaX.value, 'deltaX.valuedeltaX.value');
+      const curWidth = preWidth + deltaX.value * scaleSmallCellMs!;
+      console.log(deltaX.value * scaleSmallCellMs!, '_+_+');
+      // target.style.width = `${curWidth}px`;
+      // Object.assign(target.dataset, { width: curWidth });
+    }
+  };
+  const handleResizeEnd = (e: ResizeEvent) => {
+    deltaX.value = 0;
+    isAdsorption.value = false;
+    // stopAutoScroll();
+
+    const target = e.target;
+  }; */
+  /* const updateResize = (e: ResizeEvent) => {};
   // 初始化互动
   const initInteractResizable = () => {
     const el = unrefElement(actionRef);
-    if (!el) return;
+    if (!el || !unref(actionItem)) return;
     interact(el).resizable({
       edges: { left: true, right: true },
       margin: 5,
-      modifiers: [
-        interact.modifiers.restrictSize({
-          min: { width: 1, height: 10 }
-        })
-      ],
-      onmove: event => {
-        let { x, y } = event.target.dataset;
-        x = (parseFloat(x) || 0) + event.deltaRect.left;
-        y = (parseFloat(y) || 0) + event.deltaRect.top;
-        Object.assign(event.target.style, {
-          width: `${event.rect.width}px`,
-          transform: `translate(${x}px, ${y}px)`
-        });
-        (unref(actionItem) as any).width = event.rect.width;
-        Object.assign(event.target.dataset, { x, y });
-      }
+      onstart: handleResizeStart,
+      onmove: handleResize,
+      onend: handleResizeEnd
     });
-  };
+  }; */
   const initInteractDraggable = () => {
     const el = unrefElement(actionRef);
     if (!el) return;
@@ -119,22 +154,28 @@ export default (actionRef: MaybeComputedElementRef, actionItem: MaybeRef<Timelin
         //   relativePoints: [{ x: 0, y: 0 }]
         // })
       ],
-      listeners: {
-        // call this function on every dragmove event
-        move: dragMoveListener
-        // call this function on every dragend event
+      onstart: () => {
+        timeLineStateContext.rowLinePosition.isMoving = true;
+      },
+      onmove: dragMoveListener,
+      // call this function on every dragend event
+      onend: () => {
+        timeLineStateContext.rowLinePosition.isMoving = false;
+        timeLineStateContext.rowLinePosition.y = -1;
       }
     });
   };
 
   return {
-    initInteractResizable,
+    // initInteractResizable,
     initInteractDraggable,
     timeLineStateContext,
     handleClick,
     handleMouseDown,
     handleMouseUp,
     isSelected,
-    selectedActionIds
+    selectedActionIds,
+    scaleSmallCellMs,
+    scaleSmallCellWidth
   };
 };

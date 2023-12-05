@@ -1,74 +1,92 @@
+import type { ShallowRef } from 'vue';
+import { isString, isArray } from 'lodash';
 import { useContext } from '../hooks';
 export interface TimeLineStateContextProps {
   /**
-   * @description 是否有时间主轴
-   */
-  hasMainRow: boolean;
-  /**
-   * @description 滚动条尺寸
-   * @default 8
-   */
-  scrollBarSize: number;
-  /**
-   * @description 选中action
-   * @default []
-   * @type{Array<string>}
-   */
-  selectedActionIds: Array<string>;
-  /**
-   * @description 选中action的ref集合
-   */
-  selectedActionRefs: Map<string, HTMLElement | SVGElement>;
-  /**
-   * @description 时间线编辑区域容器ref
+   * @description 时间线编辑区域容器DOM
    * @default null
    * @type {HTMLElement|null}
    */
   timeLineEditorRef: HTMLElement | null | undefined;
   /**
-   * @description 轨道的单位, ms/px ，msPerPx
-   * @default 0
+   * @description 是否有时间主轴
    */
-  msPerPx: number;
+  hasMainRow: Ref<boolean>;
   /**
-   * @description 轨道的缩放值
+   * @description 刻度缩放单位 （ms/px）
    * @default 0
+   * @type {number}
    */
-  scale: number;
+  selectedActionIds: Ref<Array<string>>;
   /**
-   * @description 缩放的关键点
-   * @default []
+   * @description 选中action的ref集合
    */
-  scaleSliderKey: Array<number>;
+  selectedActionRefs: ShallowRef<Map<string, HTMLElement | SVGElement>>;
+
+  /**
+   * @description 拖拽目标记录值
+   */
+  rowLinePosition: {
+    y: number;
+    x?: number;
+    isMoving: boolean;
+  };
   /**
    * @description 设置选中action
    * @param {Array<string>} actionIds
    * @returns {void}
    */
   setSelectedActionId(selectId?: string | string[], push?: boolean): void;
-  /**
-   * @description 设置msPerPx大小
-   * @params {number} msPerPx
-   * @returns {void}
-   */
-  setMsPerPx(msPerPx: number): void;
-  /**
-   * @description 修改刻度缩放值
-   * @params {number}
-   * @returns {void}
-   */
-  setScale(num: number): void;
-  changeScale(num: number): void;
-  setScaleSliderKey(array: Array<number>): void;
 }
-const { useInject, useProvide } = useContext<TimeLineStateContextProps>('TimeLineStateContext', {
-  native: false,
-  readonly: false
-});
+const { useInject, useProvide } = useContext<TimeLineStateContextProps>('TimeLineStateContext');
 export default function useTimeLineStateContext() {
-  const provideTimeLineStateContext = (context: TimeLineStateContextProps): TimeLineStateContextProps => {
-    const { state } = useProvide(context);
-    return state;
+  // 是否有时间主轴
+  const hasMainRow = ref<boolean>(false);
+  // 选中的action的id集合
+  const selectedActionIds = ref<Array<string>>([]);
+  // 选中的action的ref集合
+  const selectedActionRefs = shallowRef<Map<string, HTMLElement | SVGElement>>(new Map());
+  // 拖拽目标记录值
+  const rowLinePosition = reactive({
+    y: 0,
+    isMoving: false
+  });
+  //  设置选中action的id
+  const setSelectedActionId = (selectId, push = false) => {
+    if (!selectId) {
+      selectedActionIds.value = [];
+    }
+    if (isString(selectId)) {
+      if (push) {
+        if (selectedActionIds.value.includes(selectId)) {
+          return;
+        }
+        selectedActionIds.value.push(selectId);
+        return;
+      }
+      selectedActionIds.value = [selectId];
+    }
+    if (isArray(selectId)) {
+      if (push) {
+        // eslint-disable-next-line no-param-reassign
+        selectId = selectId.filter(item => !selectedActionIds.value.includes(item));
+        if (!selectId.length) return;
+        selectedActionIds.value.push(...selectId);
+        return;
+      }
+      selectedActionIds.value = selectId;
+    }
+  };
+  const timeLineStateProps: TimeLineStateContextProps = {
+    hasMainRow,
+    timeLineEditorRef: null,
+    selectedActionIds,
+    selectedActionRefs,
+    rowLinePosition,
+    setSelectedActionId
+  };
+  const provideTimeLineStateContext = () => {
+    return useProvide(timeLineStateProps);
   };
   const injectTimeLineStateContext = () => {
     return useInject();

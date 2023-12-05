@@ -1,3 +1,4 @@
+import type { VNodeChild, Component } from 'vue';
 import type { TimelineEngine } from '../core/engine';
 import type { TimelineAction } from './timeLineAction';
 
@@ -8,6 +9,8 @@ export interface TimelineEffect {
   name?: string;
   /** 效果运行代码 */
   source?: TimeLineEffectSource;
+  /** 动作渲染 */
+  render?: (action: TimelineAction) => VNodeChild | Component;
 }
 
 export interface EffectSourceParam {

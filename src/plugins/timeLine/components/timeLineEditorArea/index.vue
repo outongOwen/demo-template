@@ -10,7 +10,7 @@
     ref="timeLineRef"
     class="timeLine-editor-area-container"
     :style="{
-      height: `calc(100% - ${timeAreaHeight}px )`
+      height: `calc(100% - ${scaleHeight}px )`
     }"
     :class="{
       'pos-center': !isOutRange
@@ -18,7 +18,7 @@
     @click.stop="handleClick"
   >
     <div
-      v-if="editorData.length"
+      v-if="editorData?.length"
       ref="timeLineInnerRef"
       class="timeLine-editor-area-inner"
       :style="{ rowGap: rowSpacing + 'px' }"
@@ -33,6 +33,14 @@
     <slot v-else name="blankPlaceholder">
       <blank-placeholder />
     </slot>
+    <!-- 时间线row辅助线 -->
+    <div
+      v-show="rowLinePosition.isMoving && rowLinePosition.y >= 0"
+      class="drag-row-line"
+      :style="{
+        top: `${rowLinePosition.y}px`
+      }"
+    />
   </div>
 </template>
 
@@ -54,21 +62,21 @@ const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
-const { timeAreaHeight, editorData, rowSpacing, mainRowId } = toReactive(timeLineContext);
-const { hasMainRow } = toRefs(timeLineStateContext);
+const { scaleHeight, editorData, rowSpacing, mainRowId } = toReactive(timeLineContext);
+const { hasMainRow, rowLinePosition } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
 const timeLineInnerRef = ref<HTMLElement>();
-const minRowRef = ref<HTMLElement>();
+const minRowRef = ref<HTMLElement | null>();
 const isOutRange = ref(false);
 const getMinRowRef = (rowRef: InstanceType<typeof TimeLineRow>, rowItem: TimelineRow) => {
   if (rowRef?.rowRef && unref(hasMainRow) && rowItem.type === mainRowId) {
     rowRef.rowRef.id = 'timeLine-main-row';
     minRowRef.value = rowRef.rowRef;
+    return;
   }
+  minRowRef.value = null;
 };
-watchEffect(() => {
-  console.log(timeLineContext, 'timeLineContexttimeLineContexttimeLineContext');
-});
+
 const { checkMainRowBottom } = useMainRow(minRowRef);
 
 useEventListener(timeLineRef, 'scroll', e => {
@@ -86,7 +94,7 @@ watch(
   () => editorData,
   () => {
     nextTick(() => {
-      if (timeLineInnerRef.value) {
+      if (timeLineInnerRef.value && editorData) {
         const maxRowWidth = editorData.reduce((prev, cur) => {
           // 通过actions中最大end值计算最大宽度
           // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -105,11 +113,9 @@ watch(
 );
 const handleClick = () => {
   console.log('点击外部');
-  timeLineStateContext.setSelectedActionId(['1', '12222']);
+  // timeLineStateContext.setSelectedActionId(['1', '12222']);
 };
 onMounted(() => {
-  // 动态计算滚动条尺寸
-  timeLineStateContext.scrollBarSize = timeLineRef.value!.offsetHeight - timeLineRef.value!.clientHeight;
   timeLineStateContext.timeLineEditorRef = timeLineRef.value;
 });
 </script>
@@ -149,7 +155,14 @@ onMounted(() => {
   width: 100%;
   overflow: scroll;
   position: relative;
-
+  .drag-row-line {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: #fff;
+    pointer-events: none;
+    z-index: 9009;
+  }
   // 禁止选中
   user-select: none;
   .timeLine-editor-area-inner {

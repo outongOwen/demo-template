@@ -12,9 +12,11 @@ export interface TimelineAction {
   start: number;
   /** 动作结束时间 */
   end: number;
-  /** 相对于自身的开始时间 */
+  /** 动作时长 */
+  duration: number;
+  /** 裁剪开始时间 */
   trimStart: number;
-  /** 相对于自身的开始时间 */
+  /** 裁剪结束时间 */
   trimEnd: number;
   /** 动作所对应的effectId */
   effectId: string;

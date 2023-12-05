@@ -25,129 +25,54 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-export default {
-  name: 'TimeLine'
-};
-</script>
+
 <script setup lang="ts">
-import { isString, isArray } from 'lodash';
 import { consola } from 'consola';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-import type { TimeLineStateContextProps } from '../../contexts';
 import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
 import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
-import type { TimelineEditorProps, TimelineRow, TimeLineContext } from '../../types';
+import { timeLineProps } from './checkProps';
 import { sortTimeLineByType } from './index';
 defineOptions({
   name: 'TimeLine'
 });
-const props = withDefaults(defineProps<TimelineEditorProps>(), {
-  editorData: (): TimelineRow[] => [],
-  rowHeight: 50,
-  rowSpacing: 10,
-  sideBarWidth: 150,
-  timeAreaHeight: 50,
-  leftOffset: 10,
-  background: 'rgba(40,40,40,1)',
-  rowBackground: 'rgba(50,50,50,1)',
-  rowActiveBackground: 'rgba(70,70,70,1)',
-  mainRowBackground: 'rgba(70,70,70,1)'
-});
+const props = defineProps(timeLineProps);
 /**
  * #TODO 需要对props进行校验和初始化操作
  */
 const { provideTimeLineContext } = useTimeLineContext();
 const { provideTimeLineStateContext } = useTimeLineStateContext();
 
-const timeLineStateContext = provideTimeLineStateContext(
-  reactive<TimeLineStateContextProps>({
-    hasMainRow: false,
-    scrollBarSize: 8,
-    selectedActionIds: [],
-    selectedActionRefs: new Map(),
-    timeLineEditorRef: null,
-    msPerPx: 0,
-    scale: 0,
-    scaleSliderKey: [],
-    setSelectedActionId: (selectId, push = false) => {
-      if (!selectId) {
-        timeLineStateContext.selectedActionIds = [];
-      }
-      if (isString(selectId)) {
-        if (push) {
-          if (timeLineStateContext.selectedActionIds.includes(selectId)) {
-            return;
-          }
-          timeLineStateContext.selectedActionIds.push(selectId);
-          return;
-        }
-        timeLineStateContext.selectedActionIds = [selectId];
-      }
-      if (isArray(selectId)) {
-        if (push) {
-          // eslint-disable-next-line no-param-reassign
-          selectId = selectId.filter(item => !timeLineStateContext.selectedActionIds.includes(item));
-          if (!selectId.length) return;
-          timeLineStateContext.selectedActionIds.push(...selectId);
-          return;
-        }
-        timeLineStateContext.selectedActionIds = selectId;
-      }
-    },
-    setMsPerPx: (msPerPx: number) => {
-      timeLineStateContext.msPerPx = msPerPx;
-    },
-    setScale: (scale: number) => {
-      timeLineStateContext.scale = scale;
-    },
-    setScaleSliderKey: (scaleSliderKey: Array<number>) => {
-      timeLineStateContext.scaleSliderKey = scaleSliderKey;
-    },
-    // eslint-disable-next-line no-empty-function
-    changeScale: () => {}
-  })
-);
+const timeLineStateContext = provideTimeLineStateContext();
 const { showSideBar, sideBarWidth, editorData, mainRow, mainRowId, background, rowSortTypes } = toRefs(props);
 const scrollTop = ref(0);
 const handleTimeLineScroll = (e: Event) => {
   const target = e.target as HTMLElement;
   scrollTop.value = target.scrollTop;
 };
-provideTimeLineContext({
-  ...props
-});
-watchEffect(() => {
-  // 遍历数据，判断是否开启主时间轴
-  if (mainRow?.value && Boolean(mainRowId?.value)) {
-    const findMainRow = editorData.value.findIndex(item => item.type === mainRowId?.value);
-    timeLineStateContext.hasMainRow = findMainRow > -1;
-    return;
-  }
-  timeLineStateContext.hasMainRow = false;
-});
-watchEffect(() => {
-  /**
-   * @description 数据校验
-   */
-  // 判断开启主时间轴后没有传入主时间轴ID
-  if (mainRow?.value && !mainRowId?.value) {
-    consola.error('mainRowId is required when mainRow is true');
-  }
-  // 判断主时间轴指定的mainRowId是否唯一
-  if (timeLineStateContext.hasMainRow) {
-    const mainRowIds = editorData.value.filter(item => item.type === mainRowId!.value);
-    // editorData中必须有mainRowId匹配的type,并且保证只有一个
-    if (mainRowIds.length > 1) {
-      consola.error('mainRowId must be unique');
+provideTimeLineContext(props);
+
+watch(
+  [mainRow, mainRowId],
+  () => {
+    if (!mainRow.value) return;
+    if (mainRow.value && !mainRowId.value) {
+      consola.warn('mainRowId must be set');
+      return;
     }
-    if (mainRowIds.length === 0) {
-      consola.error('not find matched mainRowId in editorData');
+    const findMainRow = Array.from(editorData.value.filter(item => item.type === mainRowId?.value)).length;
+    if (findMainRow > 1) {
+      consola.warn('mainRowId must be unique');
     }
-  }
-});
+    if (findMainRow === 0) {
+      consola.warn('not find matched mainRowId in editorData');
+    }
+    timeLineStateContext.hasMainRow.value = findMainRow === 1;
+  },
+  { immediate: true }
+);
 watch(
   [editorData, rowSortTypes, mainRowId],
   () => {
@@ -171,22 +96,6 @@ watch(
     immediate: true
   }
 );
-const setScaleTimeRuler = (num: number) => {
-  timeLineStateContext.changeScale(num);
-};
-onMounted(() => {
-  // // console.log(editorContainerEl.value);
-  // interact('.timeLine-editor-area-inner').dropzone({
-  //   accept: '.timeLine-editor-action',
-  //   ondropmove(event) {
-  //     console.log(event.target, 'area----ondropmove');
-  //   }
-  // });
-});
-defineExpose<TimeLineContext>({
-  setScaleTimeRuler,
-  sliderKey: toRef(timeLineStateContext, 'scaleSliderKey')
-});
 </script>
 <style lang="scss" scoped>
 .timeLine-container {
@@ -213,3 +122,4 @@ defineExpose<TimeLineContext>({
   }
 }
 </style>
+./checkProps

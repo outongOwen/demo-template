@@ -1,4 +1,4 @@
-import { inject, provide, reactive, readonly as defineReadonly } from 'vue';
+import { inject, provide } from 'vue';
 import type { InjectionKey } from 'vue';
 /**
  * @description: 创建一个vue的inject和provide上下文
@@ -16,14 +16,11 @@ export interface CreateContextOptions {
   native?: boolean; // 是否原生
 }
 
-export default function useContext<T>(contextName = 'context', options: CreateContextOptions = {}) {
+export default function useContext<T>(contextName = 'context') {
   const injectKey: InjectionKey<T> = Symbol(contextName);
   function useProvide(context: T) {
-    const { readonly = true, native = false } = options;
-    const state = reactive(context as T extends Record<string, any> ? T : Record<string, any>);
-    const provideData = readonly ? defineReadonly(state) : context;
-    provide(injectKey, native ? context : (provideData as T | Readonly<T>));
-    return { state };
+    provide(injectKey, context);
+    return context;
   }
   function useInject() {
     return inject(injectKey) as T;

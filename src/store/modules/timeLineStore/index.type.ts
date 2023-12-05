@@ -1,5 +1,11 @@
-import type { TimeLineContext } from '@/plugins/timeLine';
-interface TimeLineStateType {
-  timeLineRefs: TimeLineContext | null;
+interface ScaleInfo {
+  sliderKeys?: Array<number>;
+  scale?: number;
+  scaleSmallCellWidth?: number;
+  scaleLargeCellWidth?: number;
+  scaleSmallCellMs?: number;
 }
-export type { TimeLineStateType, TimeLineContext };
+interface TimeLineStateType {
+  scaleInfo: ScaleInfo;
+}
+export type { TimeLineStateType, ScaleInfo };
