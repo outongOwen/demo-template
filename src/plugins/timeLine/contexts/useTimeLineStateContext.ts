@@ -3,6 +3,10 @@ import { isString, isArray } from 'lodash';
 import { useContext } from '../hooks';
 export interface TimeLineStateContextProps {
   /**
+   * @description 刻度单位（ms/px）
+   */
+  scaleUnit: Ref<number>;
+  /**
    * @description 时间线编辑区域容器DOM
    * @default null
    * @type {HTMLElement|null}
@@ -40,8 +44,11 @@ export interface TimeLineStateContextProps {
 }
 const { useInject, useProvide } = useContext<TimeLineStateContextProps>('TimeLineStateContext');
 export default function useTimeLineStateContext() {
+  // 刻度单位（ms/px）
+  const scaleUnit = ref<number>(0);
   // 是否有时间主轴
   const hasMainRow = ref<boolean>(false);
+
   // 选中的action的id集合
   const selectedActionIds = ref<Array<string>>([]);
   // 选中的action的ref集合
@@ -51,6 +58,7 @@ export default function useTimeLineStateContext() {
     y: 0,
     isMoving: false
   });
+
   //  设置选中action的id
   const setSelectedActionId = (selectId, push = false) => {
     if (!selectId) {
@@ -78,6 +86,7 @@ export default function useTimeLineStateContext() {
     }
   };
   const timeLineStateProps: TimeLineStateContextProps = {
+    scaleUnit,
     hasMainRow,
     timeLineEditorRef: null,
     selectedActionIds,

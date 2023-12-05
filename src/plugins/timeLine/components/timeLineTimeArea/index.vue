@@ -12,15 +12,18 @@
 
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
-import { useTimeLineContext } from '../../contexts';
+import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 import { formatTime } from './util';
 
 defineOptions({
   name: 'TimeLineTimeArea'
 });
 const { injectTimeLineContext } = useTimeLineContext();
+const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
-const { scaleHeight, scaleSmallCellWidth, scaleLargeCellWidth, scaleSmallCellMs } = toRefs(timeLineContext);
+const timeLineStateContext = injectTimeLineStateContext();
+const { scaleHeight, scaleSmallCellWidth, scaleLargeCellWidth } = toRefs(timeLineContext);
+const { scaleUnit } = timeLineStateContext;
 const props = defineProps({
   fps: {
     type: Number,
@@ -40,13 +43,6 @@ const state: any = reactive({
   ruleStartTime: 0,
   pxPerFullScreen: 900 // px
 });
-/**
- * desc 绘制刻度
- *  */
-const scaleUnit = computed(() => {
-  return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
-});
-
 const drawRule = () => {
   // 一小格的宽度px cellWidth
   const cellWidth = unref(scaleSmallCellWidth)!;
@@ -93,7 +89,7 @@ const drawRule = () => {
     ctx.value.closePath();
   }
 };
-const caclCanvasSize = () => {
+const calcCanvasSize = () => {
   const { width, height } = timeLineRuleRef.value.getBoundingClientRect();
   // 设置画布宽高为外层元素宽高
   ruleRef.value.width = width;
@@ -115,11 +111,11 @@ watch(
 );
 useResizeObserver(timeLineRuleRef, () => {
   // 浏览器缩放，更新刻度规则
-  caclCanvasSize(); // 轨道dom尺寸变化，影响绘制
+  calcCanvasSize(); // 轨道dom尺寸变化，影响绘制
   drawRule();
 });
 onMounted(() => {
-  caclCanvasSize(); // 轨道dom尺寸变化，影响绘制
+  calcCanvasSize(); // 轨道dom尺寸变化，影响绘制
   ctx.value = ruleRef.value.getContext('2d');
   drawRule();
 });

@@ -22,6 +22,10 @@
         {{ actionItem.id }}
         {{ selectedActionIds }}
       </div>
+      <div class="wh-full of-hidden">
+        {{ actionItem.end }}
+        {{ actionItem.start }}
+      </div>
     </div>
   </div>
 </template>
@@ -37,25 +41,13 @@ defineOptions({
   name: 'TimeLineAction'
 });
 const props = defineProps<Props>();
-const { actionItem } = toRefs(props);
+const { actionItem, rowItem } = toRefs(props);
 const actionRef = ref<HTMLElement>();
-const {
-  isSelected,
-  // initInteractResizable,
-  initInteractDraggable,
-  handleClick,
-  handleMouseUp,
-  handleMouseDown,
-  selectedActionIds,
-  scaleSmallCellWidth,
-  scaleSmallCellMs
-} = timeLineActionHook(actionRef, actionItem);
-const scaleUnit = computed(() => {
-  return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
-});
+const { isSelected, initInteractable, handleClick, handleMouseUp, handleMouseDown, selectedActionIds, scaleUnit } =
+  timeLineActionHook(actionRef, actionItem, rowItem);
+
 onMounted(() => {
-  // initInteractResizable();
-  initInteractDraggable();
+  initInteractable();
 });
 </script>
 

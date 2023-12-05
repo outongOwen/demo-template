@@ -28,8 +28,4 @@ export interface TimelineAction {
   movable?: boolean;
   /** 动作是否禁止运行 */
   disable?: boolean;
-  /** 动作最小开始时间限制 */
-  minStart?: number;
-  /** 动作最大结束时间限制 */
-  maxEnd?: number;
 }

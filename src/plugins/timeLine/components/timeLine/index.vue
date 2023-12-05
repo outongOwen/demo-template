@@ -33,7 +33,7 @@ import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
 import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
-import { timeLineProps } from './checkProps';
+import { timeLineProps } from './props';
 import { sortTimeLineByType } from './index';
 defineOptions({
   name: 'TimeLine'
@@ -46,14 +46,27 @@ const { provideTimeLineContext } = useTimeLineContext();
 const { provideTimeLineStateContext } = useTimeLineStateContext();
 
 const timeLineStateContext = provideTimeLineStateContext();
-const { showSideBar, sideBarWidth, editorData, mainRow, mainRowId, background, rowSortTypes } = toRefs(props);
+const {
+  showSideBar,
+  sideBarWidth,
+  editorData,
+  mainRow,
+  mainRowId,
+  background,
+  rowSortTypes,
+  scaleSmallCellMs,
+  scaleSmallCellWidth
+} = toRefs(props);
 const scrollTop = ref(0);
 const handleTimeLineScroll = (e: Event) => {
   const target = e.target as HTMLElement;
   scrollTop.value = target.scrollTop;
 };
 provideTimeLineContext(props);
-
+// 计算时间轴缩放单位 （ms/px）
+timeLineStateContext.scaleUnit = computed(() => {
+  return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
+});
 watch(
   [mainRow, mainRowId],
   () => {
@@ -122,4 +135,3 @@ watch(
   }
 }
 </style>
-./checkProps

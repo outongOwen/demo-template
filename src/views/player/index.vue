@@ -17,8 +17,8 @@
 
 <script setup lang="ts">
 import { GlobalPlayer } from '@/layouts';
-import Canvas from './components/canvas/index.vue';
-import Controls from './components/controls/index.vue';
+import Canvas from './canvas/index.vue';
+import Controls from './controls/index.vue';
 defineOptions({ name: 'GlobalPlayer' });
 </script>
 

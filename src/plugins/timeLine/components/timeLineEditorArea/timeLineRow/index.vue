@@ -4,6 +4,7 @@
  * @since: 2023-07-13
  * index.vue
 -->
+
 <template>
   <div
     ref="rowRef"
@@ -20,6 +21,9 @@
 </template>
 
 <script setup lang="ts">
+/* eslint-disable */
+/* prettier-ignore */
+// @ts-nocheck
 import interact from 'interactjs';
 import type { Interactable } from '@interactjs/types';
 import { useTimeLineContext, useTimeLineStateContext } from '../../../contexts';
@@ -46,11 +50,11 @@ const dragJudge = event => {
   const draggableEvent = event.dragEvent;
   const { top: cTop } = timeLineStateContext.timeLineEditorRef!.getBoundingClientRect();
   const { top: rTop, bottom: rBottom, height: rHeight } = dropzoneElement.getBoundingClientRect();
-  const ty: any = rTop - cTop;
+  const ty = rTop - cTop;
   const cy = rTop - cTop + rHeight / 2;
-  const by: any = rBottom - cTop;
+  const by = rBottom - cTop;
   // 计算鼠标相对于拖拽元素的相对位置
-  const relativeY: any = draggableEvent.clientY - cTop;
+  const relativeY = draggableEvent.clientY - cTop;
   // 判断与那个边相交（容错1px）
   if (parseFloat(relativeY) <= parseFloat(ty + 2)) {
     console.log('top');

@@ -24,6 +24,14 @@ declare namespace Track {
     disabled?: boolean;
     /**  下拉选项 */
     options?: import('naive-ui').SelectOption[] | import('naive-ui').DropdownOption[];
+    /** 最大值 */
+    max?: number;
+    /** 最小值 */
+    min?: number;
+    /** 步长 */
+    step?: number;
+    /** 标记点 */
+    marks?: Array<number>;
     /** 改变之前 */
     beforeChange?: (state?: boolean) => Promise<boolean>;
     /**  选中回调 */

@@ -1,25 +1,31 @@
-// import { getCurrentInstance } from 'vue';
+/* eslint-disable */
+/* prettier-ignore */
+// @ts-nocheck
 import interact from 'interactjs';
-import { unrefElement } from '@vueuse/core';
-import type { DragEvent } from '@interactjs/types';
+import { reactiveComputed, toReactive, unrefElement } from '@vueuse/core';
+import type { DragEvent, ResizeEvent, Interactable } from '@interactjs/types';
 import type { MaybeComputedElementRef, MaybeRef } from '@vueuse/core';
-import type { TimelineAction } from '../../../types';
+import type { TimelineAction, TimelineRow } from '../../../types';
 import { useTimeLineStateContext, useTimeLineContext } from '../../../contexts';
-
+type Direction = 'left' | 'right';
 export default (
   actionRef: MaybeComputedElementRef,
-  actionItem: MaybeRef<TimelineAction>
-  // rowItem: MaybeRef<TimelineRow>
+  actionItem: MaybeRef<TimelineAction>,
+  rowItem: MaybeRef<TimelineRow>
 ) => {
   const { injectTimeLineStateContext } = useTimeLineStateContext();
   const { injectTimeLineContext } = useTimeLineContext();
   const timeLineStateContext = injectTimeLineStateContext();
   const timeLineContext = injectTimeLineContext();
-  // const deltaX = ref(0); // 拖拽距离
-  // const isAdsorption = ref(false); // 是否吸附
-  const { selectedActionIds, selectedActionRefs } = timeLineStateContext;
-  const { scaleSmallCellMs, scaleSmallCellWidth } = toRefs(timeLineContext);
+  // interact实例
+  const interactable = shallowRef<Interactable>();
+  // 拖拽距离
+  const deltaX = ref(0);
+  // 是否吸附
+  const isAdsorption = ref(false);
+  const { selectedActionIds, selectedActionRefs, scaleUnit } = timeLineStateContext;
   watchEffect(() => {
+    console.log(unref(rowItem));
     console.log('selectedActionIds', selectedActionIds.value);
   });
   const isSelected = computed(() => {
@@ -40,6 +46,11 @@ export default (
       immediate: true
     }
   );
+  const snap = reactiveComputed(() => {
+    return interact.modifiers.snap({
+      targets: [interact.snappers.grid({ x: unref(scaleUnit) * 100, y: 1 })]
+    });
+  });
   // 点击动作
   const handleClick = () => {
     console.log('213213');
@@ -50,14 +61,16 @@ export default (
     if (!el) return;
     el.style.zIndex = '';
   };
-
   // 鼠标移动抬起
   const handleMouseUp = () => {
     const el = unrefElement(actionRef);
     if (!el) return;
     el.style.zIndex = '1';
   };
-  const dragMoveListener = (event: DragEvent) => {
+  // 开始拖拽移动
+  const handleMoveStart = (event: DragEvent) => {};
+  // 拖拽移动中
+  const handleMove = (event: DragEvent) => {
     // console.log(event, '_+_+_+_+_+');
     const target = event.target;
     if (!target) return;
@@ -80,7 +93,10 @@ export default (
       Object.assign(target.dataset, { x, y });
     }
   };
-  /* const handleResizeStart = (e: ResizeEvent) => {
+  // 拖拽移动结束
+  const handleMoveEnd = (event: DragEvent) => {};
+  // 开始拖拽缩放
+  const handleResizeStart = (e: ResizeEvent) => {
     const target = e.target;
     const dir = e.edges?.left ? 'left' : 'right';
     const { left, width } = target.dataset;
@@ -88,94 +104,100 @@ export default (
     const preWidth = parseFloat(width!);
     deltaX.value = 0;
     isAdsorption.value = false;
-  }; */
-  /* const handleResize = (e: ResizeEvent) => {
+  };
+  // 拖拽缩放中
+  const handleResize = (e: ResizeEvent) => {
     const target = e.target;
     const dir = e.edges?.left ? 'left' : 'right';
     const { left = '0', width = '0' } = target.dataset;
     const preLeft = parseFloat(left!);
     const preWidth = parseFloat(width!);
-    deltaX.value += dir === 'left' ? e.deltaRect!.left : e.deltaRect!.right;
-    if (dir === 'left') {
-      target.style.left = `${preLeft + deltaX.value}px`;
-      target.style.width = `${preWidth - deltaX.value}px`;
-      Object.assign(target.dataset, { left, width });
-    }
-    if (dir === 'right') {
-      // console.log(scaleSmallCellMs, 'scaleSmallCellMsscaleUnit');
-      // console.log(deltaX.value, 'deltaX.valuedeltaX.value');
-      const curWidth = preWidth + deltaX.value * scaleSmallCellMs!;
-      console.log(deltaX.value * scaleSmallCellMs!, '_+_+');
-      // target.style.width = `${curWidth}px`;
-      // Object.assign(target.dataset, { width: curWidth });
-    }
+    console.log(preLeft, preWidth, 'preLeft,preWidth');
+    deltaX.value = dir === 'left' ? e.deltaRect!.left : e.deltaRect!.right;
   };
+  // 拖拽缩放结束
   const handleResizeEnd = (e: ResizeEvent) => {
     deltaX.value = 0;
     isAdsorption.value = false;
     // stopAutoScroll();
 
     const target = e.target;
-  }; */
-  /* const updateResize = (e: ResizeEvent) => {};
+  };
+  // 更新移动
+  const updateMove = () => {};
+  // 更新缩放
+  const updateResize = (param: { preLeft: number; preWidth: number; dir: 'left' | 'right' }) => {
+    if (!interactable.value) return;
+    const { dir, preWidth, preLeft } = param;
+    const target = interactable.value.target as HTMLElement;
+    if (dir === 'left') {
+      const curLeft = preLeft + deltaX.value;
+      const curWidth = preWidth - deltaX.value;
+      target.style.left = `${curLeft}px`;
+      target.style.width = `${curWidth}px`;
+      Object.assign(target.dataset, { left: curLeft, width: curWidth });
+      unref(actionItem).start = curLeft * unref(scaleUnit)!;
+    }
+    if (dir === 'right') {
+      const curWidth = preWidth + deltaX.value;
+      target.style.width = `${curWidth}px`;
+      Object.assign(target.dataset, { width: curWidth });
+      unref(actionItem).end = (preLeft + curWidth) * unref(scaleUnit)!;
+    }
+  };
+  // 更新宽度
+  const updateWidth = (width: number) => {
+    if (!interactable.value?.target) return;
+    const target = interactable.value.target as HTMLElement;
+    target.style.width = `${width}px`;
+    Object.assign(target.dataset, { width });
+  };
+  // 更新left
+  const updateLeft = (left: number) => {
+    if (!interactable.value?.target) return;
+    const target = interactable.value.target as HTMLElement;
+    target.style.left = `${left}px`;
+    Object.assign(target.dataset, { left });
+  };
   // 初始化互动
-  const initInteractResizable = () => {
+  const initInteractable = () => {
     const el = unrefElement(actionRef);
     if (!el || !unref(actionItem)) return;
-    interact(el).resizable({
+    const interactInst = interact(el);
+    interactInst.draggable({
+      // enable inertial throwing
+      inertia: false,
+      // // keep the element within the area of it's parent
+      modifiers: [
+        interact.modifiers.snap({
+          targets: [interact.snappers.grid({ x: 30, y: 1 })],
+          range: Infinity,
+          relativePoints: [{ x: 0, y: 0 }]
+        })
+      ],
+      onstart: handleMoveStart,
+      onmove: handleMove,
+      // call this function on every dragend event
+      onend: handleMoveEnd
+    });
+    interactInst.resizable({
       edges: { left: true, right: true },
+      modifiers: [snap],
       margin: 5,
       onstart: handleResizeStart,
       onmove: handleResize,
       onend: handleResizeEnd
     });
-  }; */
-  const initInteractDraggable = () => {
-    const el = unrefElement(actionRef);
-    if (!el) return;
-    interact(el).draggable({
-      // enable inertial throwing
-      inertia: false,
-      // // keep the element within the area of it's parent
-      modifiers: [
-        // interact.modifiers.restrict({
-        //   restriction: '#__TIME_LINE_SCROLL_EL_BAR__',
-        //   elementRect: { top: 0, left: 0, bottom: 0, right: 0 },
-        //   offset: {
-        //     top: 0,
-        //     left: 10,
-        //     bottom: 0,
-        //     right: 0
-        //   }
-        // })
-        // interact.modifiers.snap({
-        //   targets: [interact.snappers.grid({ x: 30, y: 1 })],
-        //   range: Infinity,
-        //   relativePoints: [{ x: 0, y: 0 }]
-        // })
-      ],
-      onstart: () => {
-        timeLineStateContext.rowLinePosition.isMoving = true;
-      },
-      onmove: dragMoveListener,
-      // call this function on every dragend event
-      onend: () => {
-        timeLineStateContext.rowLinePosition.isMoving = false;
-        timeLineStateContext.rowLinePosition.y = -1;
-      }
-    });
+    interactable.value = interactInst;
   };
-
   return {
-    // initInteractResizable,
-    initInteractDraggable,
+    initInteractable,
     timeLineStateContext,
     handleClick,
     handleMouseDown,
     handleMouseUp,
     isSelected,
     selectedActionIds,
-    scaleSmallCellMs,
-    scaleSmallCellWidth
+    scaleUnit
   };
 };

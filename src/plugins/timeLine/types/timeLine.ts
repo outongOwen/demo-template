@@ -1,6 +1,6 @@
 import type { Emitter } from '../core/emitter';
 import type { EventTypes } from '../core/events';
-import type { timeLineProps } from '../components/timeLine/checkProps';
+import type { timeLineProps } from '../components/timeLine/props';
 
 export interface TimelineState {
   /** dom节点 */

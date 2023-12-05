@@ -11,10 +11,6 @@ import type { InjectionKey } from 'vue';
  * const context = useInject();
  * context.state
  */
-export interface CreateContextOptions {
-  readonly?: boolean; // 是否只读
-  native?: boolean; // 是否原生
-}
 
 export default function useContext<T>(contextName = 'context') {
   const injectKey: InjectionKey<T> = Symbol(contextName);

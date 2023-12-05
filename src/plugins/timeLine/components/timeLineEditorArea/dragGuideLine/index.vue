@@ -1,0 +1,13 @@
+<!--
+ * new page
+ * @author: owenTong
+ * @since: 2023-12-04
+ * index.vue
+-->
+<template>
+  <div class="container"></div>
+</template>
+
+<script setup lang="ts"></script>
+
+<style scoped></style>
