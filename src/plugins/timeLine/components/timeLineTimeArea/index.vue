@@ -13,7 +13,6 @@
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-import { formatTime } from './util';
 
 defineOptions({
   name: 'TimeLineTimeArea'
@@ -23,12 +22,9 @@ const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
 const timeLineStateContext = injectTimeLineStateContext();
 const { scaleHeight, scaleSmallCellWidth, scaleLargeCellWidth } = toRefs(timeLineContext);
+const { getScaleRender } = timeLineContext;
 const { scaleUnit } = timeLineStateContext;
 const props = defineProps({
-  fps: {
-    type: Number,
-    default: 25
-  },
   scrollLeft: {
     // 滚动距离px, 通过它和 msPerPx，得到刻度绘制的开始时间
     type: Number,
@@ -79,9 +75,9 @@ const drawRule = () => {
       ctx.value.lineTo(x, 0 + 20);
       ctx.value.font = '10px sans-serif';
       const unit = msPerGrid >= 1000 ? 's' : 'f';
-      const timeText = formatTime(curTime, props.fps, unit);
+      const timeText = getScaleRender ? getScaleRender(curTime, unit) : curTime;
       const textWidth = ctx.value.measureText(timeText).width;
-      const textLeft = timeText === '00:00' ? 0 : textWidth / 2;
+      const textLeft = curTime === 0 ? 0 : textWidth / 2;
       ctx.value.fillText(timeText, x - textLeft, 15);
     }
     ctx.value.strokeStyle = '#ffd';

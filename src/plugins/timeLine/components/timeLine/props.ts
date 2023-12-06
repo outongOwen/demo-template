@@ -261,7 +261,7 @@ export const timeLineProps = {
    * @type {Function}
    */
   getScaleRender: {
-    type: Function as PropType<(scale: number) => VNodeChild | Component>,
+    type: Function as PropType<(time: number, unit: 's' | 'f') => VNodeChild | Component>,
     default: null
   },
   /**

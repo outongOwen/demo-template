@@ -320,6 +320,10 @@ const handleChecked = async () => {
     props.options.change && props.options.change(props.options.key, selectValue.value === props.options.key);
   }
 };
+
+/**
+ * Slider
+ */
 watch(
   () => sliderValue.value,
   () => {
@@ -332,9 +336,6 @@ watch(
     immediate: true
   }
 );
-/**
- * Slider
- */
 const handleSliderChange = (value: number) => {
   sliderValue.value = value;
   if (props.options?.marks?.length) {

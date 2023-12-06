@@ -21,6 +21,7 @@
     :scale-small-cell-width="getScaleInfo.scaleSmallCellWidth"
     :scale-large-cell-width="getScaleInfo.scaleLargeCellWidth"
     :scale-small-cell-ms="getScaleInfo.scaleSmallCellMs"
+    :get-scale-render="getScaleRender"
   >
     <template #sidebar="{ itemRow, sideBarRef }">
       <TimeLineSideBar :time-line-row="itemRow" :side-bar-ref="sideBarRef" />
@@ -36,6 +37,7 @@ import { useThemeVars } from 'naive-ui';
 // import type { TimelineRow } from '@/plugins/timeLine';
 import type { MaybeElementRef } from '@vueuse/core';
 import { useTimeLineStore } from '@/store';
+import { formatTime } from '@/utils/scaleTimeFormat';
 import { TimeLine } from '@/plugins/timeLine';
 import useTrackScale from './timeLineScale/useTrackScale';
 import { mockData, effects, sideBars } from './mock';
@@ -50,6 +52,9 @@ const timeLineRef = ref<null>();
 const timeLineStore = useTimeLineStore();
 const sideBarWidth = ref(150);
 const { getScaleInfo } = timeLineStore;
+const getScaleRender = (time: number, unit: 'f' | 's') => {
+  return formatTime(time, 25, unit);
+};
 onMounted(() => {
   // TODO ts
   const timeLineDom = document.getElementsByClassName('time-line')[0] as MaybeElementRef;
