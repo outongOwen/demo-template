@@ -1,5 +1,6 @@
 import { useResizeObserver } from '@vueuse/core';
 import type { MaybeElementRef } from '@vueuse/core';
+import { isNumber } from 'lodash';
 import { useTimeLineStore } from '@/store';
 import { mockData } from '../mock';
 // 约定：带cell单词的代表小格子，grid代表一大格子。
@@ -216,8 +217,11 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
   watch(
     () => getScaleInfo.scale,
     val => {
-      if (!val || val === curScale.value) return;
-      val && changeScale(val);
+      if (val === curScale.value) return;
+      if (isNumber(val)) {
+        curScale.value = val;
+        changeScale(val);
+      }
       timeLineStore.setScaleInfo({
         scaleSmallCellWidth: state.scaleSmallCellWidth,
         scaleLargeCellWidth: state.scaleLargeCellWidth,
