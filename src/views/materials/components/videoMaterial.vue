@@ -15,7 +15,12 @@
       />
     </template>
     <template v-if="options?.areaConfig?.searchForm" #search-form>
-      <video-search-form v-model:formModel="searchFormModel" @search="handleSearch" @reset-form="handleResetSearch" />
+      <video-search-form
+        v-show="!hidSearch"
+        :hidOrgSearch="hidOrgSearch"
+        v-model:formModel="searchFormModel"
+        @search="handleSearch"
+        @reset-form="handleResetSearch" />
     </template>
     <template v-if="options?.areaConfig?.materialBody" #material-body>
       <material-gird-list
@@ -29,6 +34,7 @@
 </template>
 
 <script setup lang="ts">
+import {videoHidden} from "@/hooks/components";
 import { GlobalMaterial } from '@/layouts';
 import VideoItem from '@/components/module/materials/materialItem/VideoItem.vue';
 import VideoSearchForm from '@/components/module/materials/searchForm/VideoForm.vue';
@@ -45,15 +51,22 @@ interface Props {
 }
 const props = defineProps<Props>();
 const { options } = toRefs(props);
+const curSecondMenuKey = ref<string>('');
+
+const hidSearch =  computed(() => {
+  return !!videoHidden.find(v=>v.item === 'all'&&v.code === curSecondMenuKey.value)
+});
+const hidOrgSearch =  computed(() => {
+  return !!videoHidden.find(v=>v.item === 'org'&&v.code === curSecondMenuKey.value)
+});
 const searchFormModel = ref<FromModelInst>({
   name: '',
   firstOrgId: null,
   secondOrgId: null,
-  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
+  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId')),
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('id');
-const curSecondMenuKey = ref<string>('');
 const secondMenuOptions = computed((): GlobalMenuOptions.SecondMenuOptions[] => {
   return options.value?.secondMenuOptions ? options.value?.secondMenuOptions : [];
 });
@@ -92,4 +105,8 @@ const requestList = async (offset: number, pageSize: number): Promise<any> => {
     return Promise.reject(error);
   }
 };
+
+
+let interval
+
 </script>

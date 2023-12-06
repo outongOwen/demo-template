@@ -7,8 +7,9 @@ enum Api {
   GET_SECOND_ORG_INFO = '/api/user-permission/getSecondOrgInfo',
   GET_USER_BIND_LIST = '/api/user-permission/getUserBindList',
   GET_PRE_STATUS = '/openapi/media-editor/pretreatmentAndPro/status',
-  TRANS_PRE = '/openapi/media-editor/pretreatment',
   TRANS_PRE_FAVORITE = '/api/material-product/favorite/pretreatment',
+  TRANS_PRE_TOOL = '/openapi/media-editor/pretreatment',
+  ATTACHMENT_COMMON_TAG = '/api/material-product/attachment-common-tag/findAll',
 }
 export const getCatalogMediumList = (params: any) => {
   return defineHttp.get<Record<string, any>>(
@@ -57,8 +58,20 @@ export const getUserBindList = (params?: any) => {
     }
   );
 };
+// 获取贴图分类
+export const getAttachmentTag = (params?: any) => {
+  return defineHttp.get<CascaderOption[]>(
+    {
+      url: Api.ATTACHMENT_COMMON_TAG,
+      params
+    },
+    {
+      ignoreCancelToken: false
+    }
+  );
+};
 // 获取预处理状态轮询接口
-export const getPreStatus = (params: any) => {
+export const getPreListStatus = (params: any) => {
   return defineHttp.get<CascaderOption[]>(
     {
       url: Api.GET_PRE_STATUS,
@@ -68,11 +81,11 @@ export const getPreStatus = (params: any) => {
       ignoreCancelToken: false
     }
   );
-}
+};
 
 // 视频素材接口
-// 预处理
-export const addVideoPretreatment = (params: any) => {
+// 预处理 -- 收藏
+export const favoritePretreatment = (params: any) => {
   return defineHttp.get<CascaderOption[]>(
     {
       url: Api.TRANS_PRE_FAVORITE,
@@ -83,12 +96,12 @@ export const addVideoPretreatment = (params: any) => {
     }
   );
 }
-// 预处理接口，针对打点拆条工具收藏的视频（内容运营添加的视频）
-// 20230823;收藏视频预处理接口统一
-export const favoritePretreatment = (params: any) => {
+// 视频素材接口
+// 预处理 -- 非收藏
+export const addVideoPretreatment = (params: any) => {
   return defineHttp.get<CascaderOption[]>(
     {
-      url: Api.TRANS_PRE_FAVORITE,
+      url: Api.TRANS_PRE_TOOL,
       params
     },
     {

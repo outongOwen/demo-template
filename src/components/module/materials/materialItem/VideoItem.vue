@@ -16,8 +16,8 @@
             :height="item.height - 20"
             :width="item.width"
             :src="item.injected.keyFrameUrl"
+            :fallback-src="defaultImg"
             :preview-src="item.injected.preUrl"
-            fallback-src=""
             object-fit="contain"
             preview-disabled
           >
@@ -34,7 +34,7 @@
         </div>
       </n-popover>
       <text class="absolute-rb pr3px">
-        {{ formatFrameByTime((item.injected.duration || item.injected.mediaAnalyze.duration) * 1000) }}
+        {{ formatFrameByTime(Number(item.injected.programLength) || item.injected.mediaAnalyze?.duration * 1000 || 0 )}}
       </text>
       <Icon
         v-if="preSuccess"
@@ -48,7 +48,7 @@
         icon="ic:outline-refresh"
         class="icon text-26px"
         :style="{ color: '#096dd9', fontSize: '26px' }"
-        @click.stop="doSomeThing"
+        @click.stop="pretreatmentEvent"
       />
     </div>
     <n-text>
@@ -62,7 +62,8 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 import { formatFrameByTime } from '@/utils';
-
+import {addVideoPretreatment, favoritePretreatment} from "@/service/api";
+import defaultImg from '@/assets/default.png'
 // interface IntersectionObserverOptions {
 //   root?: Element | Document | null | string;
 //   rootMargin?: string;
@@ -79,11 +80,40 @@ interface Props {
 }
 interface Emits {
   (event: 'preview', material: any): void;
+  (event: 'getPreStatus', id: any): void;
 }
 defineOptions({ name: 'VideoItem' });
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 const { item } = toRefs(props);
+
+const pretreatmentEvent = async () => {
+  const id: any = {
+    id: props.item.injected.id,
+    extend:  props.item.injected.extend,
+  }
+  if ( props.item.injected.mediaType) {
+    //收藏视频
+    await favoritePretreatment({
+      favoriteId:  props.item.injected.favoriteId,
+    })
+  } else {
+    await addVideoPretreatment(id)
+  }
+  let searchStatusId = id.id
+  if ( props.item.injected.source == 1) {
+    // 如果是拆条打点数据来源
+    try {
+      searchStatusId = JSON.parse(
+        JSON.parse(id.extend).pretreatment
+      ).mediaId
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  props.item.injected.preStatus = 4
+  emits('getPreStatus',searchStatusId)
+}
 const preSuccess = computed(() => {
   // 如果预处理状态preStatus == 5并且有preUrl,判定当前是预处理完成
   return (

@@ -15,29 +15,36 @@
           <!--          <n-form-item-gi path="firstOrgId">-->
           <!--            <n-select clearable v-model:value="searchFormModel.firstOrgId" label-field="orgName" value-field="orgId" placeholder="一级" :options="firstOrgOptions" />-->
           <!--          </n-form-item-gi>-->
-          <n-form-item-gi :span="2" path="secondOrgId">
-            <n-cascader
-              v-model:value="searchFormModel.secondOrgId"
-              clearable
-              label-field="orgName"
-              value-field="orgId"
-              :options="firstOrgOptions"
-              remote
-              @load="loadSecond"
-            />
-            <!--            <n-select clearable v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />-->
-          </n-form-item-gi>
-          <n-form-item-gi path="userIdFromWeb">
-            <n-select
-              v-model:value="searchFormModel.userIdFromWeb"
-              clearable
-              label-field="userName"
-              value-field="userId"
-              placeholder="三级"
-              :options="userBindList"
-            />
-          </n-form-item-gi>
-          <n-form-item-gi span="2" path="multipleSelectValue">
+          <template v-if="!hidOrgSearch">
+            <n-form-item-gi :span="2" path="secondOrgId">
+              <n-cascader
+                v-model:value="orgID"
+                clearable
+                label-field="orgName"
+                value-field="orgId"
+                :options="firstOrgOptions"
+                :on-update:value="selOrg"
+                remote
+                @load="loadSecond"
+              />
+              <!--            <n-select clearable v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />-->
+            </n-form-item-gi>
+          </template>
+          <template v-if="!hidOrgSearch">
+            <n-form-item-gi path="userIdFromWeb">
+              <n-select
+                v-model:value="searchFormModel.userIdFromWeb"
+                check-strategy="parent"
+                clearable
+                filterable
+                label-field="userName"
+                value-field="userId"
+                placeholder="三级"
+                :options="userBindList"
+              />
+            </n-form-item-gi>
+          </template>
+          <n-form-item-gi span="2">
             <n-space justify="end" :wrap-item="false" class="w100%">
               <n-button @click="resetForm">重置</n-button>
               <n-button type="primary" secondary @click="() => handleSearch('onlyMe')">只看我</n-button>
@@ -68,18 +75,20 @@ export interface FromModelInst {
 }
 interface Props {
   formModel: FromModelInst;
+  hidOrgSearch: boolean;
 }
 interface Emits {
   (e: 'update:formModel', value: FromModelInst): void;
   (e: 'search', value: FromModelInst, type?: string): void;
   (e: 'resetForm'): void;
 }
-
+const orgID = ref<number|undefined>()
 const { injectFirstOrgContext } = provideFirstOrgList();
 const { injectFullUserContext } = provideFullUserList();
 const firstOrgOptions = injectFirstOrgContext();
 const userBindList = injectFullUserContext();
 const props = defineProps<Props>();
+const { hidOrgSearch } = toRefs(props)
 const emits = defineEmits<Emits>();
 const formRef = ref<FormInst>();
 let defaultFormModel: FromModelInst;
@@ -88,6 +97,15 @@ const resetForm = () => {
   Object.assign(searchFormModel.value, cloneDeep(defaultFormModel));
   emits('resetForm');
 };
+const selOrg = (val:number,option: any,pathValues: Array<any>)=>{
+  if (option.orgLevel === 1){
+    searchFormModel.value.firstOrgId = val;
+    searchFormModel.value.secondOrgId = null
+  }else{
+    searchFormModel.value.firstOrgId = pathValues[0]?.orgId || null
+    searchFormModel.value.secondOrgId = val
+  }
+}
 const loadSecond = (option: CascaderOption) => {
   return getSecondOrgInfo({ page: 1, rows: 999, parentOrgId: option.orgId }).then(res => {
     option.children = res.content;
@@ -99,6 +117,7 @@ const handleSearch = (type?: string) => {
   emits('search', searchFormModel.value, type);
 };
 onMounted(() => {
+  console.log(searchFormModel)
   defaultFormModel = cloneDeep(searchFormModel.value);
 });
 </script>

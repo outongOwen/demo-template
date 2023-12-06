@@ -44,7 +44,7 @@
               <n-image
                 :src="materialData.path"
                 :preview-src="materialData.path"
-                fallback-src=""
+                :fallback-src="defaultImg"
                 object-fit="contain"
                 preview-disabled
                 @load="handleImageLoad"
@@ -90,6 +90,7 @@ import Player from 'xgplayer';
 import MusicPreset, { Analyze } from 'xgplayer-music';
 import Mp4Plugin from 'xgplayer-mp4';
 import { useThemeStore } from '@/store';
+import defaultImg from '@/assets/default.png'
 defineOptions({ name: 'MaterialPreviewModal', inheritAttrs: false });
 export type PlayerType = 'video' | 'music' | 'picture' | 'transparent';
 interface Props {

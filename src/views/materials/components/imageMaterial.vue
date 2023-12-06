@@ -15,7 +15,12 @@
       />
     </template>
     <template v-if="options?.areaConfig?.searchForm" #search-form>
-      <image-search-form v-model:formModel="searchFormModel" @search="handleSearch" @reset-form="handleResetSearch" />
+      <image-search-form
+        v-show="!hidSearch"
+        :hidType="hidType"
+        v-model:formModel="searchFormModel"
+        @search="handleSearch"
+        @reset-form="handleResetSearch" />
     </template>
     <template v-if="options?.areaConfig?.materialBody" #material-body>
       <material-gird-list
@@ -29,6 +34,7 @@
 </template>
 
 <script setup lang="ts">
+import {imageHidden} from "@/hooks/components";
 import { GlobalMaterial } from '@/layouts';
 import ImageItem from '@/components/module/materials/materialItem/ImageItem.vue';
 import ImageSearchForm from '@/components/module/materials/searchForm/ImageForm.vue';
@@ -49,7 +55,16 @@ const searchFormModel = ref<FromModelInst>({
   name: '',
   firstOrgId: null,
   secondOrgId: null,
+  elementTag: null,
   userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
+});
+
+const hidSearch =  computed(() => {
+  return !!imageHidden.find(v=>v.item === 'all'&&v.code === curSecondMenuKey.value)
+});
+const hidType =  computed(() => {
+  const item = imageHidden.find(v => v.code === curSecondMenuKey.value)
+  return item ? item.item : ''
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('id');

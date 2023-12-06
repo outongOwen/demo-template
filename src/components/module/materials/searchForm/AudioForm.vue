@@ -12,31 +12,41 @@
           <n-form-item-gi path="name">
             <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
           </n-form-item-gi>
-          <!--          <n-form-item-gi path="firstOrgId">-->
-          <!--            <n-select v-model:value="searchFormModel.firstOrgId" placeholder="一级" :options="generalOptions()" />-->
-          <!--          </n-form-item-gi>-->
-          <n-form-item-gi :span="2" path="secondOrgId">
-            <n-cascader
-              v-model:value="searchFormModel.secondOrgId"
-              clearable
-              label-field="orgName"
-              value-field="orgId"
-              :options="firstOrgOptions"
-              remote
-              @load="loadSecond"
-            />
-            <!--            <n-select v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />-->
-          </n-form-item-gi>
-          <n-form-item-gi path="userIdFromWeb">
-            <n-select
-              v-model:value="searchFormModel.userIdFromWeb"
-              clearable
-              label-field="userName"
-              value-field="userId"
-              placeholder="三级"
-              :options="userBindList"
-            />
-          </n-form-item-gi>
+          <template v-if="hidType === 'org'">
+            <n-form-item-gi :span="2" path="secondOrgId">
+              <n-cascader
+                v-model:value="searchFormModel.secondOrgId"
+                clearable
+                label-field="orgName"
+                value-field="orgId"
+                :options="firstOrgOptions"
+                remote
+                @load="loadSecond"
+              />
+            </n-form-item-gi>
+            <n-form-item-gi path="userIdFromWeb">
+              <n-select
+                v-model:value="searchFormModel.userIdFromWeb"
+                clearable
+                label-field="userName"
+                value-field="userId"
+                placeholder="三级"
+                :options="userBindList"
+              />
+            </n-form-item-gi>
+          </template>
+          <template v-if="hidType === 'music'||hidType === 'effect'">
+            <n-form-item-gi path="userIdFromWeb">
+              <n-select
+                v-model:value="searchFormModel.userIdFromWeb"
+                clearable
+                label-field="name"
+                value-field="id"
+                placeholder="请选择分类"
+                :options="hidType === 'music'?musicTagList:effectTagList"
+              />
+            </n-form-item-gi>
+          </template>
           <n-form-item-gi span="2" path="multipleSelectValue">
             <n-space justify="end" :wrap-item="false" class="w100%">
               <n-button @click="resetForm">重置</n-button>
@@ -52,21 +62,24 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInst, CascaderOption } from 'naive-ui';
-import { cloneDeep } from 'lodash';
-import { useVModel } from '@vueuse/core';
-import { getSecondOrgInfo } from '@/service/api';
-import { provideFirstOrgList, provideFullUserList } from '@/views/materials/hooks';
+import type {CascaderOption, FormInst} from 'naive-ui';
+import {cloneDeep} from 'lodash';
+import {useVModel} from '@vueuse/core';
+import {getAttachmentTag, getSecondOrgInfo} from '@/service/api';
+import {provideFirstOrgList, provideFullUserList} from '@/views/materials/hooks';
+
 defineOptions({ name: 'AudioSearchForm' });
 export interface FromModelInst {
   name: string | null;
   firstOrgId?: number | null;
   secondOrgId: number | null;
   userIdFromWeb: number | null;
+  elementTag: number | null;
   [key: string]: unknown;
 }
 interface Props {
   formModel: FromModelInst;
+  hidType: string
 }
 interface Emits {
   (e: 'update:formModel', value: FromModelInst): void;
@@ -74,6 +87,11 @@ interface Emits {
   (e: 'resetForm'): void;
 }
 const props = defineProps<Props>();
+
+const {hidType} = toRefs(props)
+const musicTagList = ref<CascaderOption[]>([]);
+const effectTagList = ref<CascaderOption[]>([]);
+
 const emits = defineEmits<Emits>();
 const formRef = ref<FormInst>();
 const { injectFirstOrgContext } = provideFirstOrgList();
@@ -95,8 +113,10 @@ const loadSecond = (option: CascaderOption) => {
     Promise.resolve();
   });
 };
-onMounted(() => {
+onMounted(async () => {
   defaultFormModel = cloneDeep(searchFormModel.value);
+  musicTagList.value = await getAttachmentTag({type: 1})
+  effectTagList.value = await getAttachmentTag({type: 2})
 });
 </script>
 

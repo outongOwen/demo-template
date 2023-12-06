@@ -20,7 +20,7 @@
       "
     >
       <template #default="{ item }">
-        <component :is="renderComponent" v-if="renderComponent" :item="item" @preview="handlePreview" />
+        <component :is="renderComponent" v-if="renderComponent" :item="item" @getPreStatus="getPreStatus" @preview="handlePreview" />
       </template>
     </virtual-grid>
     <div v-if="errored" class="absolute-center wh-full flex">
@@ -42,6 +42,7 @@ import type { Item as GridItem } from '@/components/custom/VirtualGrid.vue';
 import VirtualGrid from '@/components/custom/VirtualGrid.vue';
 import MaterialPreviewModal from '@/components/module/materials/materialPreviewModal/index.vue';
 import type { PlayerType } from '@/components/module/materials/materialPreviewModal/index.vue';
+import {getPreListStatus} from "@/service/api";
 defineOptions({ name: 'MaterialList' });
 interface ExposeAPI {
   refreshList: () => void;
@@ -137,10 +138,58 @@ const handlePreview = (material: any) => {
   previewMaterial.value = material.injected;
 };
 
+let intervalId: any;
+const prePollingList = ref<number[]>([])
+const getPreStatus = (id) => {
+  if (id){
+    prePollingList.value.push(id)
+  }
+  clearInterval(intervalId)
+  intervalId = setInterval(() => {
+    const ids = { ids: prePollingList.value.toString() }
+    getPretreatmentStatusInterval(ids)
+  }, 4000)
+};
+const preFlag = ref(true)
+// 预处理状态轮询接口
+const getPretreatmentStatusInterval = async(ids: any) => {
+  if (!preFlag.value) return
+  preFlag.value = false
+  try {
+    const resData: any = await getPreListStatus(ids)
+    preFlag.value = true
+    if (resData.success) {
+      const successItem: any = resData.result
+      if (successItem.length) {
+        // 轮询成功后删除对应的轮询ID
+        successItem.forEach((v: any) => {
+          if (
+            v.status !== '2' &&
+            v.status !== '4' &&
+            v.proStatus !== '2'
+          ) {
+            prePollingList.value.splice(
+              prePollingList.value.indexOf(v.id),
+              1
+            ) // preStatus不是2和4，statusProduct不是2，删除记录的id
+            refreshList()
+            if (!prePollingList.value.length){
+              clearInterval(intervalId)
+            }
+          }
+        })
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
 onMounted(() => {
   initializeList();
 });
-
+onBeforeUnmount(()=>{
+  clearInterval(intervalId)
+})
 defineExpose<ExposeAPI>({
   refreshList
 });

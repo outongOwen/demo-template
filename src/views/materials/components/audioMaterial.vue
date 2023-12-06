@@ -15,7 +15,11 @@
       />
     </template>
     <template v-if="options?.areaConfig?.searchForm" #search-form>
-      <audio-search-form v-model:formModel="searchFormModel" @search="handleSearch" @reset-form="handleResetSearch" />
+      <audio-search-form
+        :hidType="hidType"
+        v-model:formModel="searchFormModel"
+        @search="handleSearch"
+        @reset-form="handleResetSearch" />
     </template>
     <template v-if="options?.areaConfig?.materialBody" #material-body>
       <material-gird-list
@@ -45,11 +49,23 @@ interface Props {
 }
 const props = defineProps<Props>();
 const { options } = toRefs(props);
+const hidType = computed(()=>{
+  let hidType: string;
+  if (curSecondMenuKey.value === '110200'){
+    hidType = 'org'
+  }else if (curSecondMenuKey.value === '110300'){
+    hidType = 'music'
+  }else{
+    hidType = 'effect'
+  }
+  return hidType
+})
 const searchFormModel = ref<FromModelInst>({
   name: '',
   firstOrgId: null,
   secondOrgId: null,
-  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
+  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId')),
+  elementTag: null
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('id');
@@ -58,12 +74,20 @@ const secondMenuOptions = computed((): GlobalMenuOptions.SecondMenuOptions[] => 
   return options.value?.secondMenuOptions ? options.value?.secondMenuOptions : [];
 });
 const queryCondition = computed((): QueryCondition => {
-  return {
+  const params = {
     ...searchFormModel.value,
     ...{
       id: curSecondMenuKey.value
     }
   };
+  if (curSecondMenuKey.value === '110200'){
+    params.materialType = '2'
+  }else if (curSecondMenuKey.value === '110300'){
+    params.elementType = '1'
+  }else{
+    params.elementType = '2'
+  }
+  return params
 });
 watchEffect(() => {
   curSecondMenuKey.value = secondMenuOptions.value.length ? (secondMenuOptions.value[0][keyField.value] as string) : '';
