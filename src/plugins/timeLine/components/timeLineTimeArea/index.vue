@@ -5,7 +5,11 @@
  * index.vue
 -->
 <template>
-  <div ref="timeLineRuleRef" class="w100% color-#fff pr-8px" :style="{ height: scaleHeight + 'px' }">
+  <div
+    ref="timeLineRuleRef"
+    class="w100% color-#fff pr-8px"
+    :style="{ height: scaleHeight + 'px', marginLeft: `${leftOffset}px` }"
+  >
     <canvas ref="ruleRef"></canvas>
   </div>
 </template>
@@ -21,7 +25,7 @@ const { injectTimeLineContext } = useTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
 const timeLineStateContext = injectTimeLineStateContext();
-const { scaleHeight, scaleSmallCellWidth, scaleLargeCellWidth } = toRefs(timeLineContext);
+const { scaleHeight, scaleSmallCellWidth, scaleLargeCellWidth, leftOffset } = toRefs(timeLineContext);
 const { getScaleRender } = timeLineContext;
 const { scaleUnit } = timeLineStateContext;
 const props = defineProps({

@@ -9,7 +9,7 @@ export const ROW_ACTIVE_BACKGROUND = 'rgba(70,70,70,1)';
 /** 默认时间线主轴背景色 */
 export const MAIN_ROW_BACKGROUND = 'rgba(100,100,100,1)';
 /** 默认时间线操作区左侧偏移量 */
-export const LEFT_OFFSET = 0;
+export const LEFT_OFFSET = 10;
 /** 默认行高 */
 export const ROW_HEIGHT = 50;
 /** 默认行间距 */
