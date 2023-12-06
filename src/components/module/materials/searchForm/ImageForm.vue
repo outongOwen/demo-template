@@ -8,53 +8,53 @@
   <div class="wh-full">
     <div class="px-10px">
       <n-form ref="formRef" :model="searchFormModel" size="small" label-placement="top" :show-label="false" inline>
-          <n-grid cols="1 400:2 700:6" :x-gap="5">
-            <template v-if="hidType === 'name&type'">
-              <n-form-item-gi :span="2" path="secondOrgId">
-                <n-cascader
-                  v-model:value="searchFormModel.secondOrgId"
-                  clearable
-                  label-field="orgName"
-                  value-field="orgId"
-                  :options="firstOrgOptions"
-                  remote
-                  @load="loadSecond"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi path="userIdFromWeb">
-                <n-select
-                  v-model:value="searchFormModel.userIdFromWeb"
-                  clearable
-                  label-field="userName"
-                  value-field="userId"
-                  placeholder="三级"
-                  :options="userBindList"
-                />
-              </n-form-item-gi>
-            </template>
-            <template v-if="hidType === 'org'">
-              <n-form-item-gi path="name">
-                <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
-              </n-form-item-gi>
-              <n-form-item-gi path="elementTag">
-                <n-select
-                  v-model:value="searchFormModel.elementTag"
-                  clearable
-                  label-field="name"
-                  value-field="id"
-                  placeholder="请选择贴图分类"
-                  :options="tagList"
-                />
-              </n-form-item-gi>
-            </template>
-            <n-form-item-gi span="1 400:1 700:3" path="multipleSelectValue">
-              <n-space justify="end" :wrap-item="false" class="w100%">
-                <n-button @click="resetForm">重置</n-button>
-                <n-button type="primary" secondary @click="() => handleSearch()">只看我</n-button>
-                <n-button type="primary" @click="() => handleSearch('onlyMe')">搜索</n-button>
-              </n-space>
+        <n-grid cols="1 400:2 700:6" :x-gap="5">
+          <template v-if="hidType === 'name&type'">
+            <n-form-item-gi :span="2" path="secondOrgId">
+              <n-cascader
+                v-model:value="searchFormModel.secondOrgId"
+                clearable
+                label-field="orgName"
+                value-field="orgId"
+                :options="firstOrgOptions"
+                remote
+                @load="loadSecond"
+              />
             </n-form-item-gi>
-          </n-grid>
+            <n-form-item-gi path="userIdFromWeb">
+              <n-select
+                v-model:value="searchFormModel.userIdFromWeb"
+                clearable
+                label-field="userName"
+                value-field="userId"
+                placeholder="三级"
+                :options="userBindList"
+              />
+            </n-form-item-gi>
+          </template>
+          <template v-if="hidType === 'org'">
+            <n-form-item-gi path="name">
+              <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
+            </n-form-item-gi>
+            <n-form-item-gi path="elementTag">
+              <n-select
+                v-model:value="searchFormModel.elementTag"
+                clearable
+                label-field="name"
+                value-field="id"
+                placeholder="请选择贴图分类"
+                :options="tagList"
+              />
+            </n-form-item-gi>
+          </template>
+          <n-form-item-gi span="1 400:1 700:3" path="multipleSelectValue">
+            <n-space justify="end" :wrap-item="false" class="w100%">
+              <n-button @click="resetForm">重置</n-button>
+              <n-button type="primary" secondary @click="() => handleSearch()">只看我</n-button>
+              <n-button type="primary" @click="() => handleSearch('onlyMe')">搜索</n-button>
+            </n-space>
+          </n-form-item-gi>
+        </n-grid>
       </n-form>
     </div>
     <n-divider class="mt0px! mb15px!" />
@@ -65,7 +65,7 @@
 import type { FormInst, CascaderOption } from 'naive-ui';
 import { cloneDeep } from 'lodash';
 import { useVModel } from '@vueuse/core';
-import {getAttachmentTag, getSecondOrgInfo} from '@/service/api';
+import { getAttachmentTag, getSecondOrgInfo } from '@/service/api';
 import { provideFirstOrgList, provideFullUserList } from '@/views/materials/hooks';
 defineOptions({ name: 'VideoSearchForm' });
 export interface FromModelInst {
@@ -73,11 +73,12 @@ export interface FromModelInst {
   firstOrgId?: number | null;
   secondOrgId: number | null;
   userIdFromWeb: number | null;
+  elementTag: number | null;
   [key: string]: unknown;
 }
 interface Props {
   formModel: FromModelInst;
-  hidType: string
+  hidType: string;
 }
 interface Emits {
   (e: 'update:formModel', value: FromModelInst): void;
@@ -86,8 +87,8 @@ interface Emits {
 }
 const props = defineProps<Props>();
 
-const {hidType} = toRefs(props)
-const tagList = ref<CascaderOption[]>([])
+const { hidType } = toRefs(props);
+const tagList = ref<CascaderOption[]>([]);
 const emits = defineEmits<Emits>();
 const formRef = ref<FormInst>();
 const { injectFirstOrgContext } = provideFirstOrgList();
@@ -111,8 +112,8 @@ const loadSecond = (option: CascaderOption) => {
 };
 onMounted(async () => {
   defaultFormModel = cloneDeep(searchFormModel.value);
-  const data = await getAttachmentTag({type:3})
-  tagList.value = data
+  const data = await getAttachmentTag({ type: 3 });
+  tagList.value = data;
 });
 </script>
 

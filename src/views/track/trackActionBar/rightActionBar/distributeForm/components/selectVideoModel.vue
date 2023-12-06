@@ -227,4 +227,3 @@ onMounted(() => {
   getList();
 });
 </script>
-~/src/views/track/trackActionBar/rightActionBar/distributeForm/hooks/provide

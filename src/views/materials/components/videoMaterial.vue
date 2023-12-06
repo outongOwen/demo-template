@@ -17,10 +17,11 @@
     <template v-if="options?.areaConfig?.searchForm" #search-form>
       <video-search-form
         v-show="!hidSearch"
-        :hidOrgSearch="hidOrgSearch"
         v-model:formModel="searchFormModel"
+        :hid-org-search="hidOrgSearch"
         @search="handleSearch"
-        @reset-form="handleResetSearch" />
+        @reset-form="handleResetSearch"
+      />
     </template>
     <template v-if="options?.areaConfig?.materialBody" #material-body>
       <material-gird-list
@@ -34,8 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import {videoHidden} from "@/hooks/components";
 import { GlobalMaterial } from '@/layouts';
+import { videoHidden } from '@/hooks/components';
 import VideoItem from '@/components/module/materials/materialItem/VideoItem.vue';
 import VideoSearchForm from '@/components/module/materials/searchForm/VideoForm.vue';
 import SecondMenuRadioButton from '@/components/custom/RadioButtonGroup.vue';
@@ -53,17 +54,17 @@ const props = defineProps<Props>();
 const { options } = toRefs(props);
 const curSecondMenuKey = ref<string>('');
 
-const hidSearch =  computed(() => {
-  return !!videoHidden.find(v=>v.item === 'all'&&v.code === curSecondMenuKey.value)
+const hidSearch = computed(() => {
+  return Boolean(videoHidden.find(v => v.item === 'all' && v.code === curSecondMenuKey.value));
 });
-const hidOrgSearch =  computed(() => {
-  return !!videoHidden.find(v=>v.item === 'org'&&v.code === curSecondMenuKey.value)
+const hidOrgSearch = computed(() => {
+  return Boolean(videoHidden.find(v => v.item === 'org' && v.code === curSecondMenuKey.value));
 });
 const searchFormModel = ref<FromModelInst>({
   name: '',
   firstOrgId: null,
   secondOrgId: null,
-  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId')),
+  userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('id');
@@ -105,8 +106,4 @@ const requestList = async (offset: number, pageSize: number): Promise<any> => {
     return Promise.reject(error);
   }
 };
-
-
-let interval
-
 </script>

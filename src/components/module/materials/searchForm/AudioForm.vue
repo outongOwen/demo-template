@@ -35,7 +35,7 @@
               />
             </n-form-item-gi>
           </template>
-          <template v-if="hidType === 'music'||hidType === 'effect'">
+          <template v-if="hidType === 'music' || hidType === 'effect'">
             <n-form-item-gi path="userIdFromWeb">
               <n-select
                 v-model:value="searchFormModel.userIdFromWeb"
@@ -43,7 +43,7 @@
                 label-field="name"
                 value-field="id"
                 placeholder="请选择分类"
-                :options="hidType === 'music'?musicTagList:effectTagList"
+                :options="hidType === 'music' ? musicTagList : effectTagList"
               />
             </n-form-item-gi>
           </template>
@@ -62,11 +62,11 @@
 </template>
 
 <script setup lang="ts">
-import type {CascaderOption, FormInst} from 'naive-ui';
-import {cloneDeep} from 'lodash';
-import {useVModel} from '@vueuse/core';
-import {getAttachmentTag, getSecondOrgInfo} from '@/service/api';
-import {provideFirstOrgList, provideFullUserList} from '@/views/materials/hooks';
+import type { CascaderOption, FormInst } from 'naive-ui';
+import { cloneDeep } from 'lodash';
+import { useVModel } from '@vueuse/core';
+import { getAttachmentTag, getSecondOrgInfo } from '@/service/api';
+import { provideFirstOrgList, provideFullUserList } from '@/views/materials/hooks';
 
 defineOptions({ name: 'AudioSearchForm' });
 export interface FromModelInst {
@@ -79,7 +79,7 @@ export interface FromModelInst {
 }
 interface Props {
   formModel: FromModelInst;
-  hidType: string
+  hidType: string;
 }
 interface Emits {
   (e: 'update:formModel', value: FromModelInst): void;
@@ -88,7 +88,7 @@ interface Emits {
 }
 const props = defineProps<Props>();
 
-const {hidType} = toRefs(props)
+const { hidType } = toRefs(props);
 const musicTagList = ref<CascaderOption[]>([]);
 const effectTagList = ref<CascaderOption[]>([]);
 
@@ -115,8 +115,8 @@ const loadSecond = (option: CascaderOption) => {
 };
 onMounted(async () => {
   defaultFormModel = cloneDeep(searchFormModel.value);
-  musicTagList.value = await getAttachmentTag({type: 1})
-  effectTagList.value = await getAttachmentTag({type: 2})
+  musicTagList.value = await getAttachmentTag({ type: 1 });
+  effectTagList.value = await getAttachmentTag({ type: 2 });
 });
 </script>
 

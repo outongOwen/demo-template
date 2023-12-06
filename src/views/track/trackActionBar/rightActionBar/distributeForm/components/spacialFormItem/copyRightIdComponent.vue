@@ -35,4 +35,3 @@ const openModal = () => {
 </script>
 
 <style scoped></style>
-~/src/views/track/trackActionBar/rightActionBar/distributeForm/hooks

@@ -17,10 +17,11 @@
     <template v-if="options?.areaConfig?.searchForm" #search-form>
       <image-search-form
         v-show="!hidSearch"
-        :hidType="hidType"
         v-model:formModel="searchFormModel"
+        :hid-type="hidType"
         @search="handleSearch"
-        @reset-form="handleResetSearch" />
+        @reset-form="handleResetSearch"
+      />
     </template>
     <template v-if="options?.areaConfig?.materialBody" #material-body>
       <material-gird-list
@@ -34,8 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import {imageHidden} from "@/hooks/components";
 import { GlobalMaterial } from '@/layouts';
+import { imageHidden } from '@/hooks/components';
 import ImageItem from '@/components/module/materials/materialItem/ImageItem.vue';
 import ImageSearchForm from '@/components/module/materials/searchForm/ImageForm.vue';
 import SecondMenuRadioButton from '@/components/custom/RadioButtonGroup.vue';
@@ -58,17 +59,16 @@ const searchFormModel = ref<FromModelInst>({
   elementTag: null,
   userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
 });
-
-const hidSearch =  computed(() => {
-  return !!imageHidden.find(v=>v.item === 'all'&&v.code === curSecondMenuKey.value)
+const curSecondMenuKey = ref<string>('');
+const hidSearch = computed(() => {
+  return Boolean(imageHidden.find(v => v.item === 'all' && v.code === curSecondMenuKey.value));
 });
-const hidType =  computed(() => {
-  const item = imageHidden.find(v => v.code === curSecondMenuKey.value)
-  return item ? item.item : ''
+const hidType = computed(() => {
+  const item = imageHidden.find(v => v.code === curSecondMenuKey.value);
+  return item ? item.item : '';
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('id');
-const curSecondMenuKey = ref<string>('');
 const secondMenuOptions = computed((): GlobalMenuOptions.SecondMenuOptions[] => {
   return options.value?.secondMenuOptions ? options.value?.secondMenuOptions : [];
 });
