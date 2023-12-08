@@ -93,16 +93,6 @@ export function getAllEnum(that: any, isCmam = false) {
     //   type: 'contentForm',
     //   enumValues: 'content_form_list',
     // },
-    // 片头片尾
-    {
-      enumValues: 'watermarkPath',
-      type: 'watermarkPathList',
-      handler(arg: any) {
-        arg.forEach((item: any) => {
-          if (item.label === '2019片头片尾') vue.formData.watermarkPath = item.watermarkPath;
-        });
-      }
-    }
   ];
   arr.forEach(v => {
     getContentEnumList(v.params, v.type, isCmam, v.handler, v.enumValues);

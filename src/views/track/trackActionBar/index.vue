@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import LeftActionBar from './leftActionBar/index.vue';
 import RightActionBar from './rightActionBar/index.vue';
+
 defineOptions({
   name: 'TrackActionBar'
 });

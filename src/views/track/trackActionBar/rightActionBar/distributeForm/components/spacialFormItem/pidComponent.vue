@@ -1,10 +1,11 @@
 <template>
   <div class="flex w-100%">
-    <n-select v-model:value="formData.optType" clearable class="w-150px m-r-10px" :options="optTypeOptions"></n-select>
+    <n-select v-model:value="formData.optType" class="w-150px m-r-10px" :options="optTypeOptions"></n-select>
     <n-select
       v-show="!formData.optType"
       v-model:value="formData.pid"
       :on-update:value="pidChange"
+      placeholder="请选择PID"
       clearable
       filterable
       remote

@@ -44,8 +44,6 @@ import { MaterialGirdList } from './common';
 defineOptions({ name: 'AudioMaterial' });
 interface QueryCondition extends FromModelInst {
   id: string;
-  materialType?: string;
-  elementType?: string;
 }
 interface Props {
   options: GlobalMenuOptions.ExtendMenuOptions;
@@ -69,7 +67,7 @@ const searchFormModel = ref<FromModelInst>({
   firstOrgId: null,
   secondOrgId: null,
   userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId')),
-  elementTag: null
+  elementType: null
 });
 const materialListRef = ref<InstanceType<typeof MaterialGirdList> | null>(null);
 const keyField = ref<string>('id');

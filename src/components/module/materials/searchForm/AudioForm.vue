@@ -38,7 +38,7 @@
           <template v-if="hidType === 'music' || hidType === 'effect'">
             <n-form-item-gi path="userIdFromWeb">
               <n-select
-                v-model:value="searchFormModel.userIdFromWeb"
+                v-model:value="searchFormModel.elementType"
                 clearable
                 label-field="name"
                 value-field="id"
@@ -74,7 +74,7 @@ export interface FromModelInst {
   firstOrgId?: number | null;
   secondOrgId: number | null;
   userIdFromWeb: number | null;
-  elementTag: number | null;
+  elementType: string | null;
   [key: string]: unknown;
 }
 interface Props {

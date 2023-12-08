@@ -61,6 +61,7 @@
               <n-select
                 v-model:value="formData[item.key]"
                 clearable
+                :multiple="item.multiple"
                 :options="enumOptionsList[item.optName]"
                 :placeholder="item.holder"
               ></n-select>
@@ -145,8 +146,8 @@ const categoryOptObj = reactive<categoryOptDiff>({
   normal: []
 });
 watch(
-  () => formData.platformListValue,
-  async (newVal: number[]) => {
+  () => formData.value.platformListValue,
+  async (newVal: string[]) => {
     isInitialAssetIdFn();
     if (isMixedEdit) {
       isEditing.value = newVal.some((d: any) => d == '11');
@@ -170,9 +171,9 @@ watch(
     } else {
       enumOptionsList.categoryOpt = categoryOptObj.normal;
     }
-    if (newVal && newVal.includes(-1)) {
+    if (newVal && newVal.includes('-1')) {
       setList(false);
-    } else if (newVal && newVal.includes(-3)) {
+    } else if (newVal && newVal.includes('-3')) {
       if (listObject.CmamcategoryOpt) {
         getAllEnum({ formData, listObject, enumOptionsList }, true);
       } else {
@@ -187,6 +188,24 @@ watch(
   (val: boolean) => {
     const country = formInitMap.find((v: any) => v.key === 'country');
     country.show = val;
+  },
+  { immediate: true }
+);
+watch(
+  () => formData.value.categoryValue,
+  async (val: string) => {
+    enumOptionsList.lablesByCatIdOpt = [];
+    formData.value.labelsValue = [];
+    const parmStr: any = {categoryId:val}
+    if (formData.value.platformListValue.find((item: any) => item === '0')){
+      parmStr.platform = '0'
+    }
+    const params = {
+      urlCode: 'category_list',
+      parmStr: jsonToQuery(parmStr)
+    }
+    const data = await getDistributeEnum(params);
+    enumOptionsList.lablesByCatIdOpt = data.map((v: any)=> ({label: v.categoryName,value: v.categoryId}))
   },
   { immediate: true }
 );

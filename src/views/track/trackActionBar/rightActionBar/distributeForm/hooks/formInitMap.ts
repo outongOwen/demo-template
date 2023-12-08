@@ -1,7 +1,7 @@
-import pidComponent from '../components/spacialFormItem/pidComponent.vue'
-import copyRightIdComponent from '../components/spacialFormItem/copyRightIdComponent.vue'
-
-export const radioPlatForm: Array<string> = ['-3','-2','-1','0','1','2']
+import type { FormItemRule } from 'naive-ui';
+import pidComponent from '../components/spacialFormItem/pidComponent.vue';
+import copyRightIdComponent from '../components/spacialFormItem/copyRightIdComponent.vue';
+export const radioPlatForm: Array<string> = ['-3', '-2', '-1', '0', '1', '2'];
 
 export const editLongParams: Array<string> = [
   'cpLogoPath',
@@ -19,23 +19,23 @@ export const editLongParams: Array<string> = [
   'commitCheck',
   'coverSwitch',
   'mediaType',
-  'miguDefaultLogo',
+  'miguDefaultLogo'
 ];
 export const queryArrayLeft: any[] = [
   {
     type: 'textarea',
     label: '标题：',
     key: 'title',
-    length: (isEditingOrMedia: boolean) => isEditingOrMedia ? 60 : 50,
+    length: (isEditingOrMedia: boolean) => (isEditingOrMedia ? 60 : 50),
     holder: '请输入标题',
     show: true,
     rules: [
       {
         required: true,
         message: '请输入标题',
-        trigger: ['blur'],
-      },
-    ],
+        trigger: ['blur']
+      }
+    ]
   },
   {
     type: 'component',
@@ -48,9 +48,9 @@ export const queryArrayLeft: any[] = [
       {
         required: true,
         message: '请选择来源',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'input',
@@ -62,9 +62,9 @@ export const queryArrayLeft: any[] = [
       {
         required: false,
         message: '请输入来源媒资ID',
-        trigger: ['blur', 'change'],
-      },
-    ],
+        trigger: ['blur', 'change']
+      }
+    ]
   },
   {
     type: 'textarea',
@@ -72,7 +72,7 @@ export const queryArrayLeft: any[] = [
     key: 'subheading',
     length: 60,
     holder: '请输入副标题',
-    show: true,
+    show: true
   },
   {
     type: 'select',
@@ -86,9 +86,9 @@ export const queryArrayLeft: any[] = [
       {
         required: true,
         message: '请选择来源',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -103,9 +103,9 @@ export const queryArrayLeft: any[] = [
       {
         required: true,
         message: '请选择语言',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -118,9 +118,9 @@ export const queryArrayLeft: any[] = [
       {
         required: true,
         message: '请选择CPID',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'component',
@@ -132,9 +132,9 @@ export const queryArrayLeft: any[] = [
       {
         required: true,
         message: '请输入正确的版权ID',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -147,33 +147,33 @@ export const queryArrayLeft: any[] = [
       {
         required: true,
         message: '请输入运营标识',
-        trigger: ['change'],
-      },
-    ],
-  },
-]
+        trigger: ['change']
+      }
+    ]
+  }
+];
 // 优先发布选项
 const isUrgencyList = [
-    { code: '0', name: '普通（速度一般）' },
-    { code: '2', name: '紧急（速度快）' },
-    { code: '6', name: '快转（速度很快）' },
-    { code: '9', name: '闲时（速度慢）' },
-  ]
+  { code: '0', name: '普通（速度一般）' },
+  { code: '2', name: '紧急（速度快）' },
+  { code: '6', name: '快转（速度很快）' },
+  { code: '9', name: '闲时（速度慢）' }
+];
 export const queryArrayRight: any[] = [
   {
     type: 'textarea',
     label: '简介：',
     key: 'descriptionValue',
-    length: (isEditingOrMedia: boolean) => isEditingOrMedia ? 500 : 200,
+    length: (isEditingOrMedia: boolean) => (isEditingOrMedia ? 500 : 200),
     holder: '请输入简介',
     show: true,
     rules: [
       {
         required: true,
         message: '请输入视频简介',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -186,9 +186,9 @@ export const queryArrayRight: any[] = [
       {
         required: true,
         message: '请选择一级分类',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -196,14 +196,20 @@ export const queryArrayRight: any[] = [
     key: 'labelsValue',
     optName: 'lablesByCatIdOpt',
     holder: '请选择二级分类',
+    multiple: true,
     show: true,
     rules: [
       {
         required: true,
-        message: '请选择二级分类',
-        trigger: ['change'],
-      },
-    ],
+        validator(_rule: FormItemRule, value: string[] | undefined) {
+          if (!value || !value.length) {
+            return new Error('请选择二级分类');
+          }
+          return true;
+        },
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -216,14 +222,14 @@ export const queryArrayRight: any[] = [
       {
         required: true,
         message: '请选择辅助分类',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
     label: '内容形态：',
-    key: 'subsidiaryClassCode',
+    key: 'contentForm',
     optName: 'contentForm',
     holder: '请选择内容形态',
     show: true,
@@ -231,9 +237,9 @@ export const queryArrayRight: any[] = [
       {
         required: true,
         message: '请选择内容形态',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -246,9 +252,9 @@ export const queryArrayRight: any[] = [
       {
         required: true,
         message: '请选择国家及地区',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -262,9 +268,9 @@ export const queryArrayRight: any[] = [
       {
         required: true,
         message: '请选择字幕语言',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'select',
@@ -277,9 +283,9 @@ export const queryArrayRight: any[] = [
       {
         required: true,
         message: '请选择优先发布',
-        trigger: ['change'],
-      },
-    ],
+        trigger: ['change']
+      }
+    ]
   },
   {
     type: 'input',
@@ -293,9 +299,9 @@ export const queryArrayRight: any[] = [
         required: true,
         message: '请输入描述地区',
         // validator: this.occurredValue,
-        trigger: ['blur', 'change'],
-      },
-    ],
+        trigger: ['blur', 'change']
+      }
+    ]
   },
   {
     type: 'datetime',
@@ -306,9 +312,9 @@ export const queryArrayRight: any[] = [
     valueFormat: 'yyyy-MM-DD hh:mm:ss',
     eventFn: (data: any, obj: any) => {
       if (!obj.largeOnlineTime) {
-        obj.largeOnlineTime = data
+        obj.largeOnlineTime = data;
       }
-    },
+    }
   },
   {
     type: 'datetime',
@@ -319,10 +325,10 @@ export const queryArrayRight: any[] = [
     valueFormat: 'yyyy-MM-DD hh:mm:ss',
     eventFn: (data: any, obj: any) => {
       if (!obj.onlineTime) {
-        obj.onlineTime = data
+        obj.onlineTime = data;
       }
-    },
-  },
-]
-const allSelect = queryArrayLeft.concat(queryArrayRight).filter((v: any) => v.type === 'select')
-export const ListCode: Array<string> = allSelect.map((v:any)=> v.optName);
+    }
+  }
+];
+const allSelect = queryArrayLeft.concat(queryArrayRight).filter((v: any) => v.type === 'select');
+export const ListCode: Array<string> = allSelect.map((v: any) => v.optName);

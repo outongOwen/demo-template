@@ -19,6 +19,9 @@
       </div>
       <platformItem></platformItem>
       <mapInitForm></mapInitForm>
+      <strategyItem></strategyItem>
+      <outputSetting></outputSetting>
+      <labelSetting></labelSetting>
     </n-scrollbar>
   </n-modal>
 </template>
@@ -27,6 +30,9 @@
 import { primaryClassifyPri, totalStrategyPri } from './hooks/provide';
 import platformItem from './components/platformItem.vue';
 import mapInitForm from './components/mapInitForm.vue';
+import strategyItem from './components/strategyItem.vue';
+import outputSetting from './components/outputSetting.vue';
+import labelSetting from './components/labelSetting.vue';
 import { getProvideFormData } from './hooks/index';
 defineOptions({ name: 'MainForm' });
 const formData = ref<{ [key: string]: any }>({

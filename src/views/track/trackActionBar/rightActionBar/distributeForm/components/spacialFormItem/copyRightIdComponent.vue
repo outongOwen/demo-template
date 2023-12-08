@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-100%">
-    <n-input v-model:value="formData.copyRightId" class="w-50% m-r-10px"></n-input>
+    <n-input v-model:value="formData.copyRightId" placeholder="请选择版权ID" disabled class="w-50% m-r-10px"></n-input>
     <n-button type="primary" @click="openModal">选择版权</n-button>
     <copyRightModel
       v-if="showModel"

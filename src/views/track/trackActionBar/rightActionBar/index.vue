@@ -1,5 +1,8 @@
 <template>
-  <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item" />
+  <div>
+    <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item" />
+    <main-form></main-form>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -7,6 +10,7 @@ import { storeToRefs } from 'pinia';
 import { useTimeLineStore } from '@/store';
 import { useIconRender } from '@/hooks';
 import ActionBar from '../actionBar/index.vue';
+import MainForm from './distributeForm/index.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
 const { getScaleInfo } = storeToRefs(timeLineStore);

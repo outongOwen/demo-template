@@ -192,7 +192,7 @@ const resetForm = () => {
 };
 // 版权ID只能输入数字
 const formCopyrightIdNum = (val: string) => {
-  return !val || /[^\d]/g.test(val);
+  return (!val) || /^\d+$/.test(val);
 };
 const emit = defineEmits<{
   (e: 'closeModal'): void;
