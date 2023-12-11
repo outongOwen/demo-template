@@ -48,20 +48,18 @@
         />
       </n-form-item-gi>
     </n-grid>
-    <associatedVideo></associatedVideo>
   </n-form>
 </template>
 
 <script setup lang="ts">
 import type { Ref } from 'vue';
 import type { CascaderOption } from 'naive-ui';
+import { cloneDeep } from 'lodash';
 import { jsonToQuery } from '@/utils';
 import { getDistributeEnum } from '@/service/api/index';
 import { radioPlatForm } from '../hooks/formInitMap';
 import { getProvideFormData } from '../hooks/index';
 import coverImage from './coverImage.vue';
-import associatedVideo from './associatedVideo.vue';
-
 defineOptions({ name: 'PlatformItem' });
 const formRef = ref();
 const { injectFormData } = getProvideFormData();
@@ -95,6 +93,7 @@ const getWorkGroup = async () => {
     // }
     // }
   } catch (e) {
+    // eslint-disable-next-line
     console.log(e, '1111111111');
   }
 };
@@ -104,20 +103,22 @@ const handleChangePlatform = platform => {
     platform.distPlatformCode === formData.value.platformListValue[0]
   )
     return;
-  const index = formData.value.platformListValue.findIndex(v => v === platform.distPlatformCode);
+  const copyValue = cloneDeep(formData.value.platformListValue);
+  const index = copyValue.findIndex(v => v === platform.distPlatformCode);
   if (index > -1) {
-    formData.value.platformListValue.splice(index, 1);
+    copyValue.splice(index, 1);
   } else {
-    const platformIndex = formData.value.platformListValue.findIndex(v => radioPlatForm.find(vv => vv === v));
+    const platformIndex = copyValue.findIndex(v => radioPlatForm.find(vv => vv === v));
     if (radioPlatForm.find(value => value === platform.distPlatformCode) && platformIndex > -1) {
-      formData.value.platformListValue.splice(platformIndex, 1);
+      copyValue.splice(platformIndex, 1);
       nextTick(() => {
-        formData.value.platformListValue.push(platform.distPlatformCode);
+        copyValue.push(platform.distPlatformCode);
       });
     } else {
-      formData.value.platformListValue.push(platform.distPlatformCode);
+      copyValue.push(platform.distPlatformCode);
     }
   }
+  formData.value.platformListValue = copyValue;
 };
 const getGroupTask = async (id: number) => {
   const data = (await getDistributeEnum({
@@ -173,6 +174,7 @@ const getPlatforms = async () => {
       }
     }
   } catch (err) {
+    // eslint-disable-next-line
     console.log(err);
   }
 };

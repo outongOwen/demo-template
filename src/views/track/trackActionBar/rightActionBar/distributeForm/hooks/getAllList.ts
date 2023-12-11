@@ -27,8 +27,10 @@ interface EnumParam {
   handler?: (val: any) => void;
 }
 let vue: EnumConfig;
+export let communityEnum: any = reactive({});
 export function getAllEnum(that: any, isCmam = false) {
   vue = that;
+  communityEnum = that.enumOptionsList
   let enumCode = 'yunjian';
   if (vue.isMixedEdit) {
     enumCode = 'hunbian';

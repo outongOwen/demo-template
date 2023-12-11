@@ -18,23 +18,78 @@
         <n-switch v-model:value="formData.isDistribution" />
       </div>
       <platformItem></platformItem>
-      <mapInitForm></mapInitForm>
+      <associatedVideo v-show="isMediaLong"></associatedVideo>
+      <mapInitForm v-show="!isMediaLong"></mapInitForm>
       <strategyItem></strategyItem>
       <outputSetting></outputSetting>
       <labelSetting></labelSetting>
+      <vrSetting></vrSetting>
     </n-scrollbar>
+    <template #action>
+      <div class="w-100% flex justify-between">
+        <n-select v-model="formData.keepRatio" class="w-20%" :options="ratioArr"></n-select>
+        <div class="flex flex-items-center">
+          <n-button
+            strong
+            secondary
+            circle
+            :type="clearData ? 'primary' : undefined"
+            class="m-x-10px"
+            @click="clearDataChange"
+          >
+            <template #icon>
+              <n-icon>
+                <Icon :class="{ 'c-#fff': !clearData }" icon="ep:success-filled" />
+              </n-icon>
+            </template>
+          </n-button>
+          分发后清空编目
+          <n-button strong secondary circle type="primary" class="m-x-10px">
+            <template #icon>
+              <n-icon><Icon icon="bi:send-fill" /></n-icon>
+            </template>
+          </n-button>
+        </div>
+      </div>
+    </template>
   </n-modal>
 </template>
 
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
 import { primaryClassifyPri, totalStrategyPri } from './hooks/provide';
 import platformItem from './components/platformItem.vue';
+import associatedVideo from './components/associatedVideo.vue';
 import mapInitForm from './components/mapInitForm.vue';
 import strategyItem from './components/strategyItem.vue';
 import outputSetting from './components/outputSetting.vue';
 import labelSetting from './components/labelSetting.vue';
+import vrSetting from './components/vrSetting.vue';
 import { getProvideFormData } from './hooks/index';
 defineOptions({ name: 'MainForm' });
+// 分辨率选择
+const ratioArr = [
+  {
+    value: '480p',
+    label: '480p'
+  },
+  {
+    value: '540p',
+    label: '540p'
+  },
+  {
+    value: '720p',
+    label: '720p'
+  },
+  {
+    value: '1080p',
+    label: '1080p'
+  },
+  {
+    value: '4K',
+    label: '4K'
+  }
+];
 const formData = ref<{ [key: string]: any }>({
   platformListValue: []
 });
@@ -47,6 +102,11 @@ provideTotalStrategy(totalStrategyIdList);
 const { providePrimaryClassify } = primaryClassifyPri();
 providePrimaryClassify(primaryClassifyData);
 const showModal = ref(false);
+const clearData = ref(false);
+const isMediaLong = computed(() => formData.value.platformListValue.includes('-2'));
+const clearDataChange = () => {
+  clearData.value = !clearData.value;
+};
 onMounted(() => {
   showModal.value = true;
 });

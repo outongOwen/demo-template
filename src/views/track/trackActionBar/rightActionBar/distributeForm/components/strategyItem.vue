@@ -6,10 +6,12 @@
         <div class="font-900 c-#5ba5e9 text-14px m-y-10px m-l-10px">基础转码设置</div>
       </n-gi>
       <n-form-item-gi label="转码策略：" path="strategyId">
-        <n-select v-model:value="formData.strategyId" clearable :options="smallStrategy"></n-select>
-        <p v-if="smallStrategy.length" v-show="formData.strategyId" style="color: #858585">
-          转码后文件编码分类包含{{ codeRateFilter(formData.strategyId, smallStrategy) }}
-        </p>
+        <div class="w-100%">
+          <n-select v-model:value="formData.strategyId" class="100%" clearable :options="smallStrategy"></n-select>
+          <p v-if="smallStrategy.length" v-show="formData.strategyId" style="color: #858585">
+            转码后文件编码分类包含 {{ codeRateFilter(formData.strategyId, smallStrategy) }}
+          </p>
+        </div>
       </n-form-item-gi>
       <n-form-item-gi label="默认logo：" path="hasLogo">
         <n-radio-group v-model:value="formData.hasLogo" name="radiogroup">
@@ -24,16 +26,24 @@
         <n-select v-model:value="formData.watermarkPath" clearable :options="watermarkPathList"></n-select>
       </n-form-item-gi>
       <n-form-item-gi label="版权方Logo：" path="cpLogoPath">
-        <n-select v-model:value="formData.cpLogoPath" clearable :options="cpLogoPathList"></n-select>
+        <n-select
+          v-model:value="formData.cpLogoPath"
+          clearable
+          multiple
+          :options="cpLogoPathList"
+          :on-update:value="changeLogoPath"
+        ></n-select>
       </n-form-item-gi>
       <n-gi :span="2">
         <div class="font-900 c-#5ba5e9 text-14px m-x--10px p-x-20px p-y-10px b-t b-#ccc">大屏转码设置</div>
       </n-gi>
       <n-form-item-gi label="转码策略：" path="bigStrategyId">
-        <n-select v-model:value="formData.bigStrategyId" clearable :options="bigStrategy"></n-select>
-        <p v-if="bigStrategy.length" v-show="formData.strategyId" style="color: #858585">
-          转码后文件编码分类包含{{ codeRateFilter(formData.bigStrategyId, bigStrategy) }}
-        </p>
+        <div class="w-100%">
+          <n-select v-model:value="formData.bigStrategyId" class="w-100%" clearable :options="bigStrategy"></n-select>
+          <p v-if="bigStrategy.length" v-show="formData.bigStrategyId" style="color: #858585">
+            转码后文件编码分类包含 {{ codeRateFilter(formData.bigStrategyId, bigStrategy) }}
+          </p>
+        </div>
       </n-form-item-gi>
     </n-grid>
   </n-form>
@@ -43,7 +53,7 @@
 import type { SelectOption } from 'naive-ui';
 import { jsonToQuery } from '@/utils';
 import { getProvideFormData } from '@/views/track/trackActionBar/rightActionBar/distributeForm/hooks';
-import { getDistributeEnum } from '@/service/api';
+import { getDistributeEnum, getLogoMaxNumber } from '@/service/api';
 import { getStratgyEnum } from '@/views/track/trackActionBar/rightActionBar/distributeForm/hooks/getStrategyItemList';
 defineOptions({ name: 'StrategyItem' });
 const optionsObj = ref({
@@ -56,16 +66,42 @@ const optionsObj = ref({
   cmamSmallStrategy: [],
   totalStrategyIdList: []
 }) as Ref<{ [key: string]: any }>;
-const smallStrategy = ref<SelectOption[]>([]);
-const bigStrategy = ref<SelectOption[]>([]);
-const watermarkPathList = ref<SelectOption[]>([]);
-const cpLogoPathList = ref<SelectOption[]>([]);
+
 const formRef = ref();
 const { injectFormData } = getProvideFormData();
 const formData = injectFormData();
+const cpLogoPathList = ref<SelectOption[]>([]);
+
+const logoPathMax = ref(1);
+const changeLogoPath = val => {
+  if (formData.value.cpLogoPath?.length >= logoPathMax.value) {
+    cpLogoPathList.value.forEach(v => {
+      if (!formData.value.cpLogoPath.includes(v.value)) {
+        v.disabled = false;
+      }
+    });
+  }
+  const index = formData.value.cpLogoPath.findIndex(v => v === val[0]);
+  if (index > -1) {
+    formData.value.cpLogoPath.splice(index, 1);
+  } else {
+    formData.value.cpLogoPath.push(val[0]);
+  }
+  formData.value.cpLogoPath = val;
+  if (formData.value.cpLogoPath?.length >= logoPathMax.value) {
+    cpLogoPathList.value.forEach(v => {
+      if (!formData.value.cpLogoPath.includes(v.value)) {
+        v.disabled = true;
+      }
+    });
+  }
+};
+const smallStrategy = ref<SelectOption[]>([]);
+const bigStrategy = ref<SelectOption[]>([]);
+const watermarkPathList = ref<SelectOption[]>([]);
 const codeRateFilter = (code: any, list: any[]) => {
   for (let i = 0; i < list.length; i++) {
-    if (list[i].code === code) {
+    if (list[i].value === code) {
       return list[i].codeRate;
     }
   }
@@ -101,12 +137,12 @@ watch(
     if (!val) return;
     setEnum(val);
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 watch(
   () => formData.value.cpId,
   async val => {
-    formData.value.cpLogoPath = '';
+    formData.value.cpLogoPath = [];
     const params = {
       parmStr: jsonToQuery({ cpId: val }),
       urlCode: formData.value.platformListValue.includes('-3') ? 'cmam_cpLogoPath' : 'cpLogoPath'
@@ -126,6 +162,8 @@ onMounted(async () => {
   formData.value.hasLogo = ref(1);
   await getStratgyEnum(optionsObj);
   setEnum('-1');
+  const max = await getLogoMaxNumber();
+  logoPathMax.value = Number(max);
 });
 </script>
 
