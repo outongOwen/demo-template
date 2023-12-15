@@ -18,7 +18,6 @@
     }"
     @click.stop="handleClick"
   >
-    {{ dragLineData }}
     <div
       v-if="editorData?.length"
       ref="timeLineInnerRef"
@@ -109,7 +108,7 @@ const handleClick = () => {
   // timeLineStateContext.setSelectedActionId(['1', '12222']);
 };
 // 注册辅助线
-const { dragLineData } = useGuideLine();
+useGuideLine();
 
 onMounted(() => {
   timeLineStateContext.timeLineEditorRef.value = timeLineRef.value;

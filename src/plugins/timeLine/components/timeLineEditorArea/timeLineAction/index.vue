@@ -172,14 +172,17 @@ const handleMoveStart = e => {
     timeLineContext.onActionMoveStart({ action: actionItem.value, row: rowItem.value });
 };
 const move = ({ preLeft, preWidth, dx }: { preLeft: number; preWidth: number; dx: number }) => {
+  const distance = isAdsorption.value ? unref(guideAdsorptionDistance) : 0.1;
   // 控制吸附
-  if (Math.abs(deltaX.value) >= unref(guideAdsorptionDistance)!) {
-    // let curLeft =
-    //   Number(BigNumber(preLeft).plus(BigNumber(dx)).toFixed(2)) > 0
-    //     ? Number(BigNumber(preLeft).plus(BigNumber(dx)))
-    //     : 0;
-    const count = deltaX.value / unref(guideAdsorptionDistance)!;
-    let curLeft = preLeft + count * unref(guideAdsorptionDistance)!;
+  if (Math.abs(deltaX.value) >= distance!) {
+    let curLeft =
+      Number(
+        BigNumber(preLeft)
+          .plus(BigNumber(unref(deltaX)))
+          .toFixed(2)
+      ) > 0
+        ? Number(BigNumber(preLeft).plus(BigNumber(unref(deltaX))))
+        : 0;
     // 控制吸附
     let adsorption = curLeft;
     const minDis = Number.MAX_SAFE_INTEGER;
@@ -197,8 +200,7 @@ const move = ({ preLeft, preWidth, dx }: { preLeft: number; preWidth: number; dx
     } else {
       isAdsorption.value = false;
     }
-    deltaX.value %= unref(guideAdsorptionDistance)!;
-    console.log(deltaX.value, 'deltaX.valuedeltaX.value');
+    deltaX.value %= unref(distance)!;
     const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, scaleUnit.value);
     handleUpdateGuideLine({ start, end, dir: 'left' });
     if (timeLineContext.onActionMoving) {
