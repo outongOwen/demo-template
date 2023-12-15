@@ -11,9 +11,7 @@
     class="timeLine-editor-row"
     :data-type="rowItem.type"
     :style="{
-      height: rowItem?.rowHeight ? rowItem.rowHeight + 'px' : rowHeight + 'px',
-      marginLeft: `${leftOffset}px`,
-      width: `calc(100% - ${leftOffset}px)`
+      height: rowItem?.rowHeight ? rowItem.rowHeight + 'px' : rowHeight + 'px'
     }"
   >
     <TimeLineAction v-for="item in rowItem.actions" :key="item.id" :action-item="item" :row-item="rowItem" />
@@ -21,9 +19,8 @@
 </template>
 
 <script setup lang="ts">
-/* eslint-disable */
-/* prettier-ignore */
 // @ts-nocheck
+/* eslint-disable */
 import interact from 'interactjs';
 import type { Interactable } from '@interactjs/types';
 import { useTimeLineContext, useTimeLineStateContext } from '../../../contexts';
@@ -35,6 +32,9 @@ interface Props {
 interface Expose {
   rowRef: Ref<HTMLElement | undefined>;
 }
+defineOptions({
+  name: 'TimeLineRow'
+});
 const props = defineProps<Props>();
 const { rowItem } = toRefs(props);
 rowItem.value.actions.forEach(item => {
@@ -48,7 +48,7 @@ const timeLineStateContext = injectTimeLineStateContext();
 const dragJudge = event => {
   const dropzoneElement = event.target;
   const draggableEvent = event.dragEvent;
-  const { top: cTop } = timeLineStateContext.timeLineEditorRef!.getBoundingClientRect();
+  const { top: cTop } = timeLineStateContext.timeLineEditorRef.value!.getBoundingClientRect();
   const { top: rTop, bottom: rBottom, height: rHeight } = dropzoneElement.getBoundingClientRect();
   const ty = rTop - cTop;
   const cy = rTop - cTop + rHeight / 2;

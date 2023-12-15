@@ -14,9 +14,9 @@
         </template>
       </TimeLineSideBar>
       <div class="timeLine-main-wrap" :style="{ width: showSideBar ? `calc(100% - ${sideBarWidth}px)` : '100%' }">
-        <TimeLineTimeArea />
+        <TimeLineTimeArea :scroll-left="scrollLeft" />
         <TimeLineCursor />
-        <TimeLineEditorArea @scroll="handleTimeLineScroll">
+        <TimeLineEditorArea>
           <template #blankPlaceholder>
             <slot name="blankPlaceholder" />
           </template>
@@ -27,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import { useEventListener } from '@vueuse/core';
 import { consola } from 'consola';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
@@ -55,18 +56,34 @@ const {
   background,
   rowSortTypes,
   scaleSmallCellMs,
-  scaleSmallCellWidth
+  scaleSmallCellWidth,
+  leftOffset,
+  fps
 } = toRefs(props);
 const scrollTop = ref(0);
-const handleTimeLineScroll = (e: Event) => {
+const scrollLeft = ref(0);
+useEventListener(timeLineStateContext.timeLineEditorRef, 'scroll', e => {
   const target = e.target as HTMLElement;
   scrollTop.value = target.scrollTop;
-};
+  if (target.scrollLeft > leftOffset.value) {
+    scrollLeft.value = target.scrollLeft;
+  } else {
+    scrollLeft.value = 0;
+  }
+});
 provideTimeLineContext(props);
 // 计算时间轴缩放单位 （ms/px）
 timeLineStateContext.scaleUnit = computed(() => {
   return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
 });
+
+watch(
+  [timeLineStateContext.scaleUnit, fps],
+  () => {
+    timeLineStateContext.frameWidth.value = 1000 / fps.value / timeLineStateContext.scaleUnit.value;
+  },
+  { immediate: true }
+);
 watch(
   [mainRow, mainRowId],
   () => {

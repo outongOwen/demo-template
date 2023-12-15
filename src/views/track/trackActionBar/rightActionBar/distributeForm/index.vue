@@ -1,6 +1,7 @@
 <template>
   <n-modal
     v-model:show="showModal"
+    :z-index="2500"
     preset="dialog"
     :show-icon="false"
     :mask-closable="false"

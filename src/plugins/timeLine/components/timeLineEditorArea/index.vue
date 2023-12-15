@@ -10,18 +10,20 @@
     ref="timeLineRef"
     class="timeLine-editor-area-container"
     :style="{
-      height: `calc(100% - ${scaleHeight}px )`
+      height: `calc(100% - ${scaleHeight}px )`,
+      paddingLeft: `${leftOffset}px`
     }"
     :class="{
       'pos-center': !isOutRange
     }"
     @click.stop="handleClick"
   >
+    {{ dragLineData }}
     <div
       v-if="editorData?.length"
       ref="timeLineInnerRef"
       class="timeLine-editor-area-inner"
-      :style="{ rowGap: rowSpacing + 'px' }"
+      :style="{ rowGap: rowSpacing + 'px', width: timeLineInnerWidth + 'px' }"
     >
       <TimeLineRow
         v-for="item in editorData"
@@ -45,25 +47,22 @@
 </template>
 
 <script setup lang="ts">
-import { toReactive, useEventListener, useResizeObserver } from '@vueuse/core';
+import { toReactive, useResizeObserver, useElementSize } from '@vueuse/core';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-import { useMainRow } from '../../hooks';
+import { useMainRow, useGuideLine } from '../../hooks';
 import type { TimelineRow } from '../../types';
 import TimeLineRow from './timeLineRow/index.vue';
 import BlankPlaceholder from './blankPlaceholder/index.vue';
-interface Props {
-  onScroll?: (e: Event) => void;
-}
 defineOptions({
   name: 'TimeLineEditorArea'
 });
-const props = defineProps<Props>();
+// const props = defineProps<Props>();
 const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
-const { scaleHeight, editorData, rowSpacing, mainRowId } = toReactive(timeLineContext);
-const { hasMainRow, rowLinePosition } = timeLineStateContext;
+const { scaleHeight, editorData, rowSpacing, mainRowId, leftOffset } = toReactive(timeLineContext);
+const { hasMainRow, rowLinePosition, scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
 const timeLineInnerRef = ref<HTMLElement>();
 const minRowRef = ref<HTMLElement | null>();
@@ -79,44 +78,42 @@ const getMinRowRef = (rowRef: InstanceType<typeof TimeLineRow>, rowItem: Timelin
 
 const { checkMainRowBottom } = useMainRow(minRowRef);
 
-useEventListener(timeLineRef, 'scroll', e => {
-  props.onScroll && props.onScroll(e);
-});
-
 useResizeObserver([timeLineRef, timeLineInnerRef], () => {
   if (timeLineRef.value && timeLineInnerRef.value) {
     isOutRange.value = timeLineRef.value!.offsetHeight <= timeLineInnerRef.value!.offsetHeight;
     checkMainRowBottom();
   }
 });
-// 动态计算row最大宽度
-watch(
-  () => editorData,
-  () => {
-    nextTick(() => {
-      if (timeLineInnerRef.value && editorData) {
-        const maxRowWidth = editorData.reduce((prev, cur) => {
-          // 通过actions中最大end值计算最大宽度
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          const maxEnd = cur.actions.reduce((prev: any, cur: any) => {
-            return Math.max(prev, cur.end);
-          }, 0);
-          return Math.max(prev, maxEnd * 100);
-        }, 0);
-        timeLineInnerRef.value.style.width = `${maxRowWidth}px`;
-      }
-    });
-  },
-  {
-    immediate: true
+const { width: timeLineRefWidth } = useElementSize(timeLineRef);
+const maxEndTime = computed(() => {
+  if (unref(editorData)) {
+    const maxEnd = unref(editorData)!.reduce((prev, cur) => {
+      // 通过actions中最大end值计算最大宽度
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      const maxEnd = cur.actions.reduce((prev: any, cur: any) => {
+        return Math.max(prev, cur.end);
+      }, 0);
+      return Math.max(prev, maxEnd);
+    }, 0);
+    return maxEnd;
   }
-);
+  return 0;
+});
+const timeLineInnerWidth = computed(() => {
+  return unref(maxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3 >= unref(timeLineRefWidth)
+    ? unref(maxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3
+    : unref(timeLineRefWidth);
+});
 const handleClick = () => {
   console.log('点击外部');
   // timeLineStateContext.setSelectedActionId(['1', '12222']);
 };
+// 注册辅助线
+const { dragLineData } = useGuideLine();
+
 onMounted(() => {
-  timeLineStateContext.timeLineEditorRef = timeLineRef.value;
+  timeLineStateContext.timeLineEditorRef.value = timeLineRef.value;
+  console.log(timeLineRefWidth.value, '_+_+');
 });
 </script>
 

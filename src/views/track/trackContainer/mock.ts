@@ -10,21 +10,18 @@ export const mockData: TimelineRow[] = [
     actions: [
       {
         id: '1',
-        start: 2000,
-        end: 7 * 1000,
-        trimStart: 0,
-        trimEnd: 5 * 1000,
+        start: 0,
+        end: 7 * 100100,
         type: 'video',
-        effectId: 'video',
-        duration: 7 * 1000
+        effectId: 'video'
+      },
+      {
+        id: '2',
+        start: 8 * 101000,
+        end: 10 * 101000,
+        type: 'video',
+        effectId: 'video'
       }
-      // {
-      //   id: '2',
-      //   start: 200,
-      //   end: 300,
-      //   effectId: 'video',
-      //   type: 'video'
-      // },
       // {
       //   id: '3',
       //   start: 400,
@@ -43,16 +40,13 @@ export const mockData: TimelineRow[] = [
     actions: [
       {
         id: '12222',
-        start: 0,
+        start: 200,
         end: 1000 * 60 * 15,
-        trimStart: 0,
-        trimEnd: 1000 * 60 * 15,
         type: 'video',
-        effectId: 'video',
-        duration: 1000 * 60 * 15
+        effectId: 'video'
       }
     ]
-  },
+  }
   // {
   //   id: 'fffddd',
   //   name: '轨道2',
@@ -60,29 +54,29 @@ export const mockData: TimelineRow[] = [
   //   sideBarId: 'video',
   //   actions: []
   // },
-  {
-    id: 'ggg',
-    name: '轨道3',
-    sideBarId: 'audio',
-    type: 'audio',
-    actions: []
-  },
-  {
-    id: 'hhh',
-    name: '轨道4',
-    sideBarId: 'text',
-    type: 'text',
-    actions: []
-  },
-  {
-    id: 'ffff12213213',
-    name: '主轨道',
-    sideBarId: 'main',
-    type: 'main',
-    rowHeight: 80,
-    classNames: ['timeLine-main-row'],
-    actions: []
-  }
+  // {
+  //   id: 'ggg',
+  //   name: '轨道3',
+  //   sideBarId: 'audio',
+  //   type: 'audio',
+  //   actions: []
+  // },
+  // {
+  //   id: 'hhh',
+  //   name: '轨道4',
+  //   sideBarId: 'text',
+  //   type: 'text',
+  //   actions: []
+  // },
+  // {
+  //   id: 'ffff12213213',
+  //   name: '主轨道',
+  //   sideBarId: 'main',
+  //   type: 'main',
+  //   rowHeight: 80,
+  //   classNames: ['timeLine-main-row'],
+  //   actions: []
+  // }
   // {
   //   id: 'DDD',
   //   name: '轨道5',

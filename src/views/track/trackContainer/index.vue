@@ -18,6 +18,7 @@
     :row-sort-types="['text', 'video', 'main', 'audio']"
     :side-bar-width="sideBarWidth"
     :scale-height="40"
+    :fps="25"
     :scale-small-cell-width="getScaleInfo.scaleSmallCellWidth"
     :scale-large-cell-width="getScaleInfo.scaleLargeCellWidth"
     :scale-small-cell-ms="getScaleInfo.scaleSmallCellMs"

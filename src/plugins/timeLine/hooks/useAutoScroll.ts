@@ -1,11 +1,10 @@
 import { unrefElement } from '@vueuse/core';
 import type { DragEvent, ResizeEvent } from '@interactjs/types';
 import type { MaybeElement } from '@vueuse/core';
-
-export function useAutoScroll(target: MaybeElement) {
-  const DEFAULT_SPEED = 1;
-  const MAX_SPEED = 3;
-  const CRITICAL_SIZE = 10;
+const DEFAULT_SPEED = 1;
+const MAX_SPEED = 3;
+const CRITICAL_SIZE = 10;
+export default function useAutoScroll(target: Ref<MaybeElement>) {
   const leftBoundRef = ref(Number.MIN_SAFE_INTEGER);
   const rightBoundRef = ref(Number.MAX_SAFE_INTEGER);
 
