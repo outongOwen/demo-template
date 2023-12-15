@@ -1,5 +1,5 @@
 import type { VNodeChild } from 'vue';
-import type { TimelineRow, TimelineEffect, TimelineSideBar } from '../../types';
+import type { TimelineRow, TimelineEffect, TimelineSideBar, TimelineAction } from '../../types';
 import type { ITimelineEngine } from '../../core/engine';
 import {
   BACKGROUND,
@@ -13,7 +13,9 @@ import {
   SCALE_HEIGHT,
   SCALE_LARGE_CELL_WIDTH,
   SCALE_SMALL_CELL_WIDTH,
-  SCALE_SMALL_CELL_MS
+  SCALE_SMALL_CELL_MS,
+  DEFAULT_GUIDE_LINE_SNAP,
+  DEFAULT_FPS
 } from '../../const';
 export const timeLineProps = {
   /**
@@ -43,6 +45,15 @@ export const timeLineProps = {
   sideBars: {
     type: Object as PropType<Record<string, TimelineSideBar>>,
     default: null
+  },
+  /**
+   * @description 时间轴帧率
+   * @default 30
+   * @type {number}
+   */
+  fps: {
+    type: Number,
+    default: DEFAULT_FPS
   },
   /**
    * @description 是否开启侧边栏
@@ -202,22 +213,20 @@ export const timeLineProps = {
     validator: (val: number): boolean => val > 0
   },
   /**
-   * @description 是否启动网格移动吸附
+   * @description 是否开启辅助线
    * @default false
    * @type {boolean}
    */
-  gridSnap: {
+  guideLine: {
     type: Boolean,
-    default: false
+    default: true
   },
   /**
-   * @description 是否开启拖拽线
-   * @default false
-   * @type {boolean}
+   * @description 辅助线吸附距离
    */
-  dragLine: {
-    type: Boolean,
-    default: false
+  guideAdsorptionDistance: {
+    type: Number,
+    default: DEFAULT_GUIDE_LINE_SNAP
   },
   /**
    * @description 是否隐藏光标
@@ -279,7 +288,7 @@ export const timeLineProps = {
    * @type {Function}
    */
   onActionMoveStart: {
-    type: Function as PropType<(action: TimelineRow, row: TimelineRow) => void>,
+    type: Function as PropType<(params: { action: TimelineAction; row: TimelineRow }) => void>,
     default: null
   },
   /**
@@ -289,7 +298,9 @@ export const timeLineProps = {
    * @type {Function}
    */
   onActionMoving: {
-    type: Function as PropType<(action: TimelineRow, row: TimelineRow, start: number, end: number) => void | boolean>,
+    type: Function as PropType<
+      (params: { action: TimelineAction; row: TimelineRow; start: number; end: number }) => void | boolean
+    >,
     default: null
   },
   /**
@@ -298,7 +309,9 @@ export const timeLineProps = {
    * @type {Function}
    */
   onActionMoveEnd: {
-    type: Function as PropType<(action: TimelineRow, row: TimelineRow, start: number, end: number) => void>,
+    type: Function as PropType<
+      (params: { action: TimelineAction; row: TimelineRow; start: number; end: number }) => void
+    >,
     default: null
   },
   /**
@@ -307,7 +320,7 @@ export const timeLineProps = {
    * @type {Function}
    */
   onActionResizeStart: {
-    type: Function as PropType<(action: TimelineRow, row: TimelineRow, dir: 'right' | 'left') => void>,
+    type: Function as PropType<(params: { action: TimelineAction; row: TimelineRow; dir: 'right' | 'left' }) => void>,
     default: null
   },
   /**
@@ -317,7 +330,13 @@ export const timeLineProps = {
    */
   onActionResizing: {
     type: Function as PropType<
-      (action: TimelineRow, row: TimelineRow, start: number, end: number, dir: 'right' | 'left') => void | boolean
+      (params: {
+        action: TimelineAction;
+        row: TimelineRow;
+        start: number;
+        end: number;
+        dir: 'right' | 'left';
+      }) => void | boolean
     >,
     default: null
   },
@@ -328,7 +347,7 @@ export const timeLineProps = {
    */
   onActionResizeEnd: {
     type: Function as PropType<
-      (action: TimelineRow, row: TimelineRow, start: number, end: number, dir: 'right' | 'left') => void
+      (params: { action: TimelineAction; row: TimelineRow; start: number; end: number; dir: 'right' | 'left' }) => void
     >,
     default: null
   },

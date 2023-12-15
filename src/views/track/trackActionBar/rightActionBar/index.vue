@@ -1,8 +1,6 @@
 <template>
-  <div>
-    <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item" />
-    <main-form></main-form>
-  </div>
+  <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item" />
+  <main-form></main-form>
 </template>
 
 <script setup lang="ts">

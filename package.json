@@ -27,6 +27,7 @@
     "@vueuse/core": "^10.6.1",
     "axios": "1.5.0",
     "better-mock": "^0.3.7",
+    "bignumber.js": "^9.1.2",
     "colord": "^2.9.3",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.10",
@@ -93,7 +94,7 @@
     "vite-plugin-progress": "^0.0.7",
     "vite-plugin-pwa": "^0.16.7",
     "vite-plugin-svg-icons": "^2.0.1",
-    "vite-plugin-vue-devtools": "1.0.0-rc.5",
+    "vite-plugin-vue-devtools": "^1.0.0-rc.8",
     "vue-eslint-parser": "^9.3.2",
     "vue-tsc": "^1.8.22"
   },

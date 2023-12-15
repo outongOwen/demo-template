@@ -108,7 +108,7 @@ const clearDataChange = () => {
   clearData.value = !clearData.value;
 };
 onMounted(() => {
-  showModal.value = true;
+  // showModal.value = true;
 });
 </script>
 

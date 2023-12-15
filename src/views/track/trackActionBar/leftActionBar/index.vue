@@ -162,4 +162,3 @@ const barItemProps = reactiveComputed(() => {
 </script>
 
 <style scoped></style>
-../../../../components/module/cropper/index.vue ./mediaCropper/index.vue

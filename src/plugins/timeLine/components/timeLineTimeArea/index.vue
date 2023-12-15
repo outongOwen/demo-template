@@ -7,8 +7,11 @@
 <template>
   <div
     ref="timeLineRuleRef"
-    class="w100% color-#fff pr-8px"
-    :style="{ height: scaleHeight + 'px', marginLeft: `${leftOffset}px` }"
+    class="timeLine-rule-container"
+    :style="{
+      height: scaleHeight + 'px',
+      left: `${leftOffset}px`
+    }"
   >
     <canvas ref="ruleRef"></canvas>
   </div>
@@ -120,4 +123,12 @@ onMounted(() => {
   drawRule();
 });
 </script>
-<style scoped></style>
+<style scoped>
+.timeLine-rule-container {
+  position: relative;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+  z-index: 999;
+}
+</style>

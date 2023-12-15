@@ -1,18 +1,22 @@
-import type { TimelineAction, TimelineRow } from '../../../types';
+import type { TimelineAction } from '../../../types';
 /**
- * @description 判断当前action与row中action的start和end是否有重叠
- * @param {TimelineRow} action
+ * @description 判断开始时间和结束时间与row中action的进行碰撞检测
+ * @param {number} start
+ * @param {number} end
  * @param {TimelineRow} row
  * @returns {boolean}
  */
-export function isActionOverlap(action: TimelineAction, row: TimelineRow): boolean {
-  if (!action || !row) return false;
-  const { start, end } = action;
-  const { actions } = row;
-  if (!actions || !actions.length) return false;
-  return actions.some(item => {
-    if (item.id === action.id) return false;
-    const { start: s, end: e } = item;
-    return (start >= s && start <= e) || (end >= s && end <= e) || (s >= start && s <= end) || (e >= start && e <= end);
-  });
-}
+export const isActionCollision = (start: number, end: number, action: TimelineAction): boolean => {
+  // 判断开始时间和结束时间与action的进行碰撞检测
+  const { start: actionStart, end: actionEnd } = action;
+  if (start >= actionStart && start <= actionEnd) {
+    return true;
+  }
+  if (end >= actionStart && end <= actionEnd) {
+    return true;
+  }
+  if (start <= actionStart && end >= actionEnd) {
+    return true;
+  }
+  return false;
+};

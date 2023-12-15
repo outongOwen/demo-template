@@ -134,6 +134,8 @@ defineExpose({
   padding-bottom: 8px;
   // margin-right: 5px;
   border-right: 1px solid #000;
+  box-shadow: 0 0 5px #000;
+  z-index: 999;
   .pos-center {
     display: flex;
     justify-content: center;
