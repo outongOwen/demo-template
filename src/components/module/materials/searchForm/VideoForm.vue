@@ -8,15 +8,12 @@
   <div class="wh-full">
     <div class="px-10px">
       <n-form ref="formRef" :model="searchFormModel" size="small" label-placement="top" :show-label="false" inline>
-        <n-grid cols="1 400:2 700:6" :x-gap="5">
+        <n-grid cols="1 500:2 700:6" :x-gap="5">
           <n-form-item-gi path="name">
             <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
           </n-form-item-gi>
-          <!--          <n-form-item-gi path="firstOrgId">-->
-          <!--            <n-select clearable v-model:value="searchFormModel.firstOrgId" label-field="orgName" value-field="orgId" placeholder="一级" :options="firstOrgOptions" />-->
-          <!--          </n-form-item-gi>-->
           <template v-if="!hidOrgSearch">
-            <n-form-item-gi :span="2" path="secondOrgId">
+            <n-form-item-gi span="1 700:2" path="secondOrgId">
               <n-cascader
                 v-model:value="orgID"
                 clearable
@@ -27,7 +24,6 @@
                 remote
                 @load="loadSecond"
               />
-              <!--            <n-select clearable v-model:value="searchFormModel.secondOrgId" placeholder="二级" :options="generalOptions()" />-->
             </n-form-item-gi>
           </template>
           <template v-if="!hidOrgSearch">
@@ -82,13 +78,13 @@ interface Emits {
   (e: 'search', value: FromModelInst, type?: string): void;
   (e: 'resetForm'): void;
 }
-const orgID = ref<number|undefined>()
+const orgID = ref<number | undefined>();
 const { injectFirstOrgContext } = provideFirstOrgList();
 const { injectFullUserContext } = provideFullUserList();
 const firstOrgOptions = injectFirstOrgContext();
 const userBindList = injectFullUserContext();
 const props = defineProps<Props>();
-const { hidOrgSearch } = toRefs(props)
+const { hidOrgSearch } = toRefs(props);
 const emits = defineEmits<Emits>();
 const formRef = ref<FormInst>();
 let defaultFormModel: FromModelInst;
@@ -97,15 +93,15 @@ const resetForm = () => {
   Object.assign(searchFormModel.value, cloneDeep(defaultFormModel));
   emits('resetForm');
 };
-const selOrg = (val:number,option: any,pathValues: Array<any>)=>{
-  if (option.orgLevel === 1){
+const selOrg = (val: number, option: any, pathValues: Array<any>) => {
+  if (option.orgLevel === 1) {
     searchFormModel.value.firstOrgId = val;
-    searchFormModel.value.secondOrgId = null
-  }else{
-    searchFormModel.value.firstOrgId = pathValues[0]?.orgId || null
-    searchFormModel.value.secondOrgId = val
+    searchFormModel.value.secondOrgId = null;
+  } else {
+    searchFormModel.value.firstOrgId = pathValues[0]?.orgId || null;
+    searchFormModel.value.secondOrgId = val;
   }
-}
+};
 const loadSecond = (option: CascaderOption) => {
   return getSecondOrgInfo({ page: 1, rows: 999, parentOrgId: option.orgId }).then(res => {
     option.children = res.content;
@@ -117,7 +113,7 @@ const handleSearch = (type?: string) => {
   emits('search', searchFormModel.value, type);
 };
 onMounted(() => {
-  console.log(searchFormModel)
+  console.log(searchFormModel);
   defaultFormModel = cloneDeep(searchFormModel.value);
 });
 </script>

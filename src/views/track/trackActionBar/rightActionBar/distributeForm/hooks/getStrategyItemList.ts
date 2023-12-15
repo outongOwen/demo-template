@@ -43,7 +43,7 @@ const cmamParamList: Record<string, any> = {
   }
 };
 
-function getStrategyIdList(enumObj, isCmam) {
+async function getStrategyIdList(enumObj, isCmam) {
   const arr: any[] = [];
   const nameList: string[] = [];
   const params = isCmam ? cmamParamList : paramsArr;
@@ -51,7 +51,7 @@ function getStrategyIdList(enumObj, isCmam) {
     arr.push(getDistributeEnum(params[key]));
     nameList.push(key);
   });
-  Promise.allSettled(arr).then((res: any[]) => {
+  await Promise.allSettled(arr).then((res: any[]) => {
     res.forEach((v: any, i: number) => {
       if (v.status === 'fulfilled') {
         const list = v.value.map(item => {
@@ -66,6 +66,7 @@ function getStrategyIdList(enumObj, isCmam) {
       }
     });
   });
+  Promise.resolve();
 }
 async function getWaterPathList(enumObj, isCmam) {
   const data = await getDistributeEnum({ urlCode: isCmam ? 'cmam_watermarkPath' : 'watermarkPath' });

@@ -1,7 +1,6 @@
 <template>
   <n-modal
     v-model:show="showModal"
-    :z-index="2500"
     preset="dialog"
     :show-icon="false"
     :mask-closable="false"
@@ -17,13 +16,13 @@
         <div class="w-120px p-r-20px text-right">是否分发：</div>
         <n-switch v-model:value="formData.isDistribution" />
       </div>
-      <platformItem></platformItem>
-      <associatedVideo v-show="isMediaLong"></associatedVideo>
-      <mapInitForm v-show="!isMediaLong"></mapInitForm>
-      <strategyItem></strategyItem>
-      <outputSetting></outputSetting>
-      <labelSetting></labelSetting>
-      <vrSetting></vrSetting>
+      <platformItem ref="platformRef" @setTemplateData="setTemplateFn"></platformItem>
+      <associatedVideo v-show="isMediaLong" ref="associatedVideoRef"></associatedVideo>
+      <mapInitForm v-show="!isMediaLong" ref="mapInitFormRef"></mapInitForm>
+      <strategyItem ref="strategyRef"></strategyItem>
+      <outputSetting ref="outputRef"></outputSetting>
+      <labelSetting ref="labelRef"></labelSetting>
+      <vrSetting ref="vrSettingRef"></vrSetting>
     </n-scrollbar>
     <template #action>
       <div class="w-100% flex justify-between">
@@ -66,7 +65,17 @@ import outputSetting from './components/outputSetting.vue';
 import labelSetting from './components/labelSetting.vue';
 import vrSetting from './components/vrSetting.vue';
 import { getProvideFormData } from './hooks/index';
+import { setTemplateData } from './hooks/dataOperation';
 defineOptions({ name: 'MainForm' });
+
+const platformRef = ref();
+const associatedVideoRef = ref();
+const mapInitFormRef = ref();
+const strategyRef = ref();
+const outputRef = ref();
+const labelRef = ref();
+const vrSettingRef = ref();
+
 // 分辨率选择
 const ratioArr = [
   {
@@ -106,6 +115,9 @@ const clearData = ref(false);
 const isMediaLong = computed(() => formData.value.platformListValue.includes('-2'));
 const clearDataChange = () => {
   clearData.value = !clearData.value;
+};
+const setTemplateFn = data => {
+  setTemplateData(formData, data, labelRef);
 };
 onMounted(() => {
   showModal.value = true;

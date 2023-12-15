@@ -45,6 +45,7 @@
           :options="groupTaskOpt"
           label-field="taskName"
           value-field="taskId"
+          :on-update:value="changeTask"
         />
       </n-form-item-gi>
     </n-grid>
@@ -69,7 +70,7 @@ const childrenOpt = ref([]) as Ref<CascaderOption[]>;
 const workGroupOpt = ref([]) as Ref<CascaderOption[]>;
 const groupTaskOpt = ref([]) as Ref<CascaderOption[]>;
 defineExpose({ formRef });
-
+const emit = defineEmits(['setTemplateData']);
 // 获取工作组
 const getWorkGroup = async () => {
   try {
@@ -78,20 +79,6 @@ const getWorkGroup = async () => {
     };
     const data = (await getDistributeEnum(parmStr)) as CascaderOption[];
     workGroupOpt.value = data;
-    // if (data.success) {
-    //   workGroupOpt.value = data.result
-    // if (this.isMixedEdit) {
-    //   // 混编
-    //   // const country = this.queryArray.find((d: any) => d.key === 'country')
-    //   const occurred = this.queryArray.find((d: any) => d.key === 'occurred')
-    //   // country.rules[0].required = true
-    //   // this.formRules.hasLogo[0].required = false
-    //   occurred.rules[0].required = false
-    //   this.formRules.childValue[0].required = false
-    //   const groupId = getQueryString('groupId')
-    //   this.groupIdValue = Number(groupId)
-    // }
-    // }
   } catch (e) {
     // eslint-disable-next-line
     console.log(e, '1111111111');
@@ -127,6 +114,16 @@ const getGroupTask = async (id: number) => {
   })) as CascaderOption[];
   groupTaskOpt.value = data;
 };
+const getTemplateInfo = async (id: number) => {
+  const data = await getDistributeEnum({
+    parmStr: jsonToQuery({
+      taskId: id,
+      distPlatformCode: formData.value.platformListValue.includes('0') ? '0' : '-1'
+    }),
+    urlCode: 'template'
+  });
+  emit('setTemplateData', data);
+};
 const changeGroup = (newVal: any) => {
   if (newVal) {
     formData.value.groupId = newVal;
@@ -135,6 +132,13 @@ const changeGroup = (newVal: any) => {
     groupTaskOpt.value = [];
   }
 };
+const changeTask = (newVal: any) => {
+  if (newVal) {
+    formData.value.taskId = newVal;
+    getTemplateInfo(newVal);
+  }
+};
+
 const getPlatforms = async () => {
   try {
     const parmStr = {

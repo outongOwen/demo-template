@@ -141,10 +141,10 @@ const closeTag = tag => {
 };
 const getThirdLabels = async () => {
   const parmStr: any = {
-    labelRootCode: formData.value.categoryValue
+    labelRootCode: formData.value.category
   };
-  if (formData.value.labelsValue === '1003') {
-    parmStr.secondClassCode = formData.value.labelsValue.join(',');
+  if (formData.value.secondClassCode === '1003') {
+    parmStr.secondClassCode = formData.value.secondClassCode.join(',');
   }
   const params = {
     parmStr: jsonToQuery(parmStr),
@@ -154,7 +154,7 @@ const getThirdLabels = async () => {
   data.forEach(v => {
     customSelValues.value[v.code] = '';
   });
-  thirdLabelsList.value = data ? data.map(v => v) : [];
+  thirdLabelsList.value = data || [];
 };
 const searchFn = async (item: any) => {
   if (!item || item.options) return;
@@ -162,8 +162,8 @@ const searchFn = async (item: any) => {
     labelPId: item.code,
     keywords: ''
   };
-  if (formData.value.categoryValue === '1003') {
-    parmStr.secondClassCode = formData.value.labelsValue.join(',');
+  if (formData.value.category === '1003') {
+    parmStr.secondClassCode = formData.value.secondClassCode.join(',');
   }
   const params = {
     parmStr: jsonToQuery(parmStr),
@@ -172,7 +172,55 @@ const searchFn = async (item: any) => {
   const data = await getDistributeEnum(params);
   // eslint-disable-next-line
   item.options = data.map((v: any)=>({label: v.name,value: v.code}))
+  Promise.resolve();
 };
+const setCustom = (key, value) => {
+  setTimeout(async () => {
+    if (thirdLabelsList.value.length && Object.hasOwn(customSelValues.value, key)) {
+      const item = thirdLabelsList.value.find(v => v.code === key);
+      if (item) {
+        await searchFn(item);
+        const arr: any[] = [];
+        value.split(',').forEach((v: any) => {
+          const opt = item.options.find((vv: any) => vv.label === v);
+          arr.push(opt.value);
+        });
+        nextTick(() => {
+          customSelValues.value[key] = arr;
+        });
+      }
+    } else {
+      setCustom(key, value);
+    }
+  }, 200);
+};
+const setTags = tagNameList => {
+  setTimeout(() => {
+    if (secHolder.value.length || baseHolder.value.length) {
+      tagNameList.split(',').forEach(tagName => {
+        const item = secHolder.value.find(v => v.name === tagName) || baseHolder.value.find(v => v.name === tagName);
+        item && nextTick(() => selectHolder(item));
+      });
+    } else {
+      setTags(tagNameList);
+    }
+  }, 200);
+};
+const setTemplateData = data => {
+  if (!data.newKeywords) return;
+  const obj = JSON.parse(data.newKeywords);
+  Object.keys(obj).forEach(v => {
+    if (v === 'customize') {
+      customLabelArr.value = obj[v].split(',');
+    } else {
+      setCustom(v, obj[v]);
+    }
+  });
+  if (data.recommendation) {
+    setTags(data.recommendation);
+  }
+};
+defineExpose({ setTemplateData });
 // 推荐标签一级分类
 watch(
   () => formData.value.recommendation,
@@ -191,9 +239,9 @@ watch(
 );
 // 二级分类
 watch(
-  () => formData.value.labelsValue,
+  () => formData.value.secondClassCode,
   (val: string) => {
-    if (formData.value.categoryValue === '1003') {
+    if (formData.value.category === '1003') {
       if (!val) {
         thirdLabelsList.value = [];
         return;
@@ -204,10 +252,10 @@ watch(
 );
 // 一级分类
 watch(
-  () => formData.value.categoryValue,
+  () => formData.value.category,
   (val: string) => {
-    formData.value.recommendation = [formData.value.categoryValue];
-    if (!val || (val === '1003' && !formData.value.labelsValue)) {
+    formData.value.recommendation = [formData.value.category];
+    if (!val || (val === '1003' && !formData.value.secondClassCode)) {
       thirdLabelsList.value = [];
       return;
     }

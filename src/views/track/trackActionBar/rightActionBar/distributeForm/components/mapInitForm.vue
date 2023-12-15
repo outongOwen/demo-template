@@ -27,7 +27,7 @@
               <n-select
                 v-model:value="formData[item.key]"
                 clearable
-                :options="enumOptionsList[item.optName]"
+                :options="item.optData || enumOptionsList[item.optName]"
                 :placeholder="item.holder"
               ></n-select>
             </template>
@@ -62,7 +62,7 @@
                 v-model:value="formData[item.key]"
                 clearable
                 :multiple="item.multiple"
-                :options="enumOptionsList[item.optName]"
+                :options="item.optData || enumOptionsList[item.optName]"
                 :placeholder="item.holder"
               ></n-select>
             </template>
@@ -71,8 +71,7 @@
                 v-model:value="formData[item.key]"
                 class="w-100%"
                 type="datetime"
-                :value-f-format="item.valueFormat"
-                :options="enumOptionsList[item.optName]"
+                :value-format="item.valueFormat"
                 :placeholder="item.holder"
               ></n-date-picker>
             </template>
@@ -192,20 +191,21 @@ watch(
   { immediate: true }
 );
 watch(
-  () => formData.value.categoryValue,
+  () => formData.value.category,
   async (val: string) => {
+    console.log(val)
     enumOptionsList.lablesByCatIdOpt = [];
-    formData.value.labelsValue = [];
-    const parmStr: any = {categoryId:val}
+    formData.value.secondClassCode = [];
+    const parmStr: any = {enumCode:val,itemType: '1'}
     if (formData.value.platformListValue.find((item: any) => item === '0')){
-      parmStr.platform = '0'
+      parmStr.itemType = '0'
     }
     const params = {
-      urlCode: 'category_list',
+      urlCode: 'list_enum_values',
       parmStr: jsonToQuery(parmStr)
     }
     const data = await getDistributeEnum(params);
-    enumOptionsList.lablesByCatIdOpt = data.map((v: any)=> ({label: v.categoryName,value: v.categoryId}))
+    enumOptionsList.lablesByCatIdOpt = data.map((v: any)=> ({label: v.itemName,value: v.itemCode}))
   },
   { immediate: true }
 );

@@ -154,10 +154,10 @@ export const queryArrayLeft: any[] = [
 ];
 // 优先发布选项
 const isUrgencyList = [
-  { code: '0', name: '普通（速度一般）' },
-  { code: '2', name: '紧急（速度快）' },
-  { code: '6', name: '快转（速度很快）' },
-  { code: '9', name: '闲时（速度慢）' }
+  { value: '0', label: '普通（速度一般）' },
+  { value: '2', label: '紧急（速度快）' },
+  { value: '6', label: '快转（速度很快）' },
+  { value: '9', label: '闲时（速度慢）' }
 ];
 export const queryArrayRight: any[] = [
   {
@@ -178,7 +178,7 @@ export const queryArrayRight: any[] = [
   {
     type: 'select',
     label: '一级分类：',
-    key: 'categoryValue',
+    key: 'category',
     optName: 'categoryOpt',
     holder: '请选择一级分类',
     show: true,
@@ -193,7 +193,7 @@ export const queryArrayRight: any[] = [
   {
     type: 'select',
     label: '二级分类：',
-    key: 'labelsValue',
+    key: 'secondClassCode',
     optName: 'lablesByCatIdOpt',
     holder: '请选择二级分类',
     multiple: true,
@@ -296,7 +296,7 @@ export const queryArrayRight: any[] = [
     show: true,
     rules: [
       {
-        required: true,
+        required: false,
         message: '请输入描述地区',
         // validator: this.occurredValue,
         trigger: ['blur', 'change']
@@ -309,7 +309,7 @@ export const queryArrayRight: any[] = [
     key: 'onlineTime',
     holder: '请选择上线时间',
     show: true,
-    valueFormat: 'yyyy-MM-DD hh:mm:ss',
+    valueFormat: 'yyyy-MM-dd hh:mm:ss',
     eventFn: (data: any, obj: any) => {
       if (!obj.largeOnlineTime) {
         obj.largeOnlineTime = data;
@@ -322,7 +322,7 @@ export const queryArrayRight: any[] = [
     key: 'largeOnlineTime',
     holder: '请选择上线时间',
     show: true,
-    valueFormat: 'yyyy-MM-DD hh:mm:ss',
+    valueFormat: 'yyyy-MM-dd hh:mm:ss',
     eventFn: (data: any, obj: any) => {
       if (!obj.onlineTime) {
         obj.onlineTime = data;
