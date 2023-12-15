@@ -27,6 +27,7 @@
               <n-select
                 v-model:value="formData[item.key]"
                 clearable
+                :multiple="item.multiple"
                 :options="item.optData || enumOptionsList[item.optName]"
                 :placeholder="item.holder"
               ></n-select>
@@ -193,7 +194,6 @@ watch(
 watch(
   () => formData.value.category,
   async (val: string) => {
-    console.log(val)
     enumOptionsList.lablesByCatIdOpt = [];
     formData.value.secondClassCode = [];
     const parmStr: any = {enumCode:val,itemType: '1'}

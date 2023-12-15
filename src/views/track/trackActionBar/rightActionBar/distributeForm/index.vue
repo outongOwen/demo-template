@@ -43,7 +43,7 @@
             </template>
           </n-button>
           分发后清空编目
-          <n-button strong secondary circle type="primary" class="m-x-10px">
+          <n-button strong secondary circle type="primary" class="m-x-10px" @click="submitForm">
             <template #icon>
               <n-icon><Icon icon="bi:send-fill" /></n-icon>
             </template>
@@ -65,7 +65,7 @@ import outputSetting from './components/outputSetting.vue';
 import labelSetting from './components/labelSetting.vue';
 import vrSetting from './components/vrSetting.vue';
 import { getProvideFormData } from './hooks/index';
-import { setTemplateData } from './hooks/dataOperation';
+import { getDefaultEnumCodeValue, setDefaultEnumCodeValue, setTemplateData } from './hooks/dataOperation';
 defineOptions({ name: 'MainForm' });
 
 const platformRef = ref();
@@ -119,8 +119,29 @@ const clearDataChange = () => {
 const setTemplateFn = data => {
   setTemplateData(formData, data, labelRef);
 };
-onMounted(() => {
+
+const submitForm = () => {
+  const refList = [platformRef, associatedVideoRef, mapInitFormRef, strategyRef, outputRef, labelRef, vrSettingRef];
+  let flag = true;
+  refList.forEach((v: any) => {
+    flag = v.value.validate();
+    if (!flag) throw new Error(`${v.name}ValidateError`);
+  });
+};
+
+// 一级分类
+watch(
+  () => formData.value.platformListValue,
+  () => {
+    setDefaultEnumCodeValue(formData);
+  },
+  { deep: true }
+);
+
+onMounted(async () => {
   showModal.value = true;
+  await getDefaultEnumCodeValue();
+  setDefaultEnumCodeValue(formData);
 });
 </script>
 

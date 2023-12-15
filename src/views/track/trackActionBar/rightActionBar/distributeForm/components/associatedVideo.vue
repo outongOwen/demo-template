@@ -11,6 +11,24 @@
           </template>
         </n-input>
       </n-form-item-gi>
+      <n-form-item-gi
+        label="优先发布："
+        prop="isUrgency"
+        :rule="[
+          {
+            required: true,
+            message: '请选择优先发布',
+            trigger: ['change']
+          }
+        ]"
+      >
+        <n-select
+          v-model:value="formData.isUrgency"
+          clearable
+          :options="isUrgencyList"
+          placeholder="请选择优先发布"
+        ></n-select>
+      </n-form-item-gi>
       <n-form-item-gi label="视频标题：">
         <n-tooltip class="item" trigger="hover" placement="top">
           <template #trigger>
@@ -19,6 +37,64 @@
           {{ formData.title }}
         </n-tooltip>
       </n-form-item-gi>
+      <n-form-item-gi
+        v-if="communityEnum && communityEnum.operationFlagList"
+        label="运营标识："
+        prop="operationFlag"
+        :rule="[
+          {
+            required: true,
+            message: '请选择运营标识',
+            trigger: ['change']
+          }
+        ]"
+      >
+        <n-select
+          v-model:value="formData.operationFlag"
+          clearable
+          :options="communityEnum.operationFlagList"
+          placeholder="请选择运营标识"
+        ></n-select>
+      </n-form-item-gi>
+      <n-form-item-gi
+        v-if="communityEnum && communityEnum.categoryOpt && formData.videoId"
+        label="一级分类："
+        prop="operationFlag"
+        :rule="[
+          {
+            required: true,
+            message: '请选择一级分类',
+            trigger: ['change']
+          }
+        ]"
+      >
+        <n-select
+          v-model:value="formData.category"
+          clearable
+          :options="communityEnum.categoryOpt"
+          placeholder="请选择一级分类"
+        ></n-select>
+      </n-form-item-gi>
+      <n-form-item-gi
+        v-if="formData.videoId"
+        label="二级分类："
+        prop="operationFlag"
+        :rule="[
+          {
+            required: true,
+            message: '请选择二级分类',
+            trigger: ['change']
+          }
+        ]"
+      >
+        <n-select
+          v-model:value="formData.secondClassCode"
+          clearable
+          multiple
+          :options="lablesByCatIdOpt"
+          placeholder="请选择二级分类"
+        ></n-select>
+      </n-form-item-gi>
     </n-grid>
     <selectVideoModel ref="selVideoModel" @selectVideo="selectVideo"></selectVideoModel>
   </n-form>
@@ -26,6 +102,11 @@
 
 <script setup lang="ts">
 import { useDialog } from 'naive-ui';
+import type { SelectOption } from 'naive-ui';
+import { jsonToQuery } from '@/utils';
+import { getDistributeEnum } from '@/service/api';
+import { communityEnum } from '../hooks/getAllList';
+import { isUrgencyList } from '../hooks/formInitMap';
 import { getProvideFormData } from '../hooks';
 import selectVideoModel from './selectVideoModel.vue';
 
@@ -35,20 +116,30 @@ const selVideoModel = ref();
 // let selectVideoObj
 const { injectFormData } = getProvideFormData();
 const formData: any = injectFormData();
-const selectVideo = (obj: any) => {
+const lablesByCatIdOpt = ref<SelectOption[]>([]);
+
+const selectVideo = async (obj: any) => {
   // selectVideoObj = JSON.parse(JSON.stringify(obj))
-  formData.value.videoId = obj.videoId;
+  formData.value.videoId = String(obj.videoId);
   formData.value.title = obj.videoTitle;
-  formData.value.primaryClassify = obj.firstClassCode;
+  formData.value.category = obj.firstClassCode;
   if (obj.cpid) {
     formData.value.cpid = obj.cpid;
   }
-  nextTick(() => {
-    setTimeout(() => {
+  if (obj.firstClassCode) {
+    const parmStr: any = { enumCode: obj.firstClassCode, itemType: '1' };
+    const params = {
+      urlCode: 'list_enum_values',
+      parmStr: jsonToQuery(parmStr)
+    };
+    const data = await getDistributeEnum(params);
+    lablesByCatIdOpt.value = data.map((v: any) => ({ label: v.itemName, value: v.itemCode }));
+    nextTick(() => {
       formData.value.secondClassCode = obj.secondClassCode;
-    }, 1000);
-  });
+    });
+  }
 };
+
 const dialog = useDialog();
 // 视频id绑定事件
 const setVideoId = () => {
@@ -62,7 +153,7 @@ const setVideoId = () => {
       onPositiveClick: () => {
         formData.value.title = '';
         formData.value.videoId = '';
-        formData.value.primaryClassify = '';
+        formData.value.category = '';
         formData.value.secondClassCode = [];
       }
     });

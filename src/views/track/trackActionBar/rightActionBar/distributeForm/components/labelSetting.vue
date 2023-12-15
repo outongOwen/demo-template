@@ -55,7 +55,7 @@
             </template>
             清空推荐标签
           </n-button>
-          <n-checkbox-group v-if="communityEnum.categoryOpt" v-model:value="formData.recommendation">
+          <n-checkbox-group v-if="communityEnum && communityEnum.categoryOpt" v-model:value="formData.recommendation">
             <n-checkbox
               v-for="item in communityEnum.categoryOpt"
               :key="item.value"
@@ -242,7 +242,7 @@ watch(
   () => formData.value.secondClassCode,
   (val: string) => {
     if (formData.value.category === '1003') {
-      if (!val) {
+      if (!val || !val.length) {
         thirdLabelsList.value = [];
         return;
       }
@@ -255,7 +255,7 @@ watch(
   () => formData.value.category,
   (val: string) => {
     formData.value.recommendation = [formData.value.category];
-    if (!val || (val === '1003' && !formData.value.secondClassCode)) {
+    if (!val || val === '1003') {
       thirdLabelsList.value = [];
       return;
     }

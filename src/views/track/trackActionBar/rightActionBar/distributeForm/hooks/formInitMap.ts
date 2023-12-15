@@ -95,14 +95,18 @@ export const queryArrayLeft: any[] = [
     label: '语言：',
     key: 'lang',
     optName: 'lang',
-    length: 40,
     holder: '请选择语言',
     show: true,
     multiple: true,
     rules: [
       {
         required: true,
-        message: '请选择语言',
+        validator(_rule: FormItemRule, value: string[] | undefined) {
+          if (!value || !value.length) {
+            return new Error('请选择语言');
+          }
+          return true;
+        },
         trigger: ['change']
       }
     ]
@@ -153,7 +157,7 @@ export const queryArrayLeft: any[] = [
   }
 ];
 // 优先发布选项
-const isUrgencyList = [
+export const isUrgencyList = [
   { value: '0', label: '普通（速度一般）' },
   { value: '2', label: '紧急（速度快）' },
   { value: '6', label: '快转（速度很快）' },
@@ -267,7 +271,12 @@ export const queryArrayRight: any[] = [
     rules: [
       {
         required: true,
-        message: '请选择字幕语言',
+        validator(_rule: FormItemRule, value: string[] | undefined) {
+          if (!value || !value.length) {
+            return new Error('请选择字幕语言');
+          }
+          return true;
+        },
         trigger: ['change']
       }
     ]

@@ -69,7 +69,6 @@ const platforms = ref<any[]>([]);
 const childrenOpt = ref([]) as Ref<CascaderOption[]>;
 const workGroupOpt = ref([]) as Ref<CascaderOption[]>;
 const groupTaskOpt = ref([]) as Ref<CascaderOption[]>;
-defineExpose({ formRef });
 const emit = defineEmits(['setTemplateData']);
 // 获取工作组
 const getWorkGroup = async () => {
@@ -182,6 +181,13 @@ const getPlatforms = async () => {
     console.log(err);
   }
 };
+
+const validate = () => {
+  return true;
+};
+
+defineExpose({ validate, formRef });
+
 onMounted(() => {
   getWorkGroup();
   getPlatforms();
