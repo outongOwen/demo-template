@@ -196,16 +196,6 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
     getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
     getRuleScope(); // 得到刻度列表对应的缩放范围
   };
-  caclScale();
-  changeScale(0);
-  // slider需要使用的数据：marks, curScale; 刻度尺需要的数据，当前规则下，小格子宽度、大格子宽度、msPerPx(scaleUnit); slider缩放的时候，能更新以上信息。
-  state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
-  timeLineStore.setScaleInfo({
-    sliderKeys: state.sliderKeys,
-    scaleSmallCellWidth: state.scaleSmallCellWidth,
-    scaleLargeCellWidth: state.scaleLargeCellWidth,
-    scaleSmallCellMs: state.scaleSmallCellMs
-  });
   const updateTimeRule = () => {
     ruleLists.splice(0, ruleLists.length);
     state.sliderKeys = [];
@@ -238,6 +228,16 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
     // console.error('state.scaleWidth:------++++ ', scaleWidth.value);
     if (isFirst.value) {
       isFirst.value = false;
+      caclScale();
+      changeScale(0);
+      // slider需要使用的数据：marks, curScale; 刻度尺需要的数据，当前规则下，小格子宽度、大格子宽度、msPerPx(scaleUnit); slider缩放的时候，能更新以上信息。
+      state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
+      timeLineStore.setScaleInfo({
+        sliderKeys: state.sliderKeys,
+        scaleSmallCellWidth: state.scaleSmallCellWidth,
+        scaleLargeCellWidth: state.scaleLargeCellWidth,
+        scaleSmallCellMs: state.scaleSmallCellMs
+      });
       return;
     }
     updateTimeRule();
