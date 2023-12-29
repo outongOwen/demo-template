@@ -2,7 +2,7 @@
   <div>
     <div class="font-900 c-#1890FF text-16px m-y-10px">输出设置</div>
     <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1 p-10px">
-      <n-form-item-gi label="自定义帧率">
+      <n-form-item-gi label-width="120" label-placement="left" label="自定义帧率：">
         <div class="flex w-100% flex-items-center flex-grow-0">
           <n-select
             v-model:value="formData.fps"
@@ -14,11 +14,11 @@
           <span>fps</span>
         </div>
       </n-form-item-gi>
-      <n-form-item-gi label="自定义码率">
+      <n-form-item-gi label-width="120" label-placement="left" label="自定义码率：">
         <div class="flex w-100% flex-items-center flex-grow-0">
           <n-input
             v-model:value="formData.bitrate"
-            class="w-90% m-r-10px"
+            class="w-85% m-r-10px"
             autosize
             type="text"
             :allow-input="formCopyrightIdNum"

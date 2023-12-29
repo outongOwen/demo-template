@@ -4,6 +4,7 @@
     title="选择版权"
     preset="dialog"
     :show-icon="false"
+    :mask-closable="false"
     :z-index="3000"
     :on-close="closeFn"
     style="width: 1280px"

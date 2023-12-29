@@ -3,32 +3,7 @@
     <div class="font-900 c-#1890FF text-16px m-y-10px">三级标签</div>
     <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1 p-10px">
       <n-form-item-gi label="自定义">
-        <div class="w-100%">
-          <div class="flex w-100% flex-items-center flex-grow-0">
-            <n-input
-              v-model:value="customLabel"
-              class="w-90% m-r-10px"
-              autosize
-              type="text"
-              :on-blur="setCustomLabel"
-              placeholder="自定义标签"
-            ></n-input>
-            <n-button type="primary">重置</n-button>
-          </div>
-          <p class="w-100% m-t-10px">
-            <n-tag
-              v-for="(item, index) in customLabelArr"
-              :key="index"
-              type="info"
-              class="m-x-5px"
-              round
-              closable
-              @close="handleClose(index)"
-            >
-              {{ item }}
-            </n-tag>
-          </p>
-        </div>
+        <inputToTag form-key="customize" :max-length="20" show-reset></inputToTag>
       </n-form-item-gi>
       <template v-for="item in thirdLabelsList" :key="item.code">
         <n-form-item-gi :label="item.name">
@@ -100,23 +75,14 @@ import { jsonToQuery } from '@/utils';
 import { getProvideFormData } from '@/views/track/trackActionBar/rightActionBar/distributeForm/hooks';
 import { getDistributeEnum } from '@/service/api';
 import { communityEnum } from '../hooks/getAllList';
+import inputToTag from './spacialFormItem/inputToTag.vue';
+
 defineOptions({ name: 'LabelSetting' });
-const customLabel = ref('');
 const thirdLabelsList = ref([]) as Ref<any[]>;
-const customLabelArr = ref<string[]>([]);
 const secHolder = ref<any[]>([]);
 const baseHolder = ref<any[]>([]);
 const selectedTag = ref<any[]>([]);
 
-const setCustomLabel = (val: Event) => {
-  const element = val.target as HTMLInputElement;
-  if (!element?.value) return;
-  customLabelArr.value.push(element?.value);
-  customLabel.value = '';
-};
-const handleClose = index => {
-  customLabelArr.value.splice(index, 1);
-};
 const customSelValues = ref<Record<string, any>>({});
 const formRef = ref();
 const { injectFormData } = getProvideFormData();
@@ -211,7 +177,7 @@ const setTemplateData = data => {
   const obj = JSON.parse(data.newKeywords);
   Object.keys(obj).forEach(v => {
     if (v === 'customize') {
-      customLabelArr.value = obj[v].split(',');
+      customSelValues.value = obj[v].split(',');
     } else {
       setCustom(v, obj[v]);
     }

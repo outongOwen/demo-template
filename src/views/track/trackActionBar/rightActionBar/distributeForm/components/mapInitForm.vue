@@ -33,7 +33,7 @@
               ></n-select>
             </template>
             <template v-if="item.type === 'component'">
-              <component :is="item.component" :enum-options-list="enumOptionsList"></component>
+              <component :is="item.component" :form-key="item.key" :enum-options-list="enumOptionsList"></component>
             </template>
           </n-form-item>
         </template>
@@ -93,7 +93,7 @@ import { useGlobalStore } from '@/store';
 import { getQueryString, jsonToQuery } from '@/utils';
 import { getDistributeEnum } from '@/service/api';
 import { getAllEnum } from '../hooks/getAllList';
-import { ListCode, queryArrayLeft, queryArrayRight } from '../hooks/formInitMap';
+import {EditHidden, ListCode, MCNShow, queryArrayLeft, queryArrayRight} from '../hooks/formInitMap';
 import { getProvideFormData } from '../hooks';
 defineOptions({ name: 'MapInitForm' });
 const formRef = ref();
@@ -158,7 +158,32 @@ watch(
       // 媒资
       isMedia.value = newVal.some((d: any) => d == '0');
     }
-    if (isMedia) {
+    if (isEditing.value){
+      formInitMap.forEach(v=>{
+        if (EditHidden.includes(v.key)){
+          v.show&&(v.show = false)
+        }else{
+          !v.show&&(v.show = true)
+        }
+      })
+    }else if (newVal.includes('1')||newVal.includes('2')) {
+      formInitMap.forEach(v=>{
+        if (MCNShow.includes(v.key)){
+          !v.show&&(v.show = true)
+        }else{
+          v.show&&(v.show = false)
+        }
+      })
+    }else{
+      formInitMap.forEach(v=>{
+        if(v.key === 'title'){
+          v.show = true
+        }else{
+          v.show&&(v.show = false)
+        }
+      })
+    }
+    if (isMedia.value) {
       if (!categoryOptObj.media) {
         const p: any = {
           urlCode: 'category_list',

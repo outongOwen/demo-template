@@ -1,8 +1,25 @@
 import type { FormItemRule } from 'naive-ui';
 import pidComponent from '../components/spacialFormItem/pidComponent.vue';
 import copyRightIdComponent from '../components/spacialFormItem/copyRightIdComponent.vue';
-export const radioPlatForm: Array<string> = ['-3', '-2', '-1', '0', '1', '2'];
+import inputToTag from '../components/spacialFormItem/inputToTag.vue';
 
+// G客&MCN需要的编目信息
+export const MCNShow: Array<string> = [
+  'title',
+  'keyword',
+  'pid',
+  'initialAssetId',
+  'fanCircleId',
+  'operationFlag',
+  'descriptionValue',
+  'category',
+  'secondClassCode',
+  'contentForm'
+];
+export const EditHidden: Array<string> = ['keyword', 'fanCircleId'];
+// 不能共存的分发平台值
+export const radioPlatForm: Array<string> = ['-3', '-2', '-1', '0', '1', '2'];
+// 新运编长分发的值
 export const editLongParams: Array<string> = [
   'cpLogoPath',
   'hasLogo',
@@ -39,32 +56,45 @@ export const queryArrayLeft: any[] = [
   },
   {
     type: 'component',
+    label: '关键字：',
+    key: 'keyword',
+    holder: '请输入关键字',
+    show: true,
+    component: inputToTag,
+    rules: [
+      {
+        required: true,
+        validator(_rule: FormItemRule, value: string[] | undefined) {
+          if (!value || !value.length) {
+            return new Error('请输入关键字');
+          }
+          return true;
+        },
+        trigger: ['blur']
+      }
+    ]
+  },
+  {
+    type: 'select',
+    label: '圈子：',
+    key: 'fanCircleId',
+    holder: '请输入标题',
+    show: true
+  },
+  {
+    type: 'component',
     label: 'PID：',
     key: 'pid',
     optName: 'pidQueryOpt',
     show: true,
-    component: pidComponent,
-    rules: [
-      {
-        required: true,
-        message: '请选择来源',
-        trigger: ['change']
-      }
-    ]
+    component: pidComponent
   },
   {
     type: 'input',
     label: '来源媒资ID：',
     key: 'initialAssetId',
     holder: '请输入来源媒资ID',
-    show: true,
-    rules: [
-      {
-        required: false,
-        message: '请输入来源媒资ID',
-        trigger: ['blur', 'change']
-      }
-    ]
+    show: true
   },
   {
     type: 'textarea',
@@ -146,14 +176,7 @@ export const queryArrayLeft: any[] = [
     key: 'operationFlag',
     optName: 'operationFlagList',
     holder: '请输入运营标识',
-    show: true,
-    rules: [
-      {
-        required: true,
-        message: '请输入运营标识',
-        trigger: ['change']
-      }
-    ]
+    show: true
   }
 ];
 // 优先发布选项
