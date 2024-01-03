@@ -51,3 +51,30 @@ export function parserActionsToPositions(actions: TimelineAction[], scaleUnit: n
   });
   return positions;
 }
+
+/**
+ * @description 检查是否存在交集，通过目标action与actions，通过属性start和end判断
+ * @param {TimelineAction} targetAction
+ * @param {TimelineAction[]} actions
+ * @returns {boolean}
+ */
+export function checkIntersectionTime(
+  { targetStart, targetEnd, targetId }: { targetStart: number; targetEnd: number; targetId: string },
+  actions: TimelineAction[]
+): boolean {
+  // 必须排除自身
+  const filterActions = actions.filter(action => action.id !== targetId);
+  return filterActions.some(action => {
+    const { start, end } = action;
+    if (targetStart > start && targetStart < end) {
+      return true;
+    }
+    if (targetEnd > start && targetEnd < end) {
+      return true;
+    }
+    if (targetStart < start && targetEnd > end) {
+      return true;
+    }
+    return false;
+  });
+}

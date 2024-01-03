@@ -1,8 +1,8 @@
 import { parserActionsToPositions, parserTimeToTransform } from '../utils';
-import type { DragGuideLine } from '../components/timeLineEditorArea/dragGuideLine';
 import type { TimelineAction, TimelineRow } from '../types';
-const dragLineData = reactive<DragGuideLine>({ isMoving: false, movePositions: [], assistPositions: [] });
-export default function useGuideLine() {
+import type { DragActionGuideLine } from '../components/timeLineEditorArea/dragGuideLine/index';
+const dragLineActionLine = reactive<DragActionGuideLine>({ isMoving: false, movePositions: [], assistPositions: [] });
+export default function useActionGuideLine() {
   /** 获取辅助线 */
   const defaultGetAssistPosition = (data: {
     editorData: TimelineRow[];
@@ -48,30 +48,30 @@ export default function useGuideLine() {
   /** 初始化draglines */
   const initDragLine = (data: { movePositions?: number[]; assistPositions?: number[] }) => {
     const { movePositions, assistPositions } = data;
-    dragLineData.isMoving = true;
-    dragLineData.movePositions = movePositions || [];
-    dragLineData.assistPositions = assistPositions || [];
+    dragLineActionLine.isMoving = true;
+    dragLineActionLine.movePositions = movePositions || [];
+    dragLineActionLine.assistPositions = assistPositions || [];
   };
 
   /** 更新dragline */
   const updateDragLine = (data: { movePositions?: number[]; assistPositions?: number[] }) => {
     const { movePositions, assistPositions } = data;
-    if (movePositions) dragLineData.movePositions = movePositions;
-    if (assistPositions) dragLineData.assistPositions = assistPositions;
+    if (movePositions) dragLineActionLine.movePositions = movePositions;
+    if (assistPositions) dragLineActionLine.assistPositions = assistPositions;
   };
 
   /** 释放draglines */
   const disposeDragLine = () => {
-    dragLineData.isMoving = false;
-    dragLineData.movePositions = [];
-    dragLineData.assistPositions = [];
+    dragLineActionLine.isMoving = false;
+    dragLineActionLine.movePositions = [];
+    dragLineActionLine.assistPositions = [];
   };
 
   return {
     initDragLine,
     updateDragLine,
     disposeDragLine,
-    dragLineData,
+    dragLineActionLine,
     defaultGetAssistPosition,
     defaultGetMovePosition
   };

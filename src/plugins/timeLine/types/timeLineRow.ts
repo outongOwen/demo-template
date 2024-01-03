@@ -57,7 +57,7 @@ export interface TimelineRow {
   /** 行id */
   id: string;
   /** 行名称 */
-  name: string;
+  name: string | number;
   /** 行类型 */
   type: string;
   /** 行的动作列表 */

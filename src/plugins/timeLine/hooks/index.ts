@@ -1,5 +1,5 @@
 import useContext from './useContext';
 import useMainRow from './useMainRow';
-import useGuideLine from './useGuideLine';
+import useActionGuideLine from './useActionGuideLine';
 import useAutoScroll from './useAutoScroll';
-export { useContext, useMainRow, useGuideLine, useAutoScroll };
+export { useContext, useMainRow, useActionGuideLine, useAutoScroll };

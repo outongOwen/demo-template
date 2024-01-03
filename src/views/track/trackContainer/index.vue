@@ -24,9 +24,9 @@
     :scale-small-cell-ms="getScaleInfo.scaleSmallCellMs"
     :get-scale-render="getScaleRender"
   >
-    <template #sidebar="{ itemRow, sideBarRef }">
+    <!-- <template #sidebar="{ itemRow, sideBarRef }">
       <TimeLineSideBar :time-line-row="itemRow" :side-bar-ref="sideBarRef" />
-    </template>
+    </template> -->
     <!-- <template #blankPlaceholder>
       <blank-placeholder />
     </template> -->
@@ -42,7 +42,7 @@ import { formatTime } from '@/utils/scaleTimeFormat';
 import { TimeLine } from '@/plugins/timeLine';
 import useTrackScale from './timeLineScale/useTrackScale';
 import { mockData, effects, sideBars } from './mock';
-import TimeLineSideBar from './timeLineSideBar/index.vue';
+// import TimeLineSideBar from './timeLineSideBar/index.vue';
 // import BlankPlaceholder from './blankPlaceholder/index.vue';
 defineOptions({
   name: 'TrackTimeLine'

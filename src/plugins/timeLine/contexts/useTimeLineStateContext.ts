@@ -1,5 +1,4 @@
 import type { ShallowRef } from 'vue';
-import { isString, isArray } from 'lodash';
 import { useContext } from '../hooks';
 export interface TimeLineStateContextProps {
   /**
@@ -22,30 +21,9 @@ export interface TimeLineStateContextProps {
    */
   hasMainRow: Ref<boolean>;
   /**
-   * @description 刻度缩放单位 （ms/px）
-   * @default 0
-   * @type {number}
+   * @description 时间线最大时间
    */
-  selectedActionIds: Ref<Array<string>>;
-  /**
-   * @description 选中action的ref集合
-   */
-  selectedActionRefs: ShallowRef<Map<string, HTMLElement | SVGElement>>;
-
-  /**
-   * @description 拖拽目标记录值
-   */
-  rowLinePosition: {
-    y: number;
-    x?: number;
-    isMoving: boolean;
-  };
-  /**
-   * @description 设置选中action
-   * @param {Array<string>} actionIds
-   * @returns {void}
-   */
-  setSelectedActionId(selectId?: string | string[], push?: boolean): void;
+  timeLineMaxEndTime: Ref<number>;
   /**
    * @description 设置scrollLeft
    * @param {number} delta
@@ -53,7 +31,9 @@ export interface TimeLineStateContextProps {
    */
   setDeltaScrollLeft(delta: number): void;
 }
-const { useInject, useProvide } = useContext<TimeLineStateContextProps>('TimeLineStateContext');
+const { useInject, useProvide } = useContext<TimeLineStateContextProps>('TimeLineStateContext', {
+  native: true
+});
 export default function useTimeLineStateContext() {
   // 刻度单位（ms/px）
   const scaleUnit = ref<number>(0);
@@ -63,42 +43,8 @@ export default function useTimeLineStateContext() {
   const hasMainRow = ref<boolean>(false);
   // 时间线编辑区域容器DOM
   const timeLineEditorRef = shallowRef<HTMLElement | null | undefined>(null);
-  // 选中的action的id集合
-  const selectedActionIds = ref<Array<string>>([]);
-  // 选中的action的ref集合
-  const selectedActionRefs = shallowRef<Map<string, HTMLElement | SVGElement>>(new Map());
-  // 拖拽目标记录值
-  const rowLinePosition = reactive({
-    y: 0,
-    isMoving: false
-  });
-
-  //  设置选中action的id
-  const setSelectedActionId = (selectId, push = false) => {
-    if (!selectId) {
-      selectedActionIds.value = [];
-    }
-    if (isString(selectId)) {
-      if (push) {
-        if (selectedActionIds.value.includes(selectId)) {
-          return;
-        }
-        selectedActionIds.value.push(selectId);
-        return;
-      }
-      selectedActionIds.value = [selectId];
-    }
-    if (isArray(selectId)) {
-      if (push) {
-        // eslint-disable-next-line no-param-reassign
-        selectId = selectId.filter(item => !selectedActionIds.value.includes(item));
-        if (!selectId.length) return;
-        selectedActionIds.value.push(...selectId);
-        return;
-      }
-      selectedActionIds.value = selectId;
-    }
-  };
+  // 时间线最大时间
+  const timeLineMaxEndTime = ref<number>(0);
   // 根据delta设置scrollLeft
   const setDeltaScrollLeft = (delta: number) => {
     if (!timeLineEditorRef.value) return;
@@ -112,14 +58,11 @@ export default function useTimeLineStateContext() {
     frameWidth,
     hasMainRow,
     timeLineEditorRef,
-    selectedActionIds,
-    selectedActionRefs,
-    rowLinePosition,
-    setSelectedActionId,
-    setDeltaScrollLeft
+    setDeltaScrollLeft,
+    timeLineMaxEndTime
   };
-  const provideTimeLineStateContext = () => {
-    return useProvide(timeLineStateProps);
+  const provideTimeLineStateContext = (context: Partial<TimeLineStateContextProps>) => {
+    return useProvide(Object.assign(timeLineStateProps, context));
   };
   const injectTimeLineStateContext = () => {
     return useInject();

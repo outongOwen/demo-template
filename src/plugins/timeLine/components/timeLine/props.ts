@@ -219,7 +219,7 @@ export const timeLineProps = {
    */
   guideLine: {
     type: Boolean,
-    default: true
+    default: false
   },
   /**
    * @description 辅助线吸附距离

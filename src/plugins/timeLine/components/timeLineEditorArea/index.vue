@@ -14,7 +14,7 @@
       paddingLeft: `${leftOffset}px`
     }"
     :class="{
-      'pos-center': !isOutRange
+      'pos-center': !hasShowScroll
     }"
     @click.stop="handleClick"
   >
@@ -24,32 +24,30 @@
       class="timeLine-editor-area-inner"
       :style="{ rowGap: rowSpacing + 'px', width: timeLineInnerWidth + 'px' }"
     >
-      <TimeLineRow
-        v-for="item in editorData"
-        :ref="el => getMinRowRef(el as InstanceType<typeof TimeLineRow>, item)"
-        :key="item.id"
-        :row-item="item"
-      />
+      <!-- {{ dragLineActionLine }} -->
+      <TimeLineRow v-for="item in editorData" :key="item.id" :row-item="item" />
     </div>
     <slot v-else name="blankPlaceholder">
       <blank-placeholder />
     </slot>
-    <!-- 时间线row辅助线 -->
     <div
-      v-show="rowLinePosition.isMoving && rowLinePosition.y >= 0"
+      v-show="timeLineEditorAreaContext.dropzoneInfo.isMoving"
       class="drag-row-line"
       :style="{
-        top: `${rowLinePosition.y}px`
+        top: `${timeLineEditorAreaContext.dropzoneInfo.top}px`,
+        left: `${scrollLeft}px`
       }"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { toReactive, useResizeObserver, useElementSize } from '@vueuse/core';
-import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-import { useMainRow, useGuideLine } from '../../hooks';
-import type { TimelineRow } from '../../types';
+// @ts-nocheck
+/* eslint-disable */
+import { useResizeObserver, useElementSize, useScroll } from '@vueuse/core';
+import { useTimeLineContext, useTimeLineStateContext, useTimeLineEditorAreaContext } from '../../contexts';
+import { useActionGuideLine } from '../../hooks';
+// import type { TimelineAction, TimelineRow } from '../../types';
 import TimeLineRow from './timeLineRow/index.vue';
 import BlankPlaceholder from './blankPlaceholder/index.vue';
 defineOptions({
@@ -60,59 +58,37 @@ const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
-const { scaleHeight, editorData, rowSpacing, mainRowId, leftOffset } = toReactive(timeLineContext);
-const { hasMainRow, rowLinePosition, scaleUnit } = timeLineStateContext;
+const { provideTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
+const { scaleHeight, editorData, rowSpacing, leftOffset } = toRefs(timeLineContext);
+const { scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
 const timeLineInnerRef = ref<HTMLElement>();
-const minRowRef = ref<HTMLElement | null>();
-const isOutRange = ref(false);
-const getMinRowRef = (rowRef: InstanceType<typeof TimeLineRow>, rowItem: TimelineRow) => {
-  if (rowRef?.rowRef && unref(hasMainRow) && rowItem.type === mainRowId) {
-    rowRef.rowRef.id = 'timeLine-main-row';
-    minRowRef.value = rowRef.rowRef;
-    return;
-  }
-  minRowRef.value = null;
-};
-
-const { checkMainRowBottom } = useMainRow(minRowRef);
-
+// const minRowRef = ref<HTMLElement | null>();
+// 滚动条出现
+const hasShowScroll = ref(false);
+const timeLineEditorAreaContext = provideTimeLineEditorAreaContext({
+  editorData
+});
 useResizeObserver([timeLineRef, timeLineInnerRef], () => {
   if (timeLineRef.value && timeLineInnerRef.value) {
-    isOutRange.value = timeLineRef.value!.offsetHeight <= timeLineInnerRef.value!.offsetHeight;
-    checkMainRowBottom();
+    hasShowScroll.value = timeLineRef.value!.offsetHeight <= timeLineInnerRef.value!.offsetHeight;
   }
 });
+const { x: scrollLeft } = useScroll(timeLineStateContext.timeLineEditorRef);
 const { width: timeLineRefWidth } = useElementSize(timeLineRef);
-const maxEndTime = computed(() => {
-  if (unref(editorData)) {
-    const maxEnd = unref(editorData)!.reduce((prev, cur) => {
-      // 通过actions中最大end值计算最大宽度
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      const maxEnd = cur.actions.reduce((prev: any, cur: any) => {
-        return Math.max(prev, cur.end);
-      }, 0);
-      return Math.max(prev, maxEnd);
-    }, 0);
-    return maxEnd;
-  }
-  return 0;
-});
 const timeLineInnerWidth = computed(() => {
-  return unref(maxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3 >= unref(timeLineRefWidth)
-    ? unref(maxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3
+  return unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3 >=
+    unref(timeLineRefWidth)
+    ? unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3
     : unref(timeLineRefWidth);
 });
 const handleClick = () => {
-  console.log('点击外部');
-  // timeLineStateContext.setSelectedActionId(['1', '12222']);
+  timeLineEditorAreaContext.clearSelected();
 };
 // 注册辅助线
-useGuideLine();
-
+const dragLineActionLine = useActionGuideLine();
 onMounted(() => {
   timeLineStateContext.timeLineEditorRef.value = timeLineRef.value;
-  console.log(timeLineRefWidth.value, '_+_+');
 });
 </script>
 
@@ -151,16 +127,17 @@ onMounted(() => {
   width: 100%;
   overflow: scroll;
   position: relative;
+  // 禁止选中
+  user-select: none;
   .drag-row-line {
     position: absolute;
     width: 100%;
     height: 1px;
     background-color: #fff;
     pointer-events: none;
-    z-index: 9009;
+    z-index: 9999999;
   }
-  // 禁止选中
-  user-select: none;
+
   .timeLine-editor-area-inner {
     flex-shrink: 0;
     display: flex;
