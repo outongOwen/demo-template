@@ -1,6 +1,6 @@
 interface ScaleInfo {
-  sliderKeys?: Array<number>;
   scale?: number;
+  scaleStep?: number;
   scaleSmallCellWidth?: number;
   scaleLargeCellWidth?: number;
   scaleSmallCellMs?: number;

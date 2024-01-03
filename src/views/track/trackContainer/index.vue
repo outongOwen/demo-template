@@ -18,7 +18,7 @@
     :row-sort-types="['text', 'video', 'main', 'audio']"
     :side-bar-width="sideBarWidth"
     :scale-height="40"
-    :fps="25"
+    :fps="fps"
     :scale-small-cell-width="getScaleInfo.scaleSmallCellWidth"
     :scale-large-cell-width="getScaleInfo.scaleLargeCellWidth"
     :scale-small-cell-ms="getScaleInfo.scaleSmallCellMs"
@@ -52,14 +52,15 @@ const editorData = ref(mockData);
 const timeLineRef = ref<null>();
 const timeLineStore = useTimeLineStore();
 const sideBarWidth = ref(150);
+const fps = ref(25);
 const { getScaleInfo } = timeLineStore;
 const getScaleRender = (time: number, unit: 'f' | 's') => {
-  return formatTime(time, 25, unit);
+  return formatTime(time, fps.value, unit);
 };
 onMounted(() => {
   // TODO ts
   const timeLineDom = document.getElementsByClassName('time-line')[0] as MaybeElementRef;
-  useTrackScale(timeLineDom, sideBarWidth.value, 25);
+  useTrackScale(timeLineDom, sideBarWidth.value, fps.value);
 });
 </script>
 <style lang="scss" scoped>

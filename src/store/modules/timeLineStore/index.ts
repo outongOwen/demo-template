@@ -4,8 +4,8 @@ import type { TimeLineStateType, ScaleInfo } from './index.type';
 export const useTimeLineStore = defineStore('useTimeLineStore', {
   state: (): TimeLineStateType => ({
     scaleInfo: {
-      sliderKeys: [],
       scale: 0,
+      scaleStep: 0.01,
       scaleSmallCellWidth: 20, // px
       scaleLargeCellWidth: 100, // px
       scaleSmallCellMs: 40 // ms

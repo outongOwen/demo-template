@@ -12,7 +12,7 @@ import MainForm from './distributeForm/index.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
 const { getScaleInfo } = storeToRefs(timeLineStore);
-const barItemOptions: Track.ActionBarItem[] = [
+const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
     icon: 'mdi-magnet',
     label: '轨道磁吸',
@@ -79,8 +79,10 @@ const barItemOptions: Track.ActionBarItem[] = [
     key: 'autoScale',
     label: '轨道自适应',
     btnType: 'Button',
-    change: (key: any) => {
-      console.log(key);
+    change: () => {
+      const scale = getScaleInfo.value.scaleStep ? getScaleInfo.value.scaleStep - 0.01 : 0;
+      barItemOptions[barItemOptions.length - 1].defaultValue = scale;
+      timeLineStore.setScaleInfo({ scale });
     }
   },
   {
@@ -91,18 +93,18 @@ const barItemOptions: Track.ActionBarItem[] = [
     max: 1,
     min: 0,
     step: 0.01,
-    marks: [],
+    markStep: 0.01,
     change: (key: number) => {
       // console.log(key);
       timeLineStore.setScaleInfo({ scale: key });
     }
   }
-];
+]);
 watch(
-  () => getScaleInfo.value && getScaleInfo.value.sliderKeys,
+  () => getScaleInfo.value && getScaleInfo.value.scaleStep,
   val => {
     if (val) {
-      barItemOptions[barItemOptions.length - 1].marks = val;
+      barItemOptions[barItemOptions.length - 1].markStep = val;
       barItemOptions[barItemOptions.length - 1].defaultValue = getScaleInfo.value.scale;
     }
   },
