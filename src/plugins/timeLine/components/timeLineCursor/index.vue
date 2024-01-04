@@ -44,6 +44,9 @@ const cursorTime = ref(0);
 const translateX = ref(0);
 watch(scaleUnit, () => {
   translateX.value = unref(cursorTime) / unref(scaleUnit);
+  nextTick(() => {
+    unref(timeLineEditorRef)!.scrollLeft = translateX.value - unref(timeLineEditorRef)!.clientWidth / 2;
+  });
 });
 const restrictRect = reactiveComputed(() => {
   return interact.modifiers.restrict({
