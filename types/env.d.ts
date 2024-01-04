@@ -33,6 +33,7 @@ interface ImportMetaEnv {
    * - 例如：icon-local
    */
   readonly VITE_ICON_LOCAL_PREFFIX: string;
+  /** 是否开启权限校验 */
   readonly VITE_AUTH_ROUTE_MODE: 'static' | 'dynamic';
   /** 后端服务的环境类型 */
   readonly VITE_SERVICE_ENV?: ServiceEnvType;
@@ -48,6 +49,10 @@ interface ImportMetaEnv {
   readonly VITE_COMPRESS?: 'Y' | 'N';
   /** 压缩算法类型 */
   readonly VITE_COMPRESS_TYPE?: 'gzip' | 'brotliCompress' | 'deflate' | 'deflateRaw';
+  /** 是否开启打包文件压缩 */
+  readonly VITE_COMPRESSION?: 'Y' | 'N';
+  /** 文件打包文件类型 */
+  readonly VITE_COMPRESSION_TYPE?: 'zip' | 'tar';
   /** 是否应用pwa */
   readonly VITE_PWA?: 'Y' | 'N';
   /** 是否开启打包文件大小结果分析 */
