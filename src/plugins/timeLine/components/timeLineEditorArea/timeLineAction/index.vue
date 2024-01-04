@@ -31,10 +31,10 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
-/* eslint-disable */
+// // @ts-nocheck
+// /* eslint-disable */
 import interact from 'interactjs';
-import { reactiveComputed, unrefElement, useParentElement, useElementBounding } from '@vueuse/core';
+import { reactiveComputed, unrefElement } from '@vueuse/core';
 import type { DragEvent, ResizeEvent, Interactable } from '@interactjs/types';
 import { BigNumber } from 'bignumber.js';
 import { useActionGuideLine } from '../../../hooks';
@@ -61,19 +61,19 @@ const timeLineStateContext = injectTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
 const { scaleUnit, timeLineEditorRef, frameWidth } = timeLineStateContext;
-const { guideLine, guideAdsorptionDistance, editorData, hideCursor } = toRefs(timeLineContext);
-const preOrNextAction = reactiveComputed(() => {
-  const index = unref(rowItem).actions.findIndex(item => item.id === unref(actionItem).id);
-  const preAction = unref(rowItem).actions[index - 1];
-  const nextAction = unref(rowItem).actions[index + 1];
-  return {
-    preAction,
-    nextAction
-  };
-});
+const { guideLine, editorData, hideCursor } = toRefs(timeLineContext);
+// const preOrNextAction = reactiveComputed(() => {
+//   const index = unref(rowItem).actions.findIndex(item => item.id === unref(actionItem).id);
+//   const preAction = unref(rowItem).actions[index - 1];
+//   const nextAction = unref(rowItem).actions[index + 1];
+//   return {
+//     preAction,
+//     nextAction
+//   };
+// });
 // 辅助线hook
 const {
-  dragLineActionLine,
+  // dragLineActionLine,
   initDragLine,
   updateDragLine,
   disposeDragLine,
@@ -90,8 +90,6 @@ const deltaX = ref(0);
 const deltaY = ref(0);
 // 是否吸附
 const isAdsorption = ref(false);
-const parentEl = useParentElement();
-const { left: clientX } = useElementBounding(parentEl);
 const isSelected = computed(() => {
   return Boolean(timeLineEditorAreaContext.selectedActionIds.value.includes(unref(actionItem).id));
 });
@@ -169,7 +167,7 @@ const handleMouseUp = () => {
   el.style.zIndex = 'auto';
 };
 // 开始拖拽移动
-const handleMoveStart = e => {
+const handleMoveStart = () => {
   deltaX.value = 0;
   deltaY.value = 0;
   isAdsorption.value = false;
@@ -253,9 +251,9 @@ const handleResizeEnd = (e: ResizeEvent) => {
   const target = e.target;
   const { left, width } = target.dataset;
   const dir: Direction = e.edges?.right ? 'right' : 'left';
-  const endLeft = dir === 'left' ? Number(left) - (Number(left) % unref(frameWidth)) : Number(left);
-  const endWidth = dir === 'right' ? Number(width) - (Number(width) % unref(frameWidth)) : Number(width);
-  const { start, end } = parserTransformToTime({ left: endLeft, width: endWidth }, scaleUnit.value);
+  // const endLeft = dir === 'left' ? Number(left) - (Number(left) % unref(frameWidth)) : Number(left);
+  // const endWidth = dir === 'right' ? Number(width) - (Number(width) % unref(frameWidth)) : Number(width);
+  const { start, end } = parserTransformToTime({ left: Number(left), width: Number(width) }, scaleUnit.value);
   actionItem.value.start = start;
   actionItem.value.end = end;
 
@@ -272,8 +270,11 @@ const handleResize = (e: ResizeEvent) => {
   const preLeft = parseFloat(left || '0');
   const preWidth = parseFloat(width || '0');
   if (dir === 'left') {
-    console.log(e.deltaRect!.left!, 'e.deltaRect!.left!');
-    const curLeft = BigNumber(preLeft).plus(e.deltaRect!.left!).toNumber();
+    let curLeft = BigNumber(preLeft).plus(e.deltaRect!.left!).toNumber();
+    curLeft =
+      Number(curLeft) % unref(frameWidth) > unref(frameWidth) / 2
+        ? Number(curLeft) - (Number(curLeft) % unref(frameWidth)) + unref(frameWidth)
+        : Number(curLeft) - (Number(curLeft) % unref(frameWidth));
     const tempRight = preLeft + preWidth;
     const curWidth = tempRight - curLeft;
     const { start, end } = parserTransformToTime({ left: curLeft, width: curWidth }, scaleUnit.value);
@@ -294,7 +295,10 @@ const handleResize = (e: ResizeEvent) => {
   if (dir === 'right') {
     // 拖动右侧
     let curWidth = BigNumber(preWidth).plus(e.deltaRect!.right!).toNumber();
-    curWidth -= curWidth % unref(frameWidth);
+    curWidth =
+      Number(curWidth) % unref(frameWidth) > unref(frameWidth) / 2
+        ? Number(curWidth) - (Number(curWidth) % unref(frameWidth)) + unref(frameWidth)
+        : Number(curWidth) - (Number(curWidth) % unref(frameWidth));
     const { start, end } = parserTransformToTime({ left: preLeft, width: curWidth }, scaleUnit.value);
     handleUpdateGuideLine({ start, end, dir });
     if (timeLineContext.onActionResizing) {
@@ -353,21 +357,19 @@ const restrictSize = reactiveComputed(() => {
 const modifiersSnap = reactiveComputed(() => {
   return interact.modifiers.snap({
     targets: [
-      (x, y) => {
-        console.log(x - (x % unref(frameWidth)), 'x - x%unref(frameWidth)');
-        console.log(x % unref(frameWidth), '_+_+_+');
-        return {
-          x: x - (x % unref(frameWidth)),
-          y
-        };
-      }
-    ]
+      interact.createSnapGrid({
+        x: unref(frameWidth),
+        y: 1
+      })
+    ],
+    offset: { x: 5, y: 0 },
+    relativePoints: [{ x: 0, y: 0 }]
   });
 });
 const initDragResize = (interactInst: Interactable) => {
   interactInst.resizable({
     edges: { left: true, right: true },
-    modifiers: [resizeRestrictRect, restrictSize],
+    modifiers: [modifiersSnap, restrictSize, resizeRestrictRect],
     margin: 5,
     onstart: handleResizeStart,
     onmove: handleResize,
