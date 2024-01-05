@@ -10,7 +10,7 @@
     ref="timeLineRef"
     class="wh-full time-line"
     :editor-data="editorData"
-    :effects="effects"
+    :action-effects="effects"
     :side-bars="sideBars"
     show-side-bar
     :main-row="true"
@@ -40,6 +40,7 @@ import type { MaybeElementRef } from '@vueuse/core';
 import { useTimeLineStore } from '@/store';
 import { formatTime } from '@/utils/scaleTimeFormat';
 import { TimeLine } from '@/plugins/timeLine';
+import type { TimelineExpose } from '@/plugins/timeLine';
 import useTrackScale from './timeLineScale/useTrackScale';
 import { mockData, effects, sideBars } from './mock';
 // import TimeLineSideBar from './timeLineSideBar/index.vue';
@@ -49,7 +50,7 @@ defineOptions({
 });
 const themeVars = useThemeVars();
 const editorData = ref(mockData);
-const timeLineRef = ref<null>();
+const timeLineRef = ref<TimelineExpose>();
 const timeLineStore = useTimeLineStore();
 const sideBarWidth = ref(150);
 const fps = ref(25);
@@ -61,6 +62,7 @@ onMounted(() => {
   // TODO ts
   const timeLineDom = document.getElementsByClassName('time-line')[0] as MaybeElementRef;
   useTrackScale(timeLineDom, sideBarWidth.value, fps.value);
+  timeLineRef.value && timeLineStore.setTimeLineRef(timeLineRef.value);
 });
 </script>
 <style lang="scss" scoped>

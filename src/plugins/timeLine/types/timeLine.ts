@@ -2,9 +2,9 @@ import type { Emitter } from '../core/emitter';
 import type { EventTypes } from '../core/events';
 import type { timeLineProps } from '../components/timeLine/props';
 
-export interface TimelineState {
+export interface TimelineExpose {
   /** dom节点 */
-  target: HTMLElement;
+  // target: HTMLElement;
   /** 运行监听器 */
   listener: Emitter<EventTypes>;
   /** 是否正在播放 */
@@ -32,10 +32,10 @@ export interface TimelineState {
   }) => boolean;
   /** 暂停 */
   pause: () => void;
-  /** 设置scroll left */
-  setScrollLeft: (val: number) => void;
-  /** 设置scroll top */
-  setScrollTop: (val: number) => void;
+  // /** 设置scroll left */
+  // setScrollLeft: (val: number) => void;
+  // /** 设置scroll top */
+  // setScrollTop: (val: number) => void;
 }
 
 /**

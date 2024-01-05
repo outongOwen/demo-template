@@ -20,7 +20,7 @@
           'add-cover': isOutRange
         }"
         :style="{
-          top: -scrollTop + 'px',
+          top: -scrollInfo.y.value + 'px',
           rowGap: rowSpacing + 'px'
         }"
       >
@@ -46,16 +46,11 @@
   </div>
 </template>
 <script setup lang="ts">
-// @ts-nocheck
-/* eslint-disable */
 import type { VNodeChild } from 'vue';
 import { useResizeObserver } from '@vueuse/core';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-import { useMainRow } from '../../hooks';
+// import { useMainRow } from '../../hooks';
 import type { TimelineRow } from '../../types';
-interface Props {
-  scrollTop?: number;
-}
 interface Expose {
   setHideRow: (row: TimelineRow) => void;
   setLockRow: (row: TimelineRow) => void;
@@ -65,21 +60,16 @@ interface Expose {
 defineOptions({
   name: 'TimeLineBar'
 });
-const props = withDefaults(defineProps<Props>(), {
-  scrollTop: 0
-});
-const { scrollTop } = toRefs(props);
 const { injectTimeLineContext } = useTimeLineContext();
-// const { injectTimeLineStateContext } = useTimeLineStateContext();
-// const timeLineStateContext = injectTimeLineStateContext();
+const { injectTimeLineStateContext } = useTimeLineStateContext();
+const timeLineStateContext = injectTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
 const isOutRange = ref(false);
 // const mainRowRef = ref<HTMLElement | null>();
 const sideBarListRef = ref<HTMLElement | null>();
 const sideBarUlRef = ref<HTMLElement | null>();
-const { sideBarWidth, editorData, rowHeight, sideBars, scaleHeight, rowSpacing, mainRowId, leftOffset } =
-  toRefs(timeLineContext);
-
+const { sideBarWidth, editorData, rowHeight, sideBars, scaleHeight, rowSpacing, mainRowId } = toRefs(timeLineContext);
+const { scrollInfo } = timeLineStateContext;
 // const getMainRowRef = (el: HTMLElement | null, rowItem: TimelineRow) => {
 //   if (el && timeLineStateContext.hasMainRow.value && rowItem.type === unref(mainRowId)) {
 //     mainRowRef.value = el;

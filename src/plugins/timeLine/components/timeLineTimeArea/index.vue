@@ -30,14 +30,7 @@ const timeLineContext = injectTimeLineContext();
 const timeLineStateContext = injectTimeLineStateContext();
 const { scaleHeight, scaleSmallCellWidth, scaleLargeCellWidth, leftOffset } = toRefs(timeLineContext);
 const { getScaleRender } = timeLineContext;
-const { scaleUnit } = timeLineStateContext;
-const props = defineProps({
-  scrollLeft: {
-    // 滚动距离px, 通过它和 msPerPx，得到刻度绘制的开始时间
-    type: Number,
-    default: 0
-  }
-});
+const { scaleUnit, scrollInfo } = timeLineStateContext;
 const ruleRef = ref(); // canvasDom
 const timeLineRuleRef = ref(); // 刻度尺容器ref
 const ctx = ref(); // canvas上下文对象
@@ -99,13 +92,10 @@ const calcCanvasSize = () => {
   ruleRef.value.height = height;
   state.pxPerFullScreen = ruleRef.value.width;
 };
-watch(
-  () => props.scrollLeft,
-  () => {
-    state.ruleStartTime = props.scrollLeft * unref(scaleUnit)!;
-    drawRule();
-  }
-);
+watch(scrollInfo.x, () => {
+  state.ruleStartTime = unref(scrollInfo.x) * unref(scaleUnit)!;
+  drawRule();
+});
 watch(
   () => scaleUnit?.value,
   () => {

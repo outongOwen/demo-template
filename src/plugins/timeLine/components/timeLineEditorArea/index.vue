@@ -17,6 +17,7 @@
       'pos-center': !hasShowScroll
     }"
     @click.stop="handleClick"
+    @mousedown="handleMousedown"
   >
     <div
       v-if="editorData?.length"
@@ -83,8 +84,12 @@ const timeLineInnerWidth = computed(() => {
     : unref(timeLineRefWidth);
 });
 const handleClick = () => {
+  console.log('取消选中');
   timeLineEditorAreaContext.clearSelected();
 };
+const handleMousedown = ()=>{
+  console.log('是否点击');
+}
 // 注册辅助线
 const dragLineActionLine = useActionGuideLine();
 onMounted(() => {

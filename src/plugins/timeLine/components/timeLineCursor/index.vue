@@ -10,7 +10,7 @@
     class="cursor-line"
     :data-left="translateX"
     :style="{
-      transform: `translateX(${translateX - scrollLeft}px)`,
+      transform: `translateX(${translateX - unref(scrollInfo.x)}px)`,
       left: `${leftOffset}px`
     }"
   >
@@ -21,32 +21,30 @@
 </template>
 
 <script setup lang="ts">
+import { unref } from 'vue';
 import interact from 'interactjs';
 import { reactiveComputed } from '@vueuse/core';
 import type { DragEvent } from '@interactjs/types';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-interface Props {
-  scrollLeft: number;
-}
 defineOptions({
   name: 'TimeLineCursor'
 });
-const props = defineProps<Props>();
-const { scrollLeft } = toRefs(props);
 const { injectTimeLineContext } = useTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
 const timeLineStateContext = injectTimeLineStateContext();
 const { leftOffset } = toRefs(timeLineContext);
-const { scaleUnit, timeLineEditorRef, frameWidth } = timeLineStateContext;
+const { scaleUnit, timeLineEditorRef, frameWidth, cursorTime, scrollInfo, handleSetCursor } = timeLineStateContext;
 const cursorLineRef = ref<HTMLElement>();
-const cursorTime = ref(0);
 const translateX = ref(0);
 watch(scaleUnit, () => {
   translateX.value = unref(cursorTime) / unref(scaleUnit);
   nextTick(() => {
     unref(timeLineEditorRef)!.scrollLeft = translateX.value - unref(timeLineEditorRef)!.clientWidth / 2;
   });
+});
+watch(cursorTime, () => {
+  translateX.value = unref(cursorTime) / unref(scaleUnit);
 });
 const restrictRect = reactiveComputed(() => {
   return interact.modifiers.restrict({
@@ -84,16 +82,14 @@ const handleMove = (event: DragEvent) => {
     Number(curLeft) % unref(frameWidth) > unref(frameWidth) / 2
       ? Number(curLeft) - (Number(curLeft) % unref(frameWidth)) + unref(frameWidth)
       : Number(curLeft) - (Number(curLeft) % unref(frameWidth));
-  translateX.value = curLeft;
-  cursorTime.value = Math.round(curLeft * unref(scaleUnit));
+  handleSetCursor(Math.round(curLeft * unref(scaleUnit)));
 };
 const handleMoveEnd = (event: DragEvent) => {
   console.log('handleMoveEnd', event);
 };
-onMounted(() => {
+const initInteract = () => {
   interact(cursorLineRef.value!, {
-    deltaSource: 'client',
-    context: timeLineEditorRef.value!
+    deltaSource: 'client'
   }).draggable({
     modifiers: [modifiersSnap, restrictRect],
     onstart: handleMoveStart,
@@ -101,7 +97,9 @@ onMounted(() => {
     onend: handleMoveEnd,
     cursorChecker: () => 'ew-resize'
   });
-  translateX.value = unref(cursorTime) / unref(scaleUnit);
+};
+onMounted(() => {
+  initInteract();
 });
 </script>
 

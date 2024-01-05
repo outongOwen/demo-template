@@ -12,8 +12,8 @@
       left: `${actionItemSize.left}px`
     }"
     @click.stop="handleClick"
-    @mousedown="handleMouseDown"
-    @mouseup="handleMouseUp"
+    @mousedown.stop="handleMouseDown"
+    @mouseup.stop="handleMouseUp"
   >
     <div v-show="isSelected" class="active-box">
       <div class="left-handle" />
@@ -234,6 +234,7 @@ const handleMoveEnd = (e: DragEvent) => {
 };
 // 开始拖拽缩放
 const handleResizeStart = (e: ResizeEvent) => {
+  e.preventDefault();
   const dir = e.edges?.left ? 'left' : 'right';
   deltaX.value = 0;
   isAdsorption.value = false;

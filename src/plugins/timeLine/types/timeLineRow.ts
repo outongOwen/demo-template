@@ -1,4 +1,3 @@
-import type { VNodeArrayChildren } from 'vue';
 import type { TimelineAction } from './timeLineAction';
 type EventData = {
   lastLeft: number;
@@ -15,39 +14,6 @@ export type Direction = 'left' | 'right';
 export type RndResizeStartCallback = (dir: Direction) => void;
 export type RndResizeCallback = (dir: Direction, data: EventData) => boolean | void;
 export type RndResizeEndCallback = (dir: Direction, data: Pick<EventData, 'left' | 'width'>) => void;
-
-export interface RowRndApi {
-  updateWidth: (size: number) => void;
-  updateLeft: (left: number) => void;
-  getLeft: () => number;
-  getWidth: () => number;
-}
-
-export interface RowRndProps {
-  width?: number;
-  left?: number;
-  grid?: number;
-  start?: number;
-  bounds?: { left: number; right: number };
-  edges?: { left: boolean | string; right: boolean | string };
-
-  onResizeStart?: RndResizeStartCallback;
-  onResize?: RndResizeCallback;
-  onResizeEnd?: RndResizeEndCallback;
-  onDragStart?: RndDragStartCallback;
-  onDrag?: RndDragCallback;
-  onDragEnd?: RndDragEndCallback;
-  // 同时传入parentRef和deltaScrollLeft时会启动自动滚动
-  parentRef?: HTMLDivElement;
-  deltaScrollLeft?: (delta: number) => void;
-
-  children?: JSX.Element | VNode | VNodeArrayChildren | string;
-
-  enableResizing?: boolean;
-  enableDragging?: boolean;
-  adsorptionPositions?: number[];
-  adsorptionDistance?: number;
-}
 /**
  * 时间轴行基本参数
  * @export

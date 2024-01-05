@@ -8,10 +8,10 @@
 <template>
   <div class="timeLine-container">
     <div class="timeLine-inner-wrap">
-      <TimeLineSideBar v-if="showSideBar" :scroll-top="scrollTop" />
+      <TimeLineSideBar v-if="showSideBar" />
       <div class="timeLine-editor-wrap" :style="{ width: showSideBar ? `calc(100% - ${sideBarWidth}px)` : '100%' }">
-        <TimeLineTimeArea :scroll-left="scrollLeft" />
-        <TimeLineCursor :scroll-left="scrollLeft" />
+        <TimeLineTimeArea />
+        <TimeLineCursor />
         <TimeLineEditorArea>
           <template #blankPlaceholder>
             <slot name="blankPlaceholder" />
@@ -23,30 +23,26 @@
 </template>
 
 <script setup lang="ts">
-import { useEventListener } from '@vueuse/core';
 import { consola } from 'consola';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
 import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
-import type { TimelineAction } from '../../types';
+import type { TimelineAction, TimelineExpose } from '../../types';
 import { timeLineProps } from './props';
 import { sortTimeLineByType } from './index';
 defineOptions({
   name: 'TimeLine'
 });
 const props = defineProps(timeLineProps);
-/**
- * #TODO 需要对props进行校验和初始化操作
- */
 const { provideTimeLineContext } = useTimeLineContext();
 const { provideTimeLineStateContext } = useTimeLineStateContext();
-
 const {
   showSideBar,
   sideBarWidth,
   editorData,
+  actionEffects,
   mainRow,
   mainRowId,
   background,
@@ -55,8 +51,6 @@ const {
   scaleSmallCellWidth,
   fps
 } = toRefs(props);
-const scrollTop = ref(0);
-const scrollLeft = ref(0);
 provideTimeLineContext(props);
 const timeLineStateContext = provideTimeLineStateContext({
   scaleUnit: computed(() => {
@@ -78,11 +72,6 @@ const timeLineStateContext = provideTimeLineStateContext({
     }
     return 0;
   })
-});
-useEventListener(timeLineStateContext.timeLineEditorRef, 'scroll', e => {
-  const target = e.target as HTMLElement;
-  scrollTop.value = target.scrollTop;
-  scrollLeft.value = target.scrollLeft;
 });
 watch(
   [mainRow, mainRowId],
@@ -126,6 +115,47 @@ watch(
     immediate: true
   }
 );
+watchEffect(() => {
+  timeLineStateContext.engineRef.value.effects = actionEffects.value;
+});
+watchEffect(() => {
+  timeLineStateContext.engineRef.value.data = editorData.value;
+  unref(timeLineStateContext.engineRef).reRender();
+});
+onMounted(() => {
+  unref(timeLineStateContext.engineRef).on('play', () => {
+    timeLineStateContext.isPlaying.value = true;
+  });
+  unref(timeLineStateContext.engineRef).on('paused', () => {
+    timeLineStateContext.isPlaying.value = false;
+  });
+  unref(timeLineStateContext.engineRef).on('setTimeByTick', ({ time }) => {
+    let left = (time * 1000) / timeLineStateContext.scaleUnit.value;
+    left -= left % timeLineStateContext.frameWidth.value;
+    const curTime = Math.round(left * timeLineStateContext.scaleUnit.value);
+    timeLineStateContext.handleSetCursor(curTime, false);
+  });
+});
+defineExpose<TimelineExpose>({
+  get listener() {
+    return unref(timeLineStateContext.engineRef);
+  },
+  get isPlaying() {
+    return unref(timeLineStateContext.engineRef).isPlaying;
+  },
+  get isPaused() {
+    return unref(timeLineStateContext.engineRef).isPaused;
+  },
+  setPlayRate: unref(timeLineStateContext.engineRef).setPlayRate.bind(unref(timeLineStateContext.engineRef)),
+  getPlayRate: unref(timeLineStateContext.engineRef).getPlayRate.bind(unref(timeLineStateContext.engineRef)),
+  reRender: unref(timeLineStateContext.engineRef).reRender.bind(unref(timeLineStateContext.engineRef)),
+  setTime: time => {
+    timeLineStateContext.handleSetCursor(time);
+  },
+  getTime: unref(timeLineStateContext.engineRef).getTime.bind(unref(timeLineStateContext.engineRef)),
+  play: (param: Parameters<TimelineExpose['play']>[0]) => unref(timeLineStateContext.engineRef).play({ ...param }),
+  pause: unref(timeLineStateContext.engineRef).pause.bind(unref(timeLineStateContext.engineRef))
+});
 </script>
 <style lang="scss" scoped>
 .timeLine-container {
