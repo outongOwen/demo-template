@@ -6,7 +6,7 @@
  * TimeLine
 -->
 <template>
-  <div class="timeLine-container">
+  <div ref="timeLineContainerRef" class="timeLine-container">
     <div class="timeLine-inner-wrap">
       <TimeLineSideBar v-if="showSideBar" />
       <div
@@ -66,6 +66,7 @@ provideTimeLineContext(props);
 const timelineEditorWrapRef = ref<HTMLElement | null>();
 const mouseDown = ref(false);
 const mouseUp = ref(false);
+const timeLineContainerRef = ref<HTMLElement>();
 const timeLineStateContext = provideTimeLineStateContext({
   scaleUnit: computed(() => {
     return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
@@ -98,8 +99,9 @@ const handleMouseUp = () => {
 const handleWrapClick = e => {
   if (mouseDown.value && mouseUp.value) {
     const excude = ['timeLine-editor-action', 'left-handle', 'right-handle']; // 过滤轨道中不触发的dom类名
+    const { x: posX } = timelineEditorWrapRef.value!.getBoundingClientRect();
     if (excude.indexOf(e.target.className) === -1) {
-      const left = e.clientX - timelineEditorWrapRef.value!.getBoundingClientRect().x - leftOffset.value; // 点击的位置距离刻度0的距离
+      const left = e.clientX - posX - leftOffset.value; // 点击的位置距离刻度0的距离
       const frameMs = 1000 / fps.value; // 轨道帧率，一帧多少ms.
       let time = (left + timeLineStateContext.scrollInfo.x.value) * timeLineStateContext.scaleUnit.value; // 得到点击坐标对应的时间
       time = time < 0 ? 0 : time;
@@ -176,6 +178,9 @@ onMounted(() => {
   });
 });
 defineExpose<TimelineExpose>({
+  get targetEl() {
+    return timeLineContainerRef.value!;
+  },
   get listener() {
     return unref(timeLineStateContext.engineRef);
   },

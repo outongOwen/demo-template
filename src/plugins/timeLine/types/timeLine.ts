@@ -4,7 +4,7 @@ import type { timeLineProps } from '../components/timeLine/props';
 
 export interface TimelineExpose {
   /** dom节点 */
-  // target: HTMLElement;
+  targetEl: HTMLElement;
   /** 运行监听器 */
   listener: Emitter<EventTypes>;
   /** 是否正在播放 */

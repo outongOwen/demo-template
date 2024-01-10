@@ -81,9 +81,11 @@ useResizeObserver([timeLineRef, timeLineInnerRef], () => {
 const { x: scrollLeft } = useScroll(timeLineStateContext.timeLineEditorRef);
 const { width: timeLineRefWidth } = useElementSize(timeLineRef);
 const timeLineInnerWidth = computed(() => {
-  return unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3 >=
+  let offset = leftOffset ? leftOffset.value : 0;
+  offset = offset || 0;
+  return unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.5 - offset >=
     unref(timeLineRefWidth)
-    ? unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3
+    ? unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.5
     : unref(timeLineRefWidth);
 });
 const handleClick = e => {

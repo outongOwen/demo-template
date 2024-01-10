@@ -38,7 +38,6 @@
 <script setup lang="ts">
 import { useThemeVars } from 'naive-ui';
 // import type { TimelineRow } from '@/plugins/timeLine';
-import type { MaybeElementRef } from '@vueuse/core';
 import { useTimeLineStore } from '@/store';
 import { formatTime } from '@/utils/scaleTimeFormat';
 import { TimeLine } from '@/plugins/timeLine';
@@ -61,8 +60,7 @@ const getScaleRender = (time: number, unit: 'f' | 's') => {
   return formatTime(time, fps.value, unit);
 };
 onMounted(() => {
-  // TODO ts
-  const timeLineDom = document.getElementsByClassName('time-line')[0] as MaybeElementRef;
+  const timeLineDom = timeLineRef.value?.targetEl;
   useTrackScale(timeLineDom, sideBarWidth.value, fps.value);
   timeLineRef.value && timeLineStore.setTimeLineRef(timeLineRef.value);
 });
