@@ -9,7 +9,16 @@
   <div class="timeLine-container">
     <div class="timeLine-inner-wrap">
       <TimeLineSideBar v-if="showSideBar" />
-      <div class="timeLine-editor-wrap" :style="{ width: showSideBar ? `calc(100% - ${sideBarWidth}px)` : '100%' }">
+      <div
+        ref="timelineEditorWrapRef"
+        class="timeLine-editor-wrap"
+        :style="{
+          width: showSideBar ? `calc(100% - ${sideBarWidth}px)` : '100%'
+        }"
+        @click="handleWrapClick($event)"
+        @mousedown="handleMouseDown"
+        @mouseup="handleMouseUp"
+      >
         <TimeLineTimeArea />
         <TimeLineCursor />
         <TimeLineEditorArea>
@@ -50,9 +59,13 @@ const {
   rowSortTypes,
   scaleSmallCellMs,
   scaleSmallCellWidth,
-  fps
+  fps,
+  leftOffset
 } = toRefs(props);
 provideTimeLineContext(props);
+const timelineEditorWrapRef = ref<HTMLElement | null>();
+const mouseDown = ref(false);
+const mouseUp = ref(false);
 const timeLineStateContext = provideTimeLineStateContext({
   scaleUnit: computed(() => {
     return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
@@ -76,6 +89,29 @@ const timeLineStateContext = provideTimeLineStateContext({
 });
 // 注册辅助线
 useActionGuideLine();
+const handleMouseDown = () => {
+  mouseDown.value = true;
+};
+const handleMouseUp = () => {
+  mouseUp.value = true;
+};
+const handleWrapClick = e => {
+  if (mouseDown.value && mouseUp.value) {
+    const excude = ['timeLine-editor-action', 'left-handle', 'right-handle']; // 过滤轨道中不触发的dom类名
+    if (excude.indexOf(e.target.className) === -1) {
+      const left = e.clientX - timelineEditorWrapRef.value!.getBoundingClientRect().x - leftOffset.value; // 点击的位置距离刻度0的距离
+      const frameMs = 1000 / fps.value; // 轨道帧率，一帧多少ms.
+      let time = (left + timeLineStateContext.scrollInfo.x.value) * timeLineStateContext.scaleUnit.value; // 得到点击坐标对应的时间
+      time = time < 0 ? 0 : time;
+      time =
+        time > timeLineStateContext.timeLineMaxEndTime.value ? timeLineStateContext.timeLineMaxEndTime.value : time; //  限制0-duration;
+      time = Math.round(time / frameMs) * frameMs; // 对时间进行帧级对齐
+      timeLineStateContext.handleSetCursor(time); // seek时间
+    }
+  }
+  mouseDown.value = false;
+  mouseUp.value = false;
+};
 watch(
   [mainRow, mainRowId],
   () => {

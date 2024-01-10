@@ -16,8 +16,9 @@
     :class="{
       'pos-center': !hasShowScroll
     }"
-    @click.stop="handleClick"
+    @click="handleClick($event)"
     @mousedown="handleMousedown"
+    @mouseup="handleMouseup"
   >
     <div
       v-if="editorData?.length"
@@ -64,6 +65,8 @@ const { scaleHeight, editorData, rowSpacing, leftOffset, guideLine } = toRefs(ti
 const { scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
 const timeLineInnerRef = ref<HTMLElement>();
+const mouseDown = ref(false);
+const mouseUp = ref(false);
 // const minRowRef = ref<HTMLElement | null>();
 // 滚动条出现
 const hasShowScroll = ref(false);
@@ -83,14 +86,27 @@ const timeLineInnerWidth = computed(() => {
     ? unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.3
     : unref(timeLineRefWidth);
 });
-const handleClick = () => {
-  console.log('取消选中');
-  timeLineEditorAreaContext.clearSelected();
+const handleClick = e => {
+  if (mouseDown.value && mouseUp.value) {
+    console.log('取消选中', e);
+    timeLineEditorAreaContext.clearSelected();
+  } else {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  mouseDown.value = false;
+  mouseUp.value = false;
 };
 const handleMousedown = () => {
   console.log('是否点击');
+  mouseDown.value = true;
 };
+const handleMouseup = () => {
+  mouseUp.value = true;
+};
+// 注册辅助线
 const { dragLineActionLine } = useActionGuideLine();
+
 onMounted(() => {
   timeLineStateContext.timeLineEditorRef.value = timeLineRef.value;
 });
