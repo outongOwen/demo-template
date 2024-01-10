@@ -25,6 +25,6 @@ export const SCALE_SMALL_CELL_MS = 1;
 /** 默认网格X轴距离 */
 export const DEFAULT_GRID_X = 1;
 /** 默认吸附像素 */
-export const DEFAULT_GUIDE_LINE_SNAP = 8;
+export const DEFAULT_GUIDE_LINE_SNAP = 6;
 /** 默认帧数 */
 export const DEFAULT_FPS = 25;

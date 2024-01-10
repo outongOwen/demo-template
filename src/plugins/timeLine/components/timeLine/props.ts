@@ -213,6 +213,13 @@ export const timeLineProps = {
     validator: (val: number): boolean => val > 0
   },
   /**
+   * @description 是否开启鼠标吸附
+   */
+  cursorAdsorption: {
+    type: Boolean,
+    default: false
+  },
+  /**
    * @description 是否开启辅助线
    * @default false
    * @type {boolean}

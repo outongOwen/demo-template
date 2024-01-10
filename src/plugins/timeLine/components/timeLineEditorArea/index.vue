@@ -25,7 +25,7 @@
       class="timeLine-editor-area-inner"
       :style="{ rowGap: rowSpacing + 'px', width: timeLineInnerWidth + 'px' }"
     >
-      <!-- {{ dragLineActionLine }} -->
+      <div class="absolute top-0 left-0">{{ dragLineActionLine }}</div>
       <TimeLineRow v-for="item in editorData" :key="item.id" :row-item="item" />
     </div>
     <slot v-else name="blankPlaceholder">
@@ -39,16 +39,16 @@
         left: `${scrollLeft}px`
       }"
     />
+    <DragGuideLine v-if="guideLine" />
   </div>
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
-/* eslint-disable */
 import { useResizeObserver, useElementSize, useScroll } from '@vueuse/core';
 import { useTimeLineContext, useTimeLineStateContext, useTimeLineEditorAreaContext } from '../../contexts';
-import { useActionGuideLine } from '../../hooks';
 // import type { TimelineAction, TimelineRow } from '../../types';
+import { useActionGuideLine } from '../../hooks';
+import DragGuideLine from './dragGuideLine/index.vue';
 import TimeLineRow from './timeLineRow/index.vue';
 import BlankPlaceholder from './blankPlaceholder/index.vue';
 defineOptions({
@@ -60,7 +60,7 @@ const timeLineContext = injectTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
 const { provideTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
-const { scaleHeight, editorData, rowSpacing, leftOffset } = toRefs(timeLineContext);
+const { scaleHeight, editorData, rowSpacing, leftOffset, guideLine } = toRefs(timeLineContext);
 const { scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
 const timeLineInnerRef = ref<HTMLElement>();
@@ -87,11 +87,10 @@ const handleClick = () => {
   console.log('取消选中');
   timeLineEditorAreaContext.clearSelected();
 };
-const handleMousedown = ()=>{
+const handleMousedown = () => {
   console.log('是否点击');
-}
-// 注册辅助线
-const dragLineActionLine = useActionGuideLine();
+};
+const { dragLineActionLine } = useActionGuideLine();
 onMounted(() => {
   timeLineStateContext.timeLineEditorRef.value = timeLineRef.value;
 });

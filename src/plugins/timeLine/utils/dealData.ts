@@ -14,8 +14,8 @@ export function parserTimeToTransform(
 ): { left: number; width: number } {
   const { start, end } = params;
   return {
-    left: Math.round(start / scaleUnit),
-    width: Math.round((end - start) / scaleUnit)
+    left: start / scaleUnit,
+    width: (end - start) / scaleUnit
   };
 }
 /**
@@ -49,6 +49,7 @@ export function parserActionsToPositions(actions: TimelineAction[], scaleUnit: n
     positions.push(item.start / scaleUnit);
     positions.push(item.end / scaleUnit);
   });
+  positions.sort((a, b) => a - b);
   return positions;
 }
 
@@ -66,6 +67,7 @@ export function checkIntersectionTime(
   const filterActions = actions.filter(action => action.id !== targetId);
   return filterActions.some(action => {
     const { start, end } = action;
+    console.log(targetEnd - start);
     if (targetStart > start && targetStart < end) {
       return true;
     }

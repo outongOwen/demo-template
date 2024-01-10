@@ -30,6 +30,7 @@ import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
 import type { TimelineAction, TimelineExpose } from '../../types';
+import { useActionGuideLine } from '../../hooks';
 import { timeLineProps } from './props';
 import { sortTimeLineByType } from './index';
 defineOptions({
@@ -73,6 +74,8 @@ const timeLineStateContext = provideTimeLineStateContext({
     return 0;
   })
 });
+// 注册辅助线
+useActionGuideLine();
 watch(
   [mainRow, mainRowId],
   () => {

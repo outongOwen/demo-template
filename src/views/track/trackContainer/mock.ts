@@ -11,7 +11,7 @@ export const mockData: TimelineRow[] = [
       {
         id: '1',
         start: 0,
-        end: 7 * 100100,
+        end: 1000 * 60,
         type: 'video',
         effectId: 'video'
       },

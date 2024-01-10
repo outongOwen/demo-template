@@ -13,6 +13,9 @@
       transform: `translateX(${translateX - unref(scrollInfo.x)}px)`,
       left: `${leftOffset}px`
     }"
+    :class="{
+      'active-state-cursor': activeStateCursor
+    }"
   >
     <div class="cursor-line-top" />
     <div class="cursor-line-area" />
@@ -24,8 +27,9 @@
 import { unref } from 'vue';
 import interact from 'interactjs';
 import { reactiveComputed } from '@vueuse/core';
-import type { DragEvent } from '@interactjs/types';
+import type { DragEvent, Interactable } from '@interactjs/types';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
+import { useActionGuideLine } from '../../hooks';
 defineOptions({
   name: 'TimeLineCursor'
 });
@@ -33,10 +37,23 @@ const { injectTimeLineContext } = useTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
 const timeLineStateContext = injectTimeLineStateContext();
-const { leftOffset } = toRefs(timeLineContext);
-const { scaleUnit, timeLineEditorRef, frameWidth, cursorTime, scrollInfo, handleSetCursor } = timeLineStateContext;
+const { leftOffset, guideAdsorptionDistance, cursorAdsorption, editorData } = toRefs(timeLineContext);
+const { scaleUnit, timeLineEditorRef, frameWidth, cursorTime, scrollInfo, handleSetCursor, timeLineMaxEndTime } =
+  timeLineStateContext;
 const cursorLineRef = ref<HTMLElement>();
 const translateX = ref(0);
+const interactable = shallowRef<Interactable>();
+const { dragLineActionLine, defaultGetAllAssistPosition, initDragLine, disposeDragLine } = useActionGuideLine();
+// 初始化辅助线
+const handleInitGuideLine = () => {
+  if (unref(cursorAdsorption)) {
+    const assistPositions = defaultGetAllAssistPosition({
+      editorData: editorData!.value!,
+      scaleUnit: scaleUnit.value
+    });
+    initDragLine({ assistPositions, targetType: 'cursor' });
+  }
+};
 watch(scaleUnit, () => {
   translateX.value = unref(cursorTime) / unref(scaleUnit);
   nextTick(() => {
@@ -45,6 +62,17 @@ watch(scaleUnit, () => {
 });
 watch(cursorTime, () => {
   translateX.value = unref(cursorTime) / unref(scaleUnit);
+});
+const activeStateCursor = computed(() => {
+  return (
+    dragLineActionLine.isMoving &&
+    dragLineActionLine.targetType === 'action' &&
+    dragLineActionLine.movePositions.some(left => {
+      const dis = Math.abs(left - translateX.value);
+      console.log(dis, 'dissss');
+      return Math.round(dis) <= 0.001;
+    })
+  );
 });
 const restrictRect = reactiveComputed(() => {
   return interact.modifiers.restrict({
@@ -58,40 +86,70 @@ const restrictRect = reactiveComputed(() => {
     }
   });
 });
-const modifiersSnap = reactiveComputed(() => {
+const guideSnap = reactiveComputed(() => {
   return interact.modifiers.snap({
+    origin: timeLineEditorRef.value!,
     targets: [
       interact.createSnapGrid({
         x: unref(frameWidth),
-        y: 1
+        y: 1,
+        limits: {
+          left: 0,
+          right: unref(timeLineMaxEndTime) / unref(scaleUnit) - unref(scrollInfo.x),
+          bottom: Infinity,
+          top: -Infinity
+        }
       })
     ],
-    offset: { x: 5, y: 0 },
+    offset: { x: 10, y: 0 },
+    relativePoints: [{ x: 0, y: 0 }]
+  });
+});
+const adsorbSnap = reactiveComputed(() => {
+  return interact.modifiers.snap({
+    origin: timeLineEditorRef.value!,
+    targets: [
+      (x, y) => {
+        const minDis = Number.MAX_SAFE_INTEGER;
+        let adsorption = x;
+        dragLineActionLine.assistPositions.forEach(item => {
+          const dis = Math.abs(item - scrollInfo.x.value - adsorption);
+          if (dis < unref(guideAdsorptionDistance)! && dis < minDis) adsorption = item - scrollInfo.x.value;
+        });
+        const newX = adsorption;
+        return {
+          x: newX,
+          y
+        };
+      }
+    ],
+    offset: { x: 10, y: 0 },
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
 const handleMoveStart = (event: DragEvent) => {
-  console.log('handleMoveStart', event);
+  console.log(event);
+  handleInitGuideLine();
 };
 const handleMove = (event: DragEvent) => {
   const target = event.target;
   const { left } = target.dataset;
   let curLeft = parseFloat(left || '0') + event.dx;
-  curLeft < 0 && (curLeft = 0);
-  curLeft =
-    Number(curLeft) % unref(frameWidth) > unref(frameWidth) / 2
-      ? Number(curLeft) - (Number(curLeft) % unref(frameWidth)) + unref(frameWidth)
-      : Number(curLeft) - (Number(curLeft) % unref(frameWidth));
+  curLeft = Math.round(curLeft / unref(frameWidth)) * unref(frameWidth);
   handleSetCursor(Math.round(curLeft * unref(scaleUnit)));
 };
 const handleMoveEnd = (event: DragEvent) => {
   console.log('handleMoveEnd', event);
+  disposeDragLine();
 };
+
 const initInteract = () => {
-  interact(cursorLineRef.value!, {
+  const interactInst = interact(cursorLineRef.value!, {
     deltaSource: 'client'
-  }).draggable({
-    modifiers: [modifiersSnap, restrictRect],
+  });
+  interactable.value = interactInst;
+  interactInst.draggable({
+    modifiers: [restrictRect, guideSnap, adsorbSnap],
     onstart: handleMoveStart,
     onmove: handleMove,
     onend: handleMoveEnd,
@@ -145,6 +203,16 @@ onMounted(() => {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
+  }
+}
+.active-state-cursor {
+  border-left: 1px solid #fff !important;
+  border-right: 1px solid #fff !important;
+  .cursor-line-top::before {
+    background-color: #fff !important;
+  }
+  .cursor-line-top::after {
+    border-top: 5px solid #fff !important;
   }
 }
 </style>

@@ -14,6 +14,8 @@
     :side-bars="sideBars"
     show-side-bar
     :main-row="true"
+    :guide-line="true"
+    cursor-adsorption
     main-row-id="main"
     :row-sort-types="['text', 'video', 'main', 'audio']"
     :side-bar-width="sideBarWidth"

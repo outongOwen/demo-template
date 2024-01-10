@@ -1,7 +1,9 @@
+export type TargetType = 'action' | 'cursor';
 export interface DragActionGuideLine {
   isMoving: boolean;
   movePositions: number[];
   assistPositions: number[];
+  targetType: TargetType;
 }
 export interface DragLineRowGuideLine {
   isMoving: boolean;
