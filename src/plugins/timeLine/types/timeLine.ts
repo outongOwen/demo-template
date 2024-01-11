@@ -33,7 +33,7 @@ export interface TimelineExpose {
   /** 暂停 */
   pause: () => void;
   // /** 设置scroll left */
-  // setScrollLeft: (val: number) => void;
+  setScrollLeft: (val: number) => void;
   // /** 设置scroll top */
   // setScrollTop: (val: number) => void;
 }

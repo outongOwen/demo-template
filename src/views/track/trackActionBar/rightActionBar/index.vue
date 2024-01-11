@@ -83,6 +83,7 @@ const barItemOptions = reactive<Track.ActionBarItem[]>([
       const scale = getScaleInfo.value.scaleStep ? getScaleInfo.value.scaleStep - 0.01 : 0;
       barItemOptions[barItemOptions.length - 1].defaultValue = scale;
       timeLineStore.setScaleInfo({ scale });
+      timeLineStore.timeLineRef && timeLineStore.timeLineRef.setScrollLeft(0); // 滚动到0的位置
     }
   },
   {
@@ -95,7 +96,7 @@ const barItemOptions = reactive<Track.ActionBarItem[]>([
     step: 0.01,
     markStep: 0.01,
     change: (key: number) => {
-      // console.log(key);
+      barItemOptions[barItemOptions.length - 1].defaultValue = key;
       timeLineStore.setScaleInfo({ scale: key });
     }
   }

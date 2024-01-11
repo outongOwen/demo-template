@@ -198,7 +198,8 @@ defineExpose<TimelineExpose>({
   },
   getTime: unref(timeLineStateContext.engineRef).getTime.bind(unref(timeLineStateContext.engineRef)),
   play: (param: Parameters<TimelineExpose['play']>[0]) => unref(timeLineStateContext.engineRef).play({ ...param }),
-  pause: unref(timeLineStateContext.engineRef).pause.bind(unref(timeLineStateContext.engineRef))
+  pause: unref(timeLineStateContext.engineRef).pause.bind(unref(timeLineStateContext.engineRef)),
+  setScrollLeft: timeLineStateContext.setDeltaScrollLeft
 });
 </script>
 <style lang="scss" scoped>
