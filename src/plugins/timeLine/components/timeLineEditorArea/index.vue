@@ -26,7 +26,7 @@
       class="timeLine-editor-area-inner"
       :style="{ rowGap: rowSpacing + 'px', width: timeLineInnerWidth + 'px' }"
     >
-      <div class="absolute top-0 left-0">{{ dragLineActionLine }}</div>
+      <!-- <div class="absolute top-0 left-0">{{ dragLineActionLine }}</div> -->
       <TimeLineRow v-for="item in editorData" :key="item.id" :row-item="item" />
     </div>
     <slot v-else name="blankPlaceholder">
@@ -60,19 +60,17 @@ const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
-const { provideTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
+const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const { scaleHeight, editorData, rowSpacing, leftOffset, guideLine } = toRefs(timeLineContext);
 const { scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
 const timeLineInnerRef = ref<HTMLElement>();
 const mouseDown = ref(false);
 const mouseUp = ref(false);
+const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
 // const minRowRef = ref<HTMLElement | null>();
 // 滚动条出现
 const hasShowScroll = ref(false);
-const timeLineEditorAreaContext = provideTimeLineEditorAreaContext({
-  editorData
-});
 useResizeObserver([timeLineRef, timeLineInnerRef], () => {
   if (timeLineRef.value && timeLineInnerRef.value) {
     hasShowScroll.value = timeLineRef.value!.offsetHeight <= timeLineInnerRef.value!.offsetHeight;
@@ -90,8 +88,8 @@ const timeLineInnerWidth = computed(() => {
 });
 const handleClick = e => {
   if (mouseDown.value && mouseUp.value) {
-    console.log('取消选中', e);
-    timeLineEditorAreaContext.clearSelected();
+    // console.log('取消选中', e);
+    // timeLineEditorAreaContext.clearSelected();
   } else {
     e.preventDefault();
     e.stopPropagation();
@@ -107,7 +105,7 @@ const handleMouseup = () => {
   mouseUp.value = true;
 };
 // 注册辅助线
-const { dragLineActionLine } = useActionGuideLine();
+useActionGuideLine();
 
 onMounted(() => {
   timeLineStateContext.timeLineEditorRef.value = timeLineRef.value;

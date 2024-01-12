@@ -9,16 +9,22 @@ const dragLineActionLine = reactive<DragActionGuideLine>({
 });
 export default function useActionGuideLine() {
   /** 获取全部辅助线位置 */
-  const defaultGetAllAssistPosition = (data: { editorData: TimelineRow[]; scaleUnit: number }) => {
-    const { editorData, scaleUnit } = data;
+  const defaultGetAllAssistPosition = (data: {
+    editorData: TimelineRow[];
+    scaleUnit: number;
+    extendPos?: string[] | number[];
+  }) => {
+    const { editorData, scaleUnit, extendPos } = data;
     const otherActions: TimelineAction[] = [];
-
     editorData.forEach(rowItem => {
       rowItem.actions.forEach(actionItem => {
         otherActions.push(actionItem);
       });
     });
     const positions = parserActionsToPositions(otherActions, scaleUnit);
+    if (extendPos?.length) {
+      positions.push(...extendPos.map(item => Number(item)));
+    }
     return positions;
   };
   /** 获取辅助线 */
@@ -30,8 +36,9 @@ export default function useActionGuideLine() {
     hideCursor: boolean;
     cursorLeft: number;
     assistActionIds?: string[];
+    extendPos?: string[];
   }) => {
-    const { editorData, assistActionIds, action, row, scaleUnit, cursorLeft, hideCursor } = data;
+    const { editorData, assistActionIds, action, row, scaleUnit, cursorLeft, hideCursor, extendPos } = data;
     const otherActions: TimelineAction[] = [];
     if (assistActionIds) {
       editorData.forEach(rowItem => {
@@ -53,8 +60,11 @@ export default function useActionGuideLine() {
     const positions = parserActionsToPositions(otherActions, scaleUnit);
     if (!hideCursor) {
       positions.push(cursorLeft);
-      positions.sort((a, b) => a - b);
     }
+    if (extendPos?.length) {
+      positions.push(...extendPos.map(item => Number(item)));
+    }
+    positions.sort((a, b) => a - b);
     return positions;
   };
   /** 获取当前移动标记 */

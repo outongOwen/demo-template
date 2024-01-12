@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { consola } from 'consola';
-import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
+import { useTimeLineContext, useTimeLineStateContext, useTimeLineEditorAreaContext } from '../../contexts';
 import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
 import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
@@ -48,6 +48,7 @@ defineOptions({
 const props = defineProps(timeLineProps);
 const { provideTimeLineContext } = useTimeLineContext();
 const { provideTimeLineStateContext } = useTimeLineStateContext();
+const { provideTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const {
   showSideBar,
   sideBarWidth,
@@ -88,6 +89,9 @@ const timeLineStateContext = provideTimeLineStateContext({
     return 0;
   })
 });
+const timeLineEditorAreaContext = provideTimeLineEditorAreaContext({
+  editorData
+});
 // 注册辅助线
 useActionGuideLine();
 const handleMouseDown = () => {
@@ -98,9 +102,9 @@ const handleMouseUp = () => {
 };
 const handleWrapClick = e => {
   if (mouseDown.value && mouseUp.value) {
-    const excude = ['timeLine-editor-action', 'left-handle', 'right-handle']; // 过滤轨道中不触发的dom类名
+    const excludesClassName = ['timeLine-editor-action', 'left-handle', 'right-handle', 'cursor-line']; // 过滤轨道中不触发的dom类名
     const { x: posX } = timelineEditorWrapRef.value!.getBoundingClientRect();
-    if (excude.indexOf(e.target.className) === -1) {
+    if (excludesClassName.indexOf(e.target.className) === -1) {
       const left = e.clientX - posX - leftOffset.value; // 点击的位置距离刻度0的距离
       const frameMs = 1000 / fps.value; // 轨道帧率，一帧多少ms.
       let time = (left + timeLineStateContext.scrollInfo.x.value) * timeLineStateContext.scaleUnit.value; // 得到点击坐标对应的时间
@@ -110,6 +114,7 @@ const handleWrapClick = e => {
       time = Math.round(time / frameMs) * frameMs; // 对时间进行帧级对齐
       timeLineStateContext.handleSetCursor(time); // seek时间
     }
+    timeLineEditorAreaContext.clearSelected();
   }
   mouseDown.value = false;
   mouseUp.value = false;
