@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import type { TimelineAction, TimelineRow, TimelineEffect } from '../types';
 import { Emitter } from './emitter';
 import type { EventTypes } from './events';
@@ -354,6 +353,7 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
         }
 
         this._activeActionIds.splice(i, 1);
+        /* eslint-disable no-continue */
         continue;
       }
       i++;

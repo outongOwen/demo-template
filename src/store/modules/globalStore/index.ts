@@ -4,7 +4,7 @@ import type { GlobalStateType } from './index.type';
 export const useGlobalStore = defineStore('useGlobalStore', {
   state: (): GlobalStateType => ({
     testSelect: false,
-    is3v3AuthStatus: false,
+    is3v3AuthStatus: false
   }),
   getters: {
     getTestSelect(): boolean {

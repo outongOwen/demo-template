@@ -14,9 +14,9 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
   interface StateType {
     curFpsRule: Array<object>;
     currentRule: { gridValue: number; cellCount: number; unit: string; msPerCell: number }; // 当前匹配的刻度尺渲染的刻度规则----动态
-    sliderKeys: Array<number>; // slider点击加减的时候的关键点。 // 动态
     ruleScope: Array<object>; // 刻度范围列表。 // 动态
     scaleCount: number; // 动态
+    scaleStep: number; // 得到slider两侧加减的步长。
     pxPerMsInBaseRule: number;
     preScaleSmallCellWidth: number; // 缓存的最小格宽度
     scaleSmallCellWidth: number;
@@ -26,9 +26,9 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
   const state: StateType = reactive({
     curFpsRule: [],
     currentRule: { gridValue: 15, cellCount: 10, unit: 'f', msPerCell: 1 }, // 当前匹配的刻度尺渲染的刻度规则----动态
-    sliderKeys: [], // slider点击加减的时候的关键点。 // 动态
     ruleScope: [], // 刻度范围列表。 // 动态
     scaleCount: 1, // 动态
+    scaleStep: 0.01,
     pxPerMsInBaseRule: 1,
     preScaleSmallCellWidth: 1,
     scaleSmallCellWidth: 10,
@@ -96,12 +96,12 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
     // 这里根据屏幕大小、轨道时间，可以知道缩放的范围，从0-n进行缩放；知道放大到最大的时候，最小一格是多少像素，多少时间。反过来进行缩小。假如n = 10,如果n = 9,代表 2^9 / 2^10 = 1/2 代表轨道缩小1倍. currentMsPerPx = scaleUnit*2;  currentMsPerPx = scaleUnit/(Math.pow(2, sliderValue)/ Math.pow(2, scaleCountInt))
 
     // 根据n 来计算 轨道上每次缩放显示的刻度
-    let sliderSSCount = scaleCountInt - ruleLists.length + 1; // s应该显示的刻度数量
+    const sliderSSCount = scaleCountInt - ruleLists.length + 1; // s应该显示的刻度数量
     // consola.log('sliderSSCount: ', sliderSSCount);
 
     // const arrs = [1, 2, 3, 5, 10, 30, 1 * 60, 2 * 60, 3 * 60, 5 * 60, 10 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 3 * 60 * 60, 5 * 60 * 60, 10 * 60 * 60, 30 * 60 * 60] // 单位s
     const secondEnums = [1, 2, 3, 5, 10, 20, 30];
-    sliderSSCount++; // 加上了20，执行这个，如果不加20，不执行。
+    // sliderSSCount++; // 加上了20，执行这个，如果不加20，不执行。
     for (let index = 0; index < sliderSSCount; index++) {
       const item = {
         gridValue: secondEnums[index % secondEnums.length] * 60 ** Math.floor(index / secondEnums.length),
@@ -112,16 +112,8 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
       item.msPerCell = (item.gridValue * 1000) / item.cellCount;
       ruleLists.push(item);
     }
-    // consola.log('ruleLists--->', ruleLists);
-    // consola.log('state.scaleCount: ', state.scaleCount);
-
-    for (let i = 0; i < Math.ceil(state.scaleCount); i++) {
-      state.sliderKeys.unshift(Math.floor(Math.round(100 - (1 / state.scaleCount) * i * 100)) / 100);
-    }
-    if (state.scaleCount !== Math.ceil(state.scaleCount)) {
-      state.sliderKeys.unshift(0);
-    }
-    // consola.log('state.sliderKeys: ', state.sliderKeys);
+    // console.log('ruleLists--->', ruleLists);
+    state.scaleStep = 1 / state.scaleCount;
   };
 
   /**
@@ -186,29 +178,17 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
       val = 0;
     }
     curScale.value = val;
-    timeLineStore.setScaleInfo({ scale: unref(curScale), sliderKeys: state.sliderKeys });
+    timeLineStore.setScaleInfo({ scale: unref(curScale), scaleStep: state.scaleStep });
   };
   const caclScale = () => {
-    state.sliderKeys = [];
     state.ruleScope = [];
     getCurFpsRule();
     caclInitRule(); // 轨道时长变化，影响绘制
     getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
     getRuleScope(); // 得到刻度列表对应的缩放范围
   };
-  caclScale();
-  changeScale(0);
-  // slider需要使用的数据：marks, curScale; 刻度尺需要的数据，当前规则下，小格子宽度、大格子宽度、msPerPx(scaleUnit); slider缩放的时候，能更新以上信息。
-  state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
-  timeLineStore.setScaleInfo({
-    sliderKeys: state.sliderKeys,
-    scaleSmallCellWidth: state.scaleSmallCellWidth,
-    scaleLargeCellWidth: state.scaleLargeCellWidth,
-    scaleSmallCellMs: state.scaleSmallCellMs
-  });
   const updateTimeRule = () => {
     ruleLists.splice(0, ruleLists.length);
-    state.sliderKeys = [];
     state.ruleScope = [];
     caclInitRule(); // 轨道时长变化，影响绘制
     getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
@@ -238,6 +218,16 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
     // console.error('state.scaleWidth:------++++ ', scaleWidth.value);
     if (isFirst.value) {
       isFirst.value = false;
+      caclScale();
+      changeScale(0);
+      // slider需要使用的数据：marks, curScale; 刻度尺需要的数据，当前规则下，小格子宽度、大格子宽度、msPerPx(scaleUnit); slider缩放的时候，能更新以上信息。
+      state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
+      timeLineStore.setScaleInfo({
+        scaleStep: state.scaleStep,
+        scaleSmallCellWidth: state.scaleSmallCellWidth,
+        scaleLargeCellWidth: state.scaleLargeCellWidth,
+        scaleSmallCellMs: state.scaleSmallCellMs
+      });
       return;
     }
     updateTimeRule();

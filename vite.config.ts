@@ -39,10 +39,11 @@ export default defineConfig(configEnv => {
     },
     build: {
       reportCompressedSize: false,
-      sourcemap: false,
+      sourcemap: configEnv.mode === 'development',
       commonjsOptions: {
         ignoreTryCatch: false
-      }
+      },
+      outDir: viteEnv.VITE_APP_NAME
     }
   };
 });

@@ -63,7 +63,7 @@ import type { TimelineRow } from '@/plugins/timeLine';
 import { timeLineSideBarOptions, defaultTimeLineSideBarOptionItem } from './index';
 interface Props {
   timeLineRow: TimelineRow;
-  sideBarRef?: Record<string, any> | null;
+  sideBarRef?: any;
 }
 defineOptions({
   name: 'TimeLineSideBar'
@@ -79,11 +79,8 @@ const getSideBarOptionBySideBarId = computed(() => {
   return defaultTimeLineSideBarOptionItem;
 });
 const handleRowDeleteOperation = () => {
-  if (timeLineRow.value.type === 'main') {
-    sideBarRef?.value?.clearRow && sideBarRef.value.clearRow(timeLineRow.value);
-  } else {
-    sideBarRef?.value?.deleteRow && sideBarRef.value.deleteRow(timeLineRow.value);
-  }
+  console.log(unref(sideBarRef), 'sideBarRef?.value?.clearRowsideBarRef?.value?.clearRow');
+  unref(sideBarRef)?.clearRow && unref(sideBarRef)?.clearRow(timeLineRow.value);
 };
 const handleSetMuteRow = () => {
   sideBarRef?.value?.setMuteRow && sideBarRef.value.setMuteRow(timeLineRow.value);

@@ -11,7 +11,7 @@ export const mockData: TimelineRow[] = [
       {
         id: '1',
         start: 0,
-        end: 7 * 100100,
+        end: 1000 * 60,
         type: 'video',
         effectId: 'video'
       },
@@ -46,7 +46,7 @@ export const mockData: TimelineRow[] = [
         effectId: 'video'
       }
     ]
-  }
+  },
   // {
   //   id: 'fffddd',
   //   name: '轨道2',
@@ -61,13 +61,36 @@ export const mockData: TimelineRow[] = [
   //   type: 'audio',
   //   actions: []
   // },
-  // {
-  //   id: 'hhh',
-  //   name: '轨道4',
-  //   sideBarId: 'text',
-  //   type: 'text',
-  //   actions: []
-  // },
+  {
+    id: 'h12hh',
+    name: '轨道411',
+    sideBarId: 'text',
+    type: 'text',
+    actions: [
+      {
+        id: '123213fff213',
+        start: 1000 * 60,
+        end: 1000 * 60 * 15,
+        type: 'text',
+        effectId: 'text'
+      }
+    ]
+  },
+  {
+    id: 'hhh',
+    name: '轨道4',
+    sideBarId: 'text',
+    type: 'text',
+    actions: [
+      {
+        id: '123213213',
+        start: 200,
+        end: 1000 * 60 * 15,
+        type: 'text',
+        effectId: 'text'
+      }
+    ]
+  }
   // {
   //   id: 'ffff12213213',
   //   name: '主轨道',

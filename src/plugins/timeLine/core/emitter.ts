@@ -1,69 +1,57 @@
 import type { Events } from './events';
-type EventHandler<T> = (args: T) => boolean | unknown;
 
 export class Emitter<EventTypes> {
-  events = new Map<keyof EventTypes, EventHandler<EventTypes[keyof EventTypes]>[]>();
+  events: { [key: string]: CallableFunction[] } = {};
 
   constructor(events: Events) {
-    if (events.handlers) {
-      for (const key in events.handlers) {
-        if (Object.hasOwn(events.handlers, key)) {
-          this.events.set(key as keyof EventTypes, events.handlers as EventHandler<EventTypes[keyof EventTypes]>[]);
-        }
-      }
-    } else {
-      this.events = new Map();
-    }
+    this.events = events.handlers;
   }
 
-  on(name: keyof EventTypes | (keyof EventTypes)[], handler: EventHandler<EventTypes[keyof EventTypes]>): this {
-    const names = Array.isArray(name) ? name : [name];
-    names.forEach(key => {
-      if (!this.events.has(key)) {
-        this.events.set(key, []);
-      }
+  on<K extends keyof EventTypes>(names: K | K[], handler: (args: EventTypes[K]) => boolean | unknown): this {
+    const events = names instanceof Array ? names : (names as string).split(' ');
 
-      this.events.get(key)!.push(handler);
+    (events as string[]).forEach(name => {
+      if (!this.events[name]) {
+        throw new Error(`The event ${name} does not exist`);
+      }
+      this.events[name].push(handler);
     });
 
     return this;
   }
 
   emit<K extends keyof EventTypes>(name: K, params: EventTypes[K]) {
-    if (!this.events.has(name)) {
+    if (!(name in this.events)) {
       throw new Error(`The event ${String(name)} cannot be triggered`);
     }
-    return this.events.get(name)?.reduce((r, e) => {
-      return e(params) !== false && r;
-    }, true);
+
+    return this.events[name as string].reduce((r: boolean, e: CallableFunction) => e(params) !== false && r, true); // return false if at least one event is false
   }
 
-  bind<K extends keyof EventTypes>(name: K) {
-    if (this.events.has(name)) {
-      throw new Error(`The event ${String(name)} is already bound`);
+  bind(name: string) {
+    if (this.events[name]) {
+      throw new Error(`The event ${name} is already bound`);
     }
-    this.events.set(name, []);
+
+    this.events[name] = [];
   }
 
-  exist<K extends keyof EventTypes>(name: K) {
-    return this.events.has(name);
+  exist(name: string) {
+    return Array.isArray(this.events[name]);
   }
 
-  off<K extends keyof EventTypes>(name: K, handler?: EventHandler<EventTypes[keyof EventTypes]>) {
-    const listeners = this.events.get(name);
-    if (listeners) {
-      if (!handler) {
-        this.events.set(name, []);
-      } else {
-        const index = listeners.indexOf(handler as EventHandler<EventTypes[keyof EventTypes]>);
-        if (index !== -1) {
-          listeners.splice(index, 1);
-        }
+  off<K extends keyof EventTypes>(name: K, handler?: (args: EventTypes[K]) => boolean | unknown) {
+    if (this.events[name as string]) {
+      const listener = this.events[name as string];
+      if (!handler) this.events[name as string] = [];
+      else {
+        const index = listener.indexOf(handler);
+        if (index !== -1) listener.splice(index, 1);
       }
     }
   }
 
-  reset() {
-    this.events.clear();
+  offAll() {
+    this.events = Object.fromEntries(Object.keys(this.events).map(name => [name, []]));
   }
 }

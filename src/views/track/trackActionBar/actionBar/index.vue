@@ -242,7 +242,6 @@ interface Props {
 }
 const props = defineProps<Props>();
 const iconSize = 20;
-const markIndex = ref(0);
 const selectValue = ref<any>(props.options.defaultValue);
 const sliderValue = ref<number>(props.options.defaultValue as number);
 const isFocusShow = ref(false);
@@ -325,38 +324,32 @@ const handleChecked = async () => {
  * Slider
  */
 watch(
-  () => sliderValue.value,
-  () => {
-    if (!props.options?.marks?.length) return;
-    markIndex.value = props.options.marks.findIndex(item => {
-      return sliderValue.value <= item;
-    });
-  },
-  {
-    immediate: true
+  () => props.options.defaultValue,
+  val => {
+    sliderValue.value = Number(val);
   }
 );
 const handleSliderChange = (value: number) => {
   sliderValue.value = value;
-  if (props.options?.marks?.length) {
-    markIndex.value = props.options.marks.findIndex(item => {
-      return sliderValue.value <= item;
-    });
-  }
-
   props.options.change && props.options.change(sliderValue.value);
 };
 const handleMinusClick = () => {
   if (sliderValue.value === 0) return;
-  if (props.options?.marks?.length) {
-    (sliderValue.value as number) = props.options.marks[--markIndex.value];
+  if (props.options?.markStep) {
+    (sliderValue.value as number) =
+      sliderValue.value - props.options.markStep < 0
+        ? 0
+        : Math.round((sliderValue.value - props.options.markStep) * 100) / 100;
   }
   props.options.change && props.options.change(sliderValue.value);
 };
 const handleAddClick = () => {
   if (sliderValue.value === props.options.max) return;
-  if (props.options?.marks?.length) {
-    (sliderValue.value as number) = props.options.marks[++markIndex.value];
+  if (props.options?.markStep) {
+    (sliderValue.value as number) =
+      sliderValue.value + props.options.markStep > 1
+        ? 1
+        : Math.round((sliderValue.value + props.options.markStep) * 100) / 100;
   }
   props.options.change && props.options.change(sliderValue.value);
 };

@@ -32,12 +32,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { playerSettings } from '@/settings';
-import { usePlayerStore } from '@/store';
+import { usePlayerStore, useTimeLineStore } from '@/store';
 import type { ControlListOptions, SelectMixOption } from './button/index.vue';
 import PlayerControlsBtn from './button/index.vue';
 import PlayerProgressBar from './progress/index.vue';
 defineOptions({ name: 'PlayerControls' });
 const playerStore = usePlayerStore();
+const timeLineStore = useTimeLineStore();
 const { getIsFullscreenState, getProportion, getSpeed, getPlayerState } = storeToRefs(playerStore);
 const playerCurrentTime = ref<number>(0);
 // const playerPlaying = ref<boolean>(false);
@@ -64,14 +65,17 @@ const playerPlaying = computed(() => {
  * 播放
  */
 const playerPlay = () => {
-  playerStore.setPlayerState({
-    isPlaying: !playerPlaying.value
-  });
+  const result = timeLineStore.timeLineRef?.play({ autoEnd: true });
+  result &&
+    playerStore.setPlayerState({
+      isPlaying: !playerPlaying.value
+    });
 };
 /**
  * 暂停
  */
 const playerPause = () => {
+  timeLineStore.timeLineRef?.pause();
   playerStore.setPlayerState({
     isPlaying: !playerPlaying.value
   });

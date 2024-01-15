@@ -80,8 +80,11 @@ const barItemOptions: Track.ActionBarItem[] = [
     key: 'autoScale',
     label: '轨道自适应',
     btnType: 'Button',
-    change: (key: any) => {
-      console.log(key);
+    change: () => {
+      const scale = getScaleInfo.value.scaleStep ? getScaleInfo.value.scaleStep - 0.01 : 0;
+      barItemOptions[barItemOptions.length - 1].defaultValue = scale;
+      timeLineStore.setScaleInfo({ scale });
+      timeLineStore.timeLineRef && timeLineStore.timeLineRef.setScrollLeft(0); // 滚动到0的位置
     }
   },
   {
@@ -92,18 +95,18 @@ const barItemOptions: Track.ActionBarItem[] = [
     max: 1,
     min: 0,
     step: 0.01,
-    marks: [],
+    markStep: 0.01,
     change: (key: number) => {
-      // console.log(key);
+      barItemOptions[barItemOptions.length - 1].defaultValue = key;
       timeLineStore.setScaleInfo({ scale: key });
     }
   }
 ];
 watch(
-  () => getScaleInfo.value && getScaleInfo.value.sliderKeys,
+  () => getScaleInfo.value && getScaleInfo.value.scaleStep,
   val => {
     if (val) {
-      barItemOptions[barItemOptions.length - 1].marks = val;
+      barItemOptions[barItemOptions.length - 1].markStep = val;
       barItemOptions[barItemOptions.length - 1].defaultValue = getScaleInfo.value.scale;
     }
   },

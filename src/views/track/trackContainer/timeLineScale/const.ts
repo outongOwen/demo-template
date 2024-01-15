@@ -33,4 +33,4 @@ export const fpsRules: any = {
 };
 export const DURATION_BOUNDARY = 10 * 60 * 1000; // 轨道总时长的分解值，大于10min的和小于10min的，最小刻度（帧级）那里显示的不一样。
 export const MAX_WIDTH_PER_BIG_GRID = 100; // 大格的最大宽度。
-export const MIN_WIDTH_PER_BIG_GRID = 60; // 大格的最小宽度。
+export const MIN_WIDTH_PER_BIG_GRID = 52; // 大格的最小宽度。

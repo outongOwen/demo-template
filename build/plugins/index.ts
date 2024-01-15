@@ -8,6 +8,7 @@ import mockDevServerPlugin from 'vite-plugin-mock-dev-server';
 import unplugin from './unplugin';
 import visualizer from './visualizer';
 import compress from './compress';
+import compression from './compression';
 import pwa from './pwa';
 /**
  * vite插件
@@ -32,6 +33,9 @@ export function setupVitePlugins(viteEnv: ImportMetaEnv): (PluginOption | Plugin
         // exclude: ['_utils.ts']
       })
     );
+  }
+  if (viteEnv.VITE_COMPRESSION === 'Y') {
+    plugins.push(compression(viteEnv));
   }
   return plugins;
 }

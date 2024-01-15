@@ -33,8 +33,8 @@ export function parserTransformToTime(
 ): { start: number; end: number } {
   const { left, width } = params;
   return {
-    start: left * scaleUnit,
-    end: (left + width) * scaleUnit
+    start: Math.round(left * scaleUnit),
+    end: Math.round((left + width) * scaleUnit)
   };
 }
 /**
@@ -49,5 +49,34 @@ export function parserActionsToPositions(actions: TimelineAction[], scaleUnit: n
     positions.push(item.start / scaleUnit);
     positions.push(item.end / scaleUnit);
   });
+  positions.sort((a, b) => a - b);
   return positions;
+}
+
+/**
+ * @description 检查是否存在交集，通过目标action与actions，通过属性start和end判断
+ * @param {TimelineAction} targetAction
+ * @param {TimelineAction[]} actions
+ * @returns {boolean}
+ */
+export function checkIntersectionTime(
+  { targetStart, targetEnd, targetId }: { targetStart: number; targetEnd: number; targetId: string },
+  actions: TimelineAction[]
+): boolean {
+  // 必须排除自身
+  const filterActions = actions.filter(action => action.id !== targetId);
+  return filterActions.some(action => {
+    const { start, end } = action;
+    console.log(targetEnd - start);
+    if (targetStart > start && targetStart < end) {
+      return true;
+    }
+    if (targetEnd > start && targetEnd < end) {
+      return true;
+    }
+    if (targetStart < start && targetEnd > end) {
+      return true;
+    }
+    return false;
+  });
 }

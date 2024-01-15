@@ -7,14 +7,12 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    ActionBarItem: typeof import('./../src/components/module/track/ActionBarItem.vue')['default']
     AudioForm: typeof import('./../src/components/module/materials/searchForm/AudioForm.vue')['default']
     AudioItem: typeof import('./../src/components/module/materials/materialItem/AudioItem.vue')['default']
     BetterScrollBar: typeof import('./../src/components/custom/BetterScrollBar.vue')['default']
     BetterTabs: typeof import('./../src/components/custom/BetterTabs.vue')['default']
     ConfigurationContent: typeof import('./../src/components/module/packages/configurationContent/index.vue')['default']
     ContentLayout: typeof import('./../src/components/module/packages/configurationContent/ContentLayout.vue')['default']
-    Cropper: typeof import('./../src/components/module/cropper/index.vue')['default']
     ExceptionBase: typeof import('./../src/components/common/ExceptionBase.vue')['default']
     FabricVideo: typeof import('./../src/components/custom/FabricVideo.vue')['default']
     'IconIc:baselineAdd': typeof import('~icons/ic/baseline-add')['default']
@@ -86,13 +84,10 @@ declare module 'vue' {
     NText: typeof import('naive-ui')['NText']
     NTooltip: typeof import('naive-ui')['NTooltip']
     NumberInputSlider: typeof import('./../src/components/custom/NumberInputSlider.vue')['default']
-    PlayerControlsBtn: typeof import('./../src/components/module/player/PlayerControlsBtn.vue')['default']
-    PlayerProgressBar: typeof import('./../src/components/module/player/PlayerProgressBar.vue')['default']
     RadioButtonGroup: typeof import('./../src/components/custom/RadioButtonGroup.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./../src/components/custom/SvgIcon.vue')['default']
-    TimeLine: typeof import('./../src/components/module/track/TimeLine.vue')['default']
     TransparentForm: typeof import('./../src/components/module/materials/searchForm/TransparentForm.vue')['default']
     TransparentItem: typeof import('./../src/components/module/materials/materialItem/TransparentItem.vue')['default']
     VideoForm: typeof import('./../src/components/module/materials/searchForm/VideoForm.vue')['default']

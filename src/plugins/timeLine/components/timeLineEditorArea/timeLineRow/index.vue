@@ -10,6 +10,7 @@
     ref="rowRef"
     class="timeLine-editor-row"
     :data-type="rowItem.type"
+    :data-id="rowItem.id"
     :style="{
       height: rowItem?.rowHeight ? rowItem.rowHeight + 'px' : rowHeight + 'px'
     }"
@@ -19,13 +20,12 @@
 </template>
 
 <script setup lang="ts">
-// @ts-nocheck
-/* eslint-disable */
 import interact from 'interactjs';
 import type { Interactable } from '@interactjs/types';
-import { useTimeLineContext, useTimeLineStateContext } from '../../../contexts';
+import { useTimeLineContext, useTimeLineStateContext, useTimeLineEditorAreaContext } from '../../../contexts';
 import type { TimelineRow } from '../../../types';
 import TimeLineAction from '../timeLineAction/index.vue';
+import { getRowById, checkIntersectionTime, parserTransformToTime } from '../../../utils';
 interface Props {
   rowItem: TimelineRow;
 }
@@ -37,14 +37,14 @@ defineOptions({
 });
 const props = defineProps<Props>();
 const { rowItem } = toRefs(props);
-rowItem.value.actions.forEach(item => {
-  (item as any).width = 400;
-});
 const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
-const { rowHeight, rowBackground, leftOffset } = toRefs(timeLineContext);
+const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
+const { rowHeight, rowBackground, editorData } = toRefs(timeLineContext);
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
+const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
+const rowRef = ref<HTMLElement>();
 const dragJudge = event => {
   const dropzoneElement = event.target;
   const draggableEvent = event.dragEvent;
@@ -55,20 +55,36 @@ const dragJudge = event => {
   const by = rBottom - cTop;
   // 计算鼠标相对于拖拽元素的相对位置
   const relativeY = draggableEvent.clientY - cTop;
-  // 判断与那个边相交（容错1px）
-  if (parseFloat(relativeY) <= parseFloat(ty + 2)) {
-    console.log('top');
-    timeLineStateContext.rowLinePosition.y = ty - 5;
-  } else if (parseFloat(relativeY) >= parseFloat(by) - 2) {
-    console.log('bottom');
-    timeLineStateContext.rowLinePosition.y = by + 5;
+  const { id: draggableId, left, width } = draggableEvent.target.dataset;
+  const { id: dropzoneId } = dropzoneElement.dataset;
+  const { start, end } = parserTransformToTime(
+    { left: Number(left), width: Number(width) },
+    unref(timeLineStateContext.scaleUnit)
+  );
+  const currentRow = getRowById(dropzoneId, unref(editorData)!);
+  // 判断当前action与当前currentRow中action是否存在交集通过start和end
+  const intersectState = checkIntersectionTime(
+    { targetStart: start, targetEnd: end, targetId: draggableId },
+    currentRow!.actions
+  );
+  // 判断目标action与边相交关系（容错5px）
+  if (intersectState) {
+    if (relativeY >= cy) {
+      timeLineEditorAreaContext.setDropzoneInfo(dropzoneId, by + 5, 'bottom');
+    } else {
+      timeLineEditorAreaContext.setDropzoneInfo(dropzoneId, ty - 5, 'top');
+    }
+    return;
+  }
+  if (relativeY <= ty + 2) {
+    timeLineEditorAreaContext.setDropzoneInfo(dropzoneId, ty - 5, 'top');
+  } else if (relativeY >= by - 2) {
+    timeLineEditorAreaContext.setDropzoneInfo(dropzoneId, by + 5, 'bottom');
   } else {
-    timeLineStateContext.rowLinePosition.y = cy;
-    console.log('center');
+    timeLineEditorAreaContext.setDropzoneInfo(dropzoneId, cy, 'center');
   }
 };
-const rowRef = ref<HTMLElement>();
-onMounted(() => {
+const initInteractDropzone = () => {
   interact(rowRef.value!).dropzone({
     accept: ({ dropzone, draggableElement }: { dropzone: Interactable; draggableElement: Element }) => {
       if (rowItem.value.includes?.length) {
@@ -80,14 +96,6 @@ onMounted(() => {
       return (dropzone.target as Element).getAttribute('data-type') === draggableElement.getAttribute('data-type');
     },
     overlap: 'pointer',
-    // ondropactivate(event) {
-    //   // add active dropzone feedback
-    //   console.log('ondropactivate');
-    // },
-    // ondropdeactivate(event) {
-    //   // remove active dropzone feedback
-    //   console.log('ondropdeactivate');
-    // },
     ondragenter(event) {
       dragJudge(event);
     },
@@ -97,10 +105,10 @@ onMounted(() => {
     ondragleave(event) {
       dragJudge(event);
     }
-    // ondrop(event) {
-    //   // dragJudge(event);
-    // }
   });
+};
+onMounted(() => {
+  initInteractDropzone();
 });
 defineExpose<Expose>({
   rowRef

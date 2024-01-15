@@ -32,6 +32,8 @@ declare namespace Track {
     step?: number;
     /** 标记点 */
     marks?: Array<number>;
+    /** slider两侧按钮点击时增删的步长 */
+    markStep?: number;
     /** 改变之前 */
     beforeChange?: (state?: boolean) => Promise<boolean>;
     /**  选中回调 */
