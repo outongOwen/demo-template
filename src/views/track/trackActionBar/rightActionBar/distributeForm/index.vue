@@ -138,9 +138,14 @@ watch(
   },
   { deep: true }
 );
-
-onMounted(async () => {
+const open = () => {
   showModal.value = true;
+};
+defineExpose({
+  open
+});
+onMounted(async () => {
+  open();
   await getDefaultEnumCodeValue();
   setDefaultEnumCodeValue(formData);
 });
