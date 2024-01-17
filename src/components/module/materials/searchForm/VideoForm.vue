@@ -9,7 +9,7 @@
     <div class="px-10px">
       <n-form ref="formRef" :model="searchFormModel" size="small" label-placement="top" :show-label="false" inline>
         <n-grid cols="1 500:2 700:6" :x-gap="5">
-          <n-form-item-gi path="name">
+          <n-form-item-gi path="name" :span="hidOrgSearch ? '3' : '1'">
             <n-input v-model:value="searchFormModel.name" placeholder="关键字搜索" />
           </n-form-item-gi>
           <template v-if="!hidOrgSearch">
@@ -40,7 +40,7 @@
               />
             </n-form-item-gi>
           </template>
-          <n-form-item-gi span="2">
+          <n-form-item-gi :span="hidOrgSearch ? '3' : '2'">
             <n-space justify="end" :wrap-item="false" class="w100%">
               <n-button @click="resetForm">重置</n-button>
               <n-button type="primary" secondary @click="() => handleSearch('onlyMe')">只看我</n-button>
@@ -94,12 +94,15 @@ const resetForm = () => {
   emits('resetForm');
 };
 const selOrg = (val: number, option: any, pathValues: Array<any>) => {
-  if (option.orgLevel === 1) {
+  if (option?.orgLevel === 1) {
     searchFormModel.value.firstOrgId = val;
     searchFormModel.value.secondOrgId = null;
-  } else {
+  } else if (val) {
     searchFormModel.value.firstOrgId = pathValues[0]?.orgId || null;
     searchFormModel.value.secondOrgId = val;
+  } else {
+    searchFormModel.value.firstOrgId = null;
+    searchFormModel.value.secondOrgId = null;
   }
 };
 const loadSecond = (option: CascaderOption) => {

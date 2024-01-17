@@ -57,6 +57,7 @@ const searchFormModel = ref<FromModelInst>({
   firstOrgId: null,
   secondOrgId: null,
   elementTag: null,
+  elementType: null,
   userIdFromWeb: Number(new URLSearchParams(window?.location?.search)?.get('userId'))
 });
 const curSecondMenuKey = ref<string>('');
@@ -84,6 +85,9 @@ watchEffect(() => {
   curSecondMenuKey.value = secondMenuOptions.value.length ? (secondMenuOptions.value[0][keyField.value] as string) : '';
 });
 const handleSecondChecked = () => {
+  if (curSecondMenuKey.value === 'pictureElement') {
+    searchFormModel.value.elementType = '3';
+  }
   materialListRef.value?.refreshList();
 };
 const handleSearch = (_value: FromModelInst, type?: string) => {

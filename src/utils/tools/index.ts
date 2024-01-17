@@ -1,3 +1,6 @@
+import { isString } from 'lodash';
+import urlConfig from '@/service/request/baseUrl';
+
 /**
  * This function takes a base URL and an object, and returns a URL with the object's key-value pairs as
  * query parameters.
@@ -51,3 +54,31 @@ export const jsonToQuery = (data: any) => {
   }
   return strArr.join('&');
 };
+
+export function setBaseUrl(config, options) {
+  const { apiUrl, joinPrefix, urlPrefix } = options;
+  const accessToken = getQueryString('accessToken');
+  if (joinPrefix) {
+    config.url = `${urlPrefix}${config.url}`;
+  } else if (apiUrl && isString(apiUrl)) {
+    config.url = `${apiUrl}${config.url}`;
+  } else {
+    let burl = urlConfig.baseURL;
+    // '/api','/fdapi'表示使用主站token--主站token这里从主站存储的cookie里面取
+    if (config.url?.indexOf('/fdapi/') === 0) {
+      burl += urlConfig.gateWay.fdapi;
+    } else if (config.url?.indexOf('/openapi/') === 0) {
+      burl += urlConfig.gateWay.openapi;
+    } else {
+      burl += urlConfig.gateWay.api;
+    }
+    config.url = burl + config.url;
+  }
+  const params = config.params || {};
+  if (config.method === 'GET') {
+    params.accessToken = accessToken;
+    if (!config.params) config.params = params;
+  } else {
+    config.url += `?accessToken=${accessToken}`;
+  }
+}

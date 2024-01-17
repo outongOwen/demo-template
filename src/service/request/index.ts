@@ -3,8 +3,7 @@
 import type { AxiosResponse, AxiosInstance } from 'axios';
 import { isString, clone } from 'lodash';
 import { RequestEnum, ResultEnum, ContentTypeEnum, ErrorMessageEnum } from '@/enums';
-import { getCookie, getQueryString, setObjToUrlParams } from '@/utils';
-import urlConfig from '@/service/request/baseUrl';
+import { setBaseUrl, setObjToUrlParams } from '@/utils';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { VAxios } from './vAxios';
 import { checkStatus } from './checkStatus';
@@ -74,34 +73,9 @@ const transform: AxiosTransform = {
 
   // 请求之前处理config
   beforeRequestHook: (config, options) => {
-    const { apiUrl, joinPrefix, joinParamsToUrl, formatDate, joinTime = true, urlPrefix } = options;
-    let burl = urlConfig.baseURL;
-    let accessToken: string;
-    // '/api','/fdapi'表示使用主站token--主站token这里从主站存储的cookie里面取
-    if (config.url?.indexOf('/fdapi/') === 0) {
-      burl += urlConfig.gateWay.fdapi;
-      accessToken = getQueryString('accessToken');
-    } else if (config.url?.indexOf('/openapi/') === 0) {
-      burl += urlConfig.gateWay.openapi;
-      accessToken = getQueryString('accessToken');
-    } else {
-      burl += urlConfig.gateWay.api;
-      accessToken = getCookie('accessToken');
-    }
-    config.url = burl + config.url;
-    if (joinPrefix) {
-      config.url = `${urlPrefix}${config.url}`;
-    }
-
-    if (apiUrl && isString(apiUrl)) {
-      config.url = `${apiUrl}${config.url}`;
-    }
+    const { joinParamsToUrl, formatDate, joinTime = true } = options;
+    setBaseUrl(config, options);
     const params = config.params || {};
-    if (config.method === 'GET'){
-      params.accessToken = accessToken;
-    } else {
-      config.url += ('?accessToken='+accessToken);
-    }
     const data = config.data || false;
     formatDate && data && !isString(data) && formatRequestDate(data);
     if (config.method?.toUpperCase() === RequestEnum.GET) {

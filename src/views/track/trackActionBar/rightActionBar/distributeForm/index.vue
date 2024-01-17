@@ -12,18 +12,18 @@
       <div class="text-18px h-30px flex items-center justify-between">视频分发</div>
     </template>
     <n-divider />
-    <n-scrollbar class="max-h-70vh p-r-20px">
+    <n-scrollbar class="max-h-70vh p-r-20px last">
       <div class="flex justify-start m-b-20px">
         <div class="w-120px p-r-20px text-right">是否分发：</div>
         <n-switch v-model:value="formData.isDistribution" />
       </div>
       <platformItem ref="platformRef" @setTemplateData="setTemplateFn"></platformItem>
       <associatedVideo v-show="isMediaLong" ref="associatedVideoRef"></associatedVideo>
-      <mapInitForm v-show="!isMediaLong" ref="mapInitFormRef"></mapInitForm>
-      <strategyItem ref="strategyRef"></strategyItem>
+      <mapInitForm v-show="!isMediaLong && !onlyFtp" ref="mapInitFormRef"></mapInitForm>
+      <strategyItem v-show="!isMCN && !onlyFtp" ref="strategyRef"></strategyItem>
       <outputSetting ref="outputRef"></outputSetting>
-      <labelSetting ref="labelRef"></labelSetting>
-      <vrSetting ref="vrSettingRef"></vrSetting>
+      <labelSetting v-show="!isMCN && !onlyFtp && !isMediaLong" ref="labelRef"></labelSetting>
+      <vrSetting v-show="!isMCN && !onlyFtp" ref="vrSettingRef"></vrSetting>
     </n-scrollbar>
     <template #action>
       <div class="w-100% flex justify-between">
@@ -113,7 +113,11 @@ const { providePrimaryClassify } = primaryClassifyPri();
 providePrimaryClassify(primaryClassifyData);
 const showModal = ref(false);
 const clearData = ref(false);
+const mediaCode = ['1', '2'];
+const notFtp = ['-1', '-2', '-3', '1', '2'];
 const isMediaLong = computed(() => formData.value.platformListValue.includes('-2'));
+const isMCN = computed(() => Boolean(mediaCode.find(v => formData.value.platformListValue.includes(v))));
+const onlyFtp = computed(() => !notFtp.find(v => formData.value.platformListValue.includes(v)));
 const clearDataChange = () => {
   clearData.value = !clearData.value;
 };

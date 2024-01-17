@@ -19,6 +19,8 @@
       <n-form-item-gi label="视频封面图：">
         <coverImage></coverImage>
       </n-form-item-gi>
+    </n-grid>
+    <n-grid v-show="showWork" x-gap="12" :cols="2">
       <n-form-item-gi label="内容作者：">
         <n-select
           v-model:value="formData.childValue"
@@ -70,6 +72,9 @@ const childrenOpt = ref([]) as Ref<CascaderOption[]>;
 const workGroupOpt = ref([]) as Ref<CascaderOption[]>;
 const groupTaskOpt = ref([]) as Ref<CascaderOption[]>;
 const emit = defineEmits(['setTemplateData']);
+const needWork = ['-1', '-3', '1', '2'];
+const showWork = computed(() => needWork.find(v => formData.value.platformListValue.includes(v)));
+
 // 获取工作组
 const getWorkGroup = async () => {
   try {

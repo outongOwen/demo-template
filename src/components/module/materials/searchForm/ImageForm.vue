@@ -25,6 +25,7 @@
               <n-select
                 v-model:value="searchFormModel.userIdFromWeb"
                 clearable
+                filterable
                 label-field="userName"
                 value-field="userId"
                 placeholder="三级"
