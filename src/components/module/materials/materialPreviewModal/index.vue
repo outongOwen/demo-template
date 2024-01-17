@@ -17,7 +17,7 @@
       <div class="h100% box-border">
         <div class="px-20px py10px flex">
           <!-- 头部区域 -->
-          <div class="flex-center font-500 w100% text-18px">{{ materialData.name || '测试' }}</div>
+          <div class="flex-center font-500 w100% text-18px">{{ materialData.title || '' }}</div>
           <n-button tertiary size="tiny" @click="isShowModal = false">
             <template #icon>
               <n-icon :size="25">
@@ -30,7 +30,7 @@
         <div class="w100% h-[calc(100%-48px)] flex p20px box-border">
           <!-- 素材展示区域 -->
           <div class="w-75% h100% relative flex-center relative bg-[rgba(0,0,0,0.6)]">
-            <template v-if="playerType === 'video'">
+            <template v-if="playerType === 'video' || playerType === 'transparent'">
               <div id="preview-container" class="wh-full relative" />
             </template>
             <template v-if="playerType === 'music'">
@@ -40,10 +40,10 @@
               <div class="absolute-center z9" />
               <icon-mdi:music class="absolute-transform-center text-100px color-[rgba(255,255,255,0.6)]" />
             </template>
-            <template v-if="playerType === 'picture' || playerType === 'transparent'">
+            <template v-if="playerType === 'picture'">
               <n-image
-                :src="materialData.path"
-                :preview-src="materialData.path"
+                :src="materialData.preUrl"
+                :preview-src="materialData.preUrl"
                 :fallback-src="defaultImg"
                 object-fit="contain"
                 preview-disabled
@@ -62,20 +62,24 @@
           <n-divider vertical class="h100%! mx-20px!" />
           <!-- 素材详情区域 -->
           <div class="w25% h100%">
-            <n-descriptions label-placement="left" title="视频信息" size="large" :column="1">
+            <n-descriptions label-placement="left" title="素材信息" size="large" :column="1">
               <n-descriptions-item>
                 <template #label>{{ '类型' }}</template>
-                视频
+                {{ playerTypeFormat }}
               </n-descriptions-item>
-              <n-descriptions-item label="分辨率">
-                {{ materialData.resolvePower || '' }}
+              <n-descriptions-item>
+                <template #label>{{ '时长' }}</template>
+                {{ formatFrameByTime(Number(materialData.programLength)) }}
+              </n-descriptions-item>
+              <n-descriptions-item v-if="playerType !== 'music'" label="分辨率">
+                {{ `${materialData.width} * ${materialData.height}` || '' }}
               </n-descriptions-item>
               <n-descriptions-item label="创建人">
-                {{ materialData.createName || '' }}
+                {{ materialData.userName || '' }}
               </n-descriptions-item>
-              <n-descriptions-item label="创建时间">
-                {{ materialData.updateTime || '' }}
-              </n-descriptions-item>
+              <!-- <n-descriptions-item label="创建时间">
+                {{ materialData.createdTime || '' }}
+              </n-descriptions-item> -->
             </n-descriptions>
           </div>
         </div>
@@ -90,9 +94,11 @@ import Player from 'xgplayer';
 import MusicPreset, { Analyze } from 'xgplayer-music';
 import Mp4Plugin from 'xgplayer-mp4';
 import { useThemeStore } from '@/store';
-import defaultImg from '@/assets/default.png'
+import { formatFrameByTime } from '@/utils';
+import defaultImg from '@/assets/default.png';
 defineOptions({ name: 'MaterialPreviewModal', inheritAttrs: false });
 export type PlayerType = 'video' | 'music' | 'picture' | 'transparent';
+export type PlayerTypeFormat = '视频' | '音频' | '图片' | '透明素材';
 interface Props {
   showModal: boolean;
   materialData: any;
@@ -117,6 +123,27 @@ let xgPlayer: Player;
 const playerType = computed((): PlayerType => {
   // const { materialType } = materialData.value;
   return materialType.value;
+});
+
+const playerTypeFormat = computed((): PlayerTypeFormat => {
+  let name;
+  switch (materialType.value) {
+    case 'video':
+      name = '视频';
+      break;
+    case 'music':
+      name = '音频';
+      break;
+    case 'picture':
+      name = '图片';
+      break;
+    case 'transparent':
+      name = '透明素材';
+      break;
+    default:
+      name = '视频';
+  }
+  return name;
 });
 const createVideoPlayer = () => {
   return new Player({
@@ -151,7 +178,7 @@ const createVideoPlayer = () => {
 const createMusicPlayer = () => {
   return new Player({
     id: 'preview-container',
-    url: materialData.value.sourcePath, // [{ src: '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/music/audio.mp3', name: '林宥嘉·脆弱一分钟', poster: '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/music/poster-small.jpeg' }],
+    url: materialData.value.preUrl, // [{ src: '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/music/audio.mp3', name: '林宥嘉·脆弱一分钟', poster: '//sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/music/poster-small.jpeg' }],
     volume: 0.8,
     mediaType: 'audio',
     presets: ['default', MusicPreset],
@@ -190,14 +217,14 @@ const createAnalyze = () => {
   });
 };
 const handleModalAfterEnter = () => {
-  if (playerType.value === 'video') {
+  if (playerType.value === 'video' || playerType.value === 'transparent') {
     xgPlayer = createVideoPlayer();
   }
   if (playerType.value === 'music') {
     xgPlayer = createMusicPlayer();
     createAnalyze();
   }
-  if (playerType.value === 'video' || playerType.value === 'music') {
+  if (playerType.value === 'video' || playerType.value === 'music' || playerType.value === 'transparent') {
     xgPlayer.once('ready', () => {
       isShowPreviewInfoLoading.value = false;
     });
