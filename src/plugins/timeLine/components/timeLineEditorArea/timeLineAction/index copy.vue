@@ -32,6 +32,8 @@
 </template>
 
 <script setup lang="ts">
+// // @ts-nocheck
+// /* eslint-disable */
 import interact from 'interactjs';
 import { reactiveComputed, unrefElement } from '@vueuse/core';
 import type { DragEvent, ResizeEvent, Interactable } from '@interactjs/types';
@@ -80,15 +82,18 @@ const cacheOffset = ref(0);
 // 是否吸附
 const isAdsorption = ref(false);
 const interactActionType = ref<string | null>(null);
-
 const isSelected = computed(() => {
   return Boolean(timeLineEditorAreaContext.selectedActionIds.value.includes(unref(actionItem).id));
 });
+
 watch(isSelected, state => {
   state
     ? timeLineEditorAreaContext.selectedActionRefs.set(actionItem.value.id, actionRef.value!)
     : timeLineEditorAreaContext.selectedActionRefs.delete(actionItem.value.id);
 });
+// watch([scaleUnit, frameWidth], () => {
+//   interactable.value?.reflow({ name: 'drag' });
+// });
 const actionItemSize = reactiveComputed(() => {
   return parserTimeToTransform(
     {
@@ -98,6 +103,7 @@ const actionItemSize = reactiveComputed(() => {
     scaleUnit.value
   );
 });
+
 // 初始化辅助线
 const handleInitGuideLine = () => {
   if (guideLine) {
@@ -135,7 +141,7 @@ const handleUpdateWidth = (width: number) => {
 const handleUpdateLeft = (left: number) => {
   if (!interactable.value?.target) return;
   const target = interactable.value.target as HTMLElement;
-  target.style.transform = `translate(${left}px,${unref(deltaY)}px)`;
+  target.style.transform = `translate(${left}px,${deltaY.value}px)`;
   Object.assign(target.dataset, { left });
 };
 // 点击动作
@@ -146,7 +152,7 @@ const handleClick = () => {
 const handleMouseDown = () => {
   const el = unrefElement(actionRef);
   if (!el) return;
-  el.style.zIndex = '9';
+  el.style.zIndex = '9999';
   timeLineEditorAreaContext.setSelectedActionId(unref(actionItem).id);
 };
 // 鼠标移动抬起
@@ -169,11 +175,11 @@ const handleMoveStart = () => {
 // 拖拽移动中
 const handleMove = e => {
   const target = e.target;
+  deltaY.value += e.dy;
   const { left, width } = target.dataset;
   const preLeft = parseFloat(left || 0);
   const preWidth = parseFloat(width || 0);
   const curLeft = preLeft + e.dx;
-  deltaY.value += e.dy;
   const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, scaleUnit.value);
   handleUpdateGuideLine({ start, end });
   if (timeLineContext.onActionMoving) {
@@ -198,7 +204,6 @@ const handleMoveEnd = (e: DragEvent) => {
   disposeDragLine();
   const target = e.target;
   const { left, width } = target.dataset;
-  target.style.transform = `translate(${left}px,${unref(deltaY)}px)`;
   const curLeft = Math.round(Number(left) / unref(frameWidth)) * unref(frameWidth);
   const { start, end } = parserTransformToTime({ left: curLeft, width: Number(width) }, scaleUnit.value);
   actionItem.value.start = start;
@@ -289,13 +294,13 @@ const handleResize = (e: ResizeEvent) => {
   }
 };
 const draggableRestrictRectModifier = reactiveComputed(() => {
-  return interact.modifiers.restrictEdges({
-    outer: '.timeLine-editor-area-inner',
-    offset: {
+  return interact.modifiers.restrict({
+    restriction: 'parent',
+    elementRect: {
       left: 0,
       right: 0,
-      top: -Number.MAX_SAFE_INTEGER,
-      bottom: 0
+      top: Infinity,
+      bottom: -Infinity
     }
   });
 });
@@ -334,11 +339,11 @@ const guideSnapModifier = reactiveComputed(() => {
 });
 const resizeRestrictRectModifier = reactiveComputed(() => {
   return interact.modifiers.restrictEdges({
-    outer: '.timeLine-editor-area-inner',
+    outer: 'parent',
     offset: {
       left: 0,
-      right: 0,
-      top: -Infinity,
+      right: -Infinity,
+      top: 0,
       bottom: 0
     }
   });
@@ -389,7 +394,7 @@ const initDraggable = (interactInst: Interactable) => {
     onmove: handleMove,
     onend: handleMoveEnd,
     autoScroll: {
-      container: timeLineEditorRef.value!,
+      container: '#__TIME_LINE_SCROLL_EL_BAR__',
       margin: 50,
       distance: 10,
       interval: 10
@@ -405,63 +410,61 @@ const initDragResize = (interactInst: Interactable) => {
     margin: 5,
     onstart: handleResizeStart,
     onmove: handleResize,
-    onend: handleResizeEnd
-    // autoScroll: {
-    //   container: timeLineEditorRef.value!,
-    //   margin: 50,
-    //   distance: 10,
-    //   interval: 10
-    // }
+    onend: handleResizeEnd,
+    autoScroll: {
+      container: '#__TIME_LINE_SCROLL_EL_BAR__',
+      margin: 50,
+      distance: 10,
+      interval: 10
+    }
   });
 };
 // 初始化自动滚动监听事件
 const initAutoScroll = (interactInst: Interactable) => {
   interactInst &&
     interactInst.on('autoscroll', event => {
-      // event.preventDefault();
-      // event.stopPropagation();
-      const target = event.target;
-      const { left, width } = target.dataset;
-      const preLeft = parseFloat(left || 0);
-      const preWidth = parseFloat(width || 0);
-      cacheOffset.value += event.delta.x;
-      if (interactActionType.value === 'move') {
-        const curLeft = preLeft + Math.round(unref(cacheOffset) / unref(frameWidth)) * unref(frameWidth);
-        const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, scaleUnit.value);
-        handleUpdateGuideLine({ start, end });
-        if (timeLineContext.onActionMoving) {
-          const ret = timeLineContext.onActionMoving({
-            action: actionItem.value,
-            row: rowItem.value,
-            start,
-            end
-          });
-          if (ret === false) return;
-        }
-        handleUpdateLeft(curLeft);
-      }
-      if (interactActionType.value === 'resize') {
-        // const curWidth = preWidth + Math.round(unref(cacheOffset) / unref(frameWidth)) * unref(frameWidth);
-        // const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, scaleUnit.value);
-        // handleUpdateGuideLine({ start, end });
-        // if (timeLineContext.onActionMoving) {
-        //   const ret = timeLineContext.onActionMoving({
-        //     action: actionItem.value,
-        //     row: rowItem.value,
-        //     start,
-        //     end
-        //   });
-        //   if (ret === false) return;
-        // }
-      }
-      cacheOffset.value -= Math.round(unref(cacheOffset) / unref(frameWidth)) * unref(frameWidth);
+      console.log(event);
+      // const target = event.target;
+      // const { left, width } = target.dataset;
+      // const preLeft = parseFloat(left || 0);
+      // const preWidth = parseFloat(width || 0);
+      // cacheOffset.value += event.delta.x;
+      // if (interactActionType.value === 'move') {
+      //   const curLeft = preLeft + Math.round(unref(cacheOffset) / unref(frameWidth)) * unref(frameWidth);
+      //   const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, scaleUnit.value);
+      //   handleUpdateGuideLine({ start, end });
+      //   if (timeLineContext.onActionMoving) {
+      //     const ret = timeLineContext.onActionMoving({
+      //       action: actionItem.value,
+      //       row: rowItem.value,
+      //       start,
+      //       end
+      //     });
+      //     if (ret === false) return;
+      //   }
+      //   handleUpdateLeft(curLeft);
+      // }
+      // if (interactActionType.value === 'resize') {
+      //   // const curWidth = preWidth + Math.round(unref(cacheOffset) / unref(frameWidth)) * unref(frameWidth);
+      //   // const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, scaleUnit.value);
+      //   // handleUpdateGuideLine({ start, end });
+      //   // if (timeLineContext.onActionMoving) {
+      //   //   const ret = timeLineContext.onActionMoving({
+      //   //     action: actionItem.value,
+      //   //     row: rowItem.value,
+      //   //     start,
+      //   //     end
+      //   //   });
+      //   //   if (ret === false) return;
+      //   // }
+      // }
+      // cacheOffset.value -= Math.round(unref(cacheOffset) / unref(frameWidth)) * unref(frameWidth);
     });
 };
 // 初始化互动
 const initInteractable = () => {
   const el = unrefElement(actionRef);
   if (!el || !unref(actionItem)) return;
-  interact.dynamicDrop(true);
   const interactInst = interact(el, {
     deltaSource: 'client'
   });
@@ -470,13 +473,8 @@ const initInteractable = () => {
   initDragResize(interactInst);
   initAutoScroll(interactInst);
 };
-onBeforeUnmount(() => {
-  interactable.value?.unset();
-});
 onMounted(() => {
-  nextTick(() => {
-    initInteractable();
-  });
+  initInteractable();
 });
 </script>
 
@@ -486,6 +484,8 @@ onMounted(() => {
   background-color: #000;
   border-radius: 2px;
   z-index: auto;
+  height: 100%;
+
   .active-box {
     position: absolute;
     top: 0;

@@ -18,14 +18,11 @@
         @click="handleWrapClick($event)"
         @mousedown="handleMouseDown"
         @mouseup="handleMouseUp"
+        @wheel="handleWheel"
       >
         <TimeLineTimeArea />
-        <TimeLineCursor />
-        <TimeLineEditorArea>
-          <template #blankPlaceholder>
-            <slot name="blankPlaceholder" />
-          </template>
-        </TimeLineEditorArea>
+        <TimeLineCursor v-if="editorData.length && !hideCursor" />
+        <TimeLineEditorArea />
       </div>
     </div>
   </div>
@@ -61,7 +58,8 @@ const {
   scaleSmallCellMs,
   scaleSmallCellWidth,
   fps,
-  leftOffset
+  leftOffset,
+  hideCursor
 } = toRefs(props);
 provideTimeLineContext(props);
 const timelineEditorWrapRef = ref<HTMLElement | null>();
@@ -182,6 +180,20 @@ onMounted(() => {
     timeLineStateContext.handleSetCursor(curTime, false);
   });
 });
+const handleWheel = event => {
+  event.preventDefault();
+  const deltaX = event.deltaX;
+  const deltaY = event.deltaY;
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    nextTick(() => {
+      timeLineStateContext.timeLineEditorRef.value?.scrollBy(deltaX, 0);
+    });
+  } else {
+    nextTick(() => {
+      timeLineStateContext.timeLineEditorRef.value?.scrollBy(0, deltaY);
+    });
+  }
+};
 defineExpose<TimelineExpose>({
   get targetEl() {
     return timeLineContainerRef.value!;
@@ -212,7 +224,8 @@ defineExpose<TimelineExpose>({
   background-color: v-bind('background');
   width: 100%;
   height: 100%;
-
+  user-select: none;
+  touch-action: none;
   .timeLine-inner-wrap {
     width: 100%;
     height: 100%;
@@ -222,7 +235,6 @@ defineExpose<TimelineExpose>({
     .timeLine-divider {
       height: 100%;
       width: 1px;
-      background-color: #000;
     }
 
     .timeLine-editor-wrap {

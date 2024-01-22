@@ -63,11 +63,9 @@ export function checkIntersectionTime(
   { targetStart, targetEnd, targetId }: { targetStart: number; targetEnd: number; targetId: string },
   actions: TimelineAction[]
 ): boolean {
-  // 必须排除自身
   const filterActions = actions.filter(action => action.id !== targetId);
   return filterActions.some(action => {
     const { start, end } = action;
-    console.log(targetEnd - start);
     if (targetStart > start && targetStart < end) {
       return true;
     }

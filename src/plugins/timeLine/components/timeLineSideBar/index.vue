@@ -5,22 +5,23 @@
  * index.vue
 -->
 <template>
-  <div class="timeLine-sideBar-container" :style="{ width: sideBarWidth + 'px', paddingTop: scaleHeight! + 'px' }">
+  <div class="timeLine-sideBar-container" :style="{ width: sideBarWidth + 'px' }">
     <div
-      ref="sideBarListRef"
+      class="top-cover"
+      :style="{
+        height: scaleHeight! + 'px'
+      }"
+    />
+    <div
       class="sideBar-list"
-      :class="{
-        'pos-center': !isOutRange
+      :style="{
+        top: -scrollInfo.y.value + scaleHeight! + 'px',
+        minHeight: `calc(100% - ${scaleHeight! - 8}px)`
       }"
     >
       <ul
-        ref="sideBarUlRef"
         class="sideBar-ul"
-        :class="{
-          'add-cover': isOutRange
-        }"
         :style="{
-          top: -scrollInfo.y.value + 'px',
           rowGap: rowSpacing + 'px'
         }"
       >
@@ -42,12 +43,12 @@
         </li>
       </ul>
     </div>
+    <div class="bottom-cover" />
     <div class="timeLine-divider" />
   </div>
 </template>
 <script setup lang="ts">
 import type { VNodeChild } from 'vue';
-import { useResizeObserver } from '@vueuse/core';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 // import { useMainRow } from '../../hooks';
 import type { TimelineRow } from '../../types';
@@ -64,11 +65,9 @@ const { injectTimeLineContext } = useTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
 const timeLineContext = injectTimeLineContext();
-const isOutRange = ref(false);
 // const mainRowRef = ref<HTMLElement | null>();
-const sideBarListRef = ref<HTMLElement | null>();
-const sideBarUlRef = ref<HTMLElement | null>();
-const { sideBarWidth, editorData, rowHeight, sideBars, scaleHeight, rowSpacing, mainRowId } = toRefs(timeLineContext);
+const { sideBarWidth, editorData, rowHeight, sideBars, scaleHeight, rowSpacing, mainRowId, background } =
+  toRefs(timeLineContext);
 const { scrollInfo } = timeLineStateContext;
 // const getMainRowRef = (el: HTMLElement | null, rowItem: TimelineRow) => {
 //   if (el && timeLineStateContext.hasMainRow.value && rowItem.type === unref(mainRowId)) {
@@ -106,10 +105,6 @@ const setMuteRow = (row: TimelineRow) => {
 const renderSideBarComponent = (item: TimelineRow): VNodeChild | Component | null => {
   return (sideBars?.value?.[item.sideBarId!]?.render && sideBars.value?.[item.sideBarId!]?.render!(item, {})) ?? null;
 };
-useResizeObserver([sideBarListRef, sideBarUlRef], () => {
-  isOutRange.value = sideBarUlRef.value!.clientHeight + 40 >= sideBarListRef.value!.clientHeight;
-  // checkMainRowBottom();
-});
 defineExpose<Expose>({
   setHideRow,
   setLockRow,
@@ -121,33 +116,44 @@ defineExpose<Expose>({
 <style scoped lang="scss">
 .timeLine-sideBar-container {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 8px;
-  // margin-right: 5px;
-  border-right: 1px solid #000;
+  align-items: flex-start;
+  position: relative;
+  justify-content: flex-start;
+  top: 0;
+  left: 0;
   box-shadow: 0 0 5px #000;
-  z-index: 999;
-  .pos-center {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
+  z-index: 11;
+  .top-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background-color: v-bind('background');
   }
-  .add-cover {
-    margin: 20px 0;
+  .bottom-cover {
+    position: absolute;
+    height: 8px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background-color: v-bind('background');
   }
   .sideBar-list {
-    height: 100%;
-    overflow: hidden;
+    align-items: stretch;
+    display: flex;
+    flex-grow: 1;
+    flex-shrink: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 20px 0;
     .sideBar-ul {
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      position: relative;
-      .sideBar-ul-li {
-        overflow: hidden;
-      }
     }
   }
 }

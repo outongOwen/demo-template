@@ -10,11 +10,7 @@
     ref="timeLineRef"
     class="timeLine-editor-area-container"
     :style="{
-      height: `calc(100% - ${scaleHeight}px )`,
-      paddingLeft: `${leftOffset}px`
-    }"
-    :class="{
-      'pos-center': !hasShowScroll
+      top: `${scaleHeight}px`
     }"
     @click="handleClick($event)"
     @mousedown="handleMousedown"
@@ -22,31 +18,27 @@
   >
     <div
       v-if="editorData?.length"
-      ref="timeLineInnerRef"
-      class="timeLine-editor-area-inner"
-      :style="{ rowGap: rowSpacing + 'px', width: timeLineInnerWidth + 'px' }"
-    >
-      <!-- <div class="absolute top-0 left-0">{{ dragLineActionLine }}</div> -->
-      <TimeLineRow v-for="item in editorData" :key="item.id" :row-item="item" />
-    </div>
-    <slot v-else name="blankPlaceholder">
-      <blank-placeholder />
-    </slot>
-    <div
-      v-show="timeLineEditorAreaContext.dropzoneInfo.isMoving"
-      class="drag-row-line"
+      class="timeLine-editor-area-wrapper"
       :style="{
-        top: `${timeLineEditorAreaContext.dropzoneInfo.top}px`,
-        left: `${scrollLeft}px`
+        left: `${leftOffset}px`
       }"
-    />
+    >
+      <div
+        ref="timeLineInnerRef"
+        class="timeLine-editor-area-inner"
+        :style="{ width: timeLineInnerWidth + 'px', rowGap: rowSpacing + 'px' }"
+      >
+        <TimeLineRow v-for="item in editorData" :key="item.id" :row-item="item" />
+      </div>
+    </div>
+    <blank-placeholder v-else />
     <DragGuideLine v-if="guideLine" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useResizeObserver, useElementSize, useScroll } from '@vueuse/core';
-import { useTimeLineContext, useTimeLineStateContext, useTimeLineEditorAreaContext } from '../../contexts';
+import { useElementSize } from '@vueuse/core';
+import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 // import type { TimelineAction, TimelineRow } from '../../types';
 import { useActionGuideLine } from '../../hooks';
 import DragGuideLine from './dragGuideLine/index.vue';
@@ -60,31 +52,17 @@ const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
-const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
+// const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const { scaleHeight, editorData, rowSpacing, leftOffset, guideLine } = toRefs(timeLineContext);
 const { scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
-const timeLineInnerRef = ref<HTMLElement>();
 const mouseDown = ref(false);
 const mouseUp = ref(false);
-const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
+// const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
 // const minRowRef = ref<HTMLElement | null>();
-// 滚动条出现
-const hasShowScroll = ref(false);
-useResizeObserver([timeLineRef, timeLineInnerRef], () => {
-  if (timeLineRef.value && timeLineInnerRef.value) {
-    hasShowScroll.value = timeLineRef.value!.offsetHeight <= timeLineInnerRef.value!.offsetHeight;
-  }
-});
-const { x: scrollLeft } = useScroll(timeLineStateContext.timeLineEditorRef);
 const { width: timeLineRefWidth } = useElementSize(timeLineRef);
 const timeLineInnerWidth = computed(() => {
-  let offset = leftOffset ? leftOffset.value : 0;
-  offset = offset || 0;
-  return unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.5 - offset >=
-    unref(timeLineRefWidth)
-    ? unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth) * 0.5
-    : unref(timeLineRefWidth);
+  return unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth);
 });
 const handleClick = e => {
   if (mouseDown.value && mouseUp.value) {
@@ -144,11 +122,13 @@ onMounted(() => {
   @include timeLineScrollbar(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.3), 8px);
 }
 .timeLine-editor-area-container {
-  width: 100%;
-  overflow: scroll;
-  position: relative;
-  // 禁止选中
-  user-select: none;
+  align-items: flex-start;
+  position: absolute;
+  justify-content: flex-start;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: auto;
   .drag-row-line {
     position: absolute;
     width: 100%;
@@ -157,19 +137,21 @@ onMounted(() => {
     pointer-events: none;
     z-index: 9999999;
   }
-
-  .timeLine-editor-area-inner {
-    flex-shrink: 0;
+  .timeLine-editor-area-wrapper {
+    align-items: stretch;
     display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    justify-content: flex-start;
+    flex-grow: 1;
+    flex-shrink: 0;
+    min-height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    .timeLine-editor-area-inner {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px 0;
+    }
   }
-}
-.pos-center {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
 }
 </style>

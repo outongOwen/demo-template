@@ -15,7 +15,15 @@
       height: rowItem?.rowHeight ? rowItem.rowHeight + 'px' : rowHeight + 'px'
     }"
   >
-    <TimeLineAction v-for="item in rowItem.actions" :key="item.id" :action-item="item" :row-item="rowItem" />
+    <TimeLineAction
+      v-for="item in rowItem.actions"
+      :key="item.id"
+      :action-item="item"
+      :row-item="rowItem"
+      :style="{
+        height: rowItem?.rowHeight ? rowItem.rowHeight + 'px' : rowHeight + 'px'
+      }"
+    />
   </div>
 </template>
 
@@ -84,6 +92,9 @@ const dragJudge = event => {
     timeLineEditorAreaContext.setDropzoneInfo(dropzoneId, cy, 'center');
   }
 };
+onBeforeUnmount(() => {
+  interact(rowRef.value!).unset();
+});
 const initInteractDropzone = () => {
   interact(rowRef.value!).dropzone({
     accept: ({ dropzone, draggableElement }: { dropzone: Interactable; draggableElement: Element }) => {
@@ -97,6 +108,7 @@ const initInteractDropzone = () => {
     },
     overlap: 'pointer',
     ondragenter(event) {
+      console.log('dsfdsfdsfds');
       dragJudge(event);
     },
     ondropmove(event) {
@@ -117,10 +129,9 @@ defineExpose<Expose>({
 
 <style scoped>
 .timeLine-editor-row {
-  position: relative;
   flex-shrink: 0;
   background-color: v-bind('rowBackground');
-  width: 100%;
+  position: relative;
 }
 /* .timeLine-editor-row:hover {
   background-color: v-bind('rowActiveBackground');

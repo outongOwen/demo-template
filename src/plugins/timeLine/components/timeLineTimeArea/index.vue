@@ -9,11 +9,11 @@
     ref="timeLineRuleRef"
     class="timeLine-rule-container"
     :style="{
-      height: scaleHeight + 'px',
-      left: `${leftOffset}px`
+      height: `${scaleHeight}px`,
+      left: `${offsetLeft}px`
     }"
   >
-    <canvas ref="ruleRef"></canvas>
+    <canvas ref="ruleRef" />
   </div>
 </template>
 
@@ -92,16 +92,25 @@ const calcCanvasSize = () => {
   ruleRef.value.height = height;
   state.pxPerFullScreen = ruleRef.value.width;
 };
-watch(scrollInfo.x, () => {
-  state.ruleStartTime = unref(scrollInfo.x) * unref(scaleUnit)!;
-  drawRule();
-});
+watch(
+  () => {
+    const scrollLeft = scrollInfo.x.value > leftOffset!.value! ? scrollInfo.x.value - leftOffset!.value! : 0;
+    return scrollLeft;
+  },
+  scrollLeft => {
+    state.ruleStartTime = scrollLeft * unref(scaleUnit)!;
+    drawRule();
+  }
+);
 watch(
   () => scaleUnit?.value,
   () => {
     drawRule();
   }
 );
+const offsetLeft = computed(() => {
+  return leftOffset!.value! - scrollInfo.x.value > 0 ? leftOffset!.value! - scrollInfo.x.value : 0;
+});
 useResizeObserver(timeLineRuleRef, () => {
   // 浏览器缩放，更新刻度规则
   calcCanvasSize(); // 轨道dom尺寸变化，影响绘制
@@ -117,8 +126,9 @@ onMounted(() => {
 .timeLine-rule-container {
   position: relative;
   top: 0;
+  left: 0;
   width: 100%;
   overflow: hidden;
-  z-index: 999;
+  z-index: 9;
 }
 </style>
