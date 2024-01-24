@@ -210,7 +210,10 @@ defineExpose<TimelineExpose>({
   },
   pause: timeLineStateContext.enginePause.bind(unref(timeLineStateContext.engineRef)),
   setScrollLeft: (val: number) => {
-    timeLineStateContext.timeLineEditorRef.value?.scrollBy(val, 0);
+    timeLineStateContext.timeLineEditorRef.value?.scrollTo({
+      left: val,
+      behavior: 'smooth'
+    });
   }
 });
 </script>

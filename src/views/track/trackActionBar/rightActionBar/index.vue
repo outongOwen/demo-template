@@ -13,7 +13,7 @@ const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
 const { getScaleInfo } = storeToRefs(timeLineStore);
 const formRef = ref();
-const barItemOptions: Track.ActionBarItem[] = [
+const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
     icon: 'mdi-magnet',
     label: '轨道磁吸',
@@ -84,7 +84,11 @@ const barItemOptions: Track.ActionBarItem[] = [
       const scale = getScaleInfo.value.scaleStep ? getScaleInfo.value.scaleStep - 0.01 : 0;
       barItemOptions[barItemOptions.length - 1].defaultValue = scale;
       timeLineStore.setScaleInfo({ scale });
-      timeLineStore.timeLineRef && timeLineStore.timeLineRef.setScrollLeft(0); // 滚动到0的位置
+      nextTick(() => {
+        // consol
+      }).then(() => {
+        timeLineStore.timeLineRef && timeLineStore.timeLineRef.setScrollLeft(0); // 滚动到0的位置
+      });
     }
   },
   {
@@ -101,7 +105,7 @@ const barItemOptions: Track.ActionBarItem[] = [
       timeLineStore.setScaleInfo({ scale: key });
     }
   }
-];
+]);
 watch(
   () => getScaleInfo.value && getScaleInfo.value.scaleStep,
   val => {
