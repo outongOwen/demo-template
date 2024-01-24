@@ -12,9 +12,7 @@
     :style="{
       top: `${scaleHeight}px`
     }"
-    @click="handleClick($event)"
-    @mousedown="handleMousedown"
-    @mouseup="handleMouseup"
+    @contextmenu.stop="handleContextMenu"
   >
     <div
       v-if="editorData?.length"
@@ -52,35 +50,17 @@ const { injectTimeLineContext } = useTimeLineContext();
 const timeLineContext = injectTimeLineContext();
 const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
-// const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const { scaleHeight, editorData, rowSpacing, leftOffset, guideLine } = toRefs(timeLineContext);
 const { scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
-const mouseDown = ref(false);
-const mouseUp = ref(false);
-// const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
 // const minRowRef = ref<HTMLElement | null>();
 const { width: timeLineRefWidth } = useElementSize(timeLineRef);
 const timeLineInnerWidth = computed(() => {
   return unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth);
 });
-const handleClick = e => {
-  if (mouseDown.value && mouseUp.value) {
-    // console.log('取消选中', e);
-    // timeLineEditorAreaContext.clearSelected();
-  } else {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-  mouseDown.value = false;
-  mouseUp.value = false;
-};
-const handleMousedown = () => {
-  console.log('是否点击');
-  mouseDown.value = true;
-};
-const handleMouseup = () => {
-  mouseUp.value = true;
+// 右键菜单
+const handleContextMenu = (event: MouseEvent) => {
+  event.preventDefault();
 };
 // 注册辅助线
 useActionGuideLine();

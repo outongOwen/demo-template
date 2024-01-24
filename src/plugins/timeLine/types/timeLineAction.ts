@@ -14,6 +14,8 @@ export interface TimelineAction {
   end: number;
   /** 动作所对应的effectId */
   effectId: string;
+  /** 动作名称 */
+  name?: string;
   /** 动作是否可以选中 */
   selected?: boolean;
   /** 动作是否可伸缩 */

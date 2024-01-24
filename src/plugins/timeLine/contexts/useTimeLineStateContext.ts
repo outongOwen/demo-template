@@ -3,6 +3,7 @@ import { useScroll } from '@vueuse/core';
 import { useContext } from '../hooks';
 import { TimelineEngine } from '../core';
 import type { ITimelineEngine } from '../core';
+import type { TimelineExpose } from '../types';
 export interface TimeLineStateContextProps {
   /**
    * @description 当前指针时间
@@ -60,6 +61,22 @@ export interface TimeLineStateContextProps {
    * @returns {boolean}
    */
   handleSetCursor(time: number, updateTime?: boolean): boolean;
+  /**
+   * @description 根据位置设置光标
+   * @param {number} clientX 鼠标位置
+   * @param {number} offsetLeft 偏移量
+   */
+  setCursorByPos(clientX: number, leftOffset: number): void;
+  /**
+   * @description 暂停
+   * @returns {void}
+   */
+  enginePause(): void;
+  /**
+   * @description 播放
+   * @returns {void}
+   */
+  enginePlay(param?: Parameters<TimelineExpose['play']>[0]): boolean;
 }
 const { useInject, useProvide } = useContext<TimeLineStateContextProps>('TimeLineStateContext', {
   native: true
@@ -101,6 +118,33 @@ export default function useTimeLineStateContext() {
     result && (cursorTime.value = time);
     return result;
   };
+  /**
+   * @description 根据位置设置光标
+   * @param {number} posX 当前位置
+   * @param {number} frameMs  一帧多少毫秒
+   */
+  const setCursorByPos = (clientX: number, leftOffset: number) => {
+    const posX = clientX - timeLineEditorRef.value!.getBoundingClientRect().left + scrollInfo.x.value - leftOffset;
+    const curX = Math.round(posX / frameWidth.value) * frameWidth.value;
+    let time = curX * scaleUnit.value;
+    time = time < 0 ? 0 : time;
+    time = time > timeLineMaxEndTime.value ? timeLineMaxEndTime.value : time; //  限制0-duration;
+    handleSetCursor(time); // seek时间
+  };
+  /**
+   * @description 暂停
+   * @returns {void}
+   */
+  const enginePause = () => {
+    engineRef.value.isPlaying && engineRef.value.pause();
+  };
+  /**
+   * @description 播放
+   * @returns {void}
+   */
+  const enginePlay = (param?: Parameters<TimelineExpose['play']>[0]): boolean => {
+    return engineRef.value.isPaused && engineRef.value.play({ ...param });
+  };
   const timeLineStateProps: TimeLineStateContextProps = {
     scrollInfo,
     isPlaying,
@@ -112,10 +156,13 @@ export default function useTimeLineStateContext() {
     setDeltaScrollLeft,
     timeLineMaxEndTime,
     engineRef,
-    handleSetCursor
+    handleSetCursor,
+    setCursorByPos,
+    enginePause,
+    enginePlay
   };
-  const provideTimeLineStateContext = (context: Partial<TimeLineStateContextProps>) => {
-    return useProvide(Object.assign(timeLineStateProps, context));
+  const provideTimeLineStateContext = (context?: Partial<TimeLineStateContextProps>) => {
+    return useProvide(Object.assign(timeLineStateProps, context || {}));
   };
   const injectTimeLineStateContext = () => {
     return useInject();

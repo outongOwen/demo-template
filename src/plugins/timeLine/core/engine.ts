@@ -23,7 +23,7 @@ export interface ITimelineEngine extends Emitter<EventTypes> {
   /** 获取播放时间 */
   getTime(): number;
   /** 播放 */
-  play(param: {
+  play(param?: {
     /** 默认从头运行到尾, 优先级大于autoEnd */
     toTime?: number;
     /** 是否播放完后自动结束 */

@@ -10,14 +10,13 @@
     <div class="timeLine-inner-wrap">
       <TimeLineSideBar v-if="showSideBar" />
       <div
-        ref="timelineEditorWrapRef"
         class="timeLine-editor-wrap"
         :style="{
           width: showSideBar ? `calc(100% - ${sideBarWidth}px)` : '100%'
         }"
-        @click="handleWrapClick($event)"
-        @mousedown="handleMouseDown"
-        @mouseup="handleMouseUp"
+        @click="handleClick"
+        @mousedown="() => (isMouseDown = true)"
+        @mouseup="() => (isMouseUp = true)"
         @wheel="handleWheel"
       >
         <TimeLineTimeArea />
@@ -58,64 +57,28 @@ const {
   scaleSmallCellMs,
   scaleSmallCellWidth,
   fps,
-  leftOffset,
-  hideCursor
+  hideCursor,
+  leftOffset
 } = toRefs(props);
 provideTimeLineContext(props);
-const timelineEditorWrapRef = ref<HTMLElement | null>();
-const mouseDown = ref(false);
-const mouseUp = ref(false);
 const timeLineContainerRef = ref<HTMLElement>();
-const timeLineStateContext = provideTimeLineStateContext({
-  scaleUnit: computed(() => {
-    return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
-  }),
-  frameWidth: computed(() => {
-    return 1000 / unref(fps)! / (unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!);
-  }),
-  timeLineMaxEndTime: computed(() => {
-    if (unref(editorData)) {
-      const maxEnd = unref(unref(editorData)).reduce((prev, cur) => {
-        // 通过actions中最大end值计算最大宽度
-        const maxTime = cur.actions.reduce((aPrev: number, aCur: TimelineAction) => {
-          return Math.max(aPrev, aCur.end);
-        }, 0);
-        return Math.max(prev, maxTime);
-      }, 0);
-      return maxEnd;
-    }
-    return 0;
-  })
-});
+const timeLineStateContext = provideTimeLineStateContext();
 const timeLineEditorAreaContext = provideTimeLineEditorAreaContext({
   editorData
 });
+const isMouseDown = ref(false);
+const isMouseUp = ref(false);
 // 注册辅助线
 useActionGuideLine();
-const handleMouseDown = () => {
-  mouseDown.value = true;
-};
-const handleMouseUp = () => {
-  mouseUp.value = true;
-};
-const handleWrapClick = e => {
-  if (mouseDown.value && mouseUp.value) {
-    const excludesClassName = ['timeLine-editor-action', 'left-handle', 'right-handle', 'cursor-line']; // 过滤轨道中不触发的dom类名
-    const { x: posX } = timelineEditorWrapRef.value!.getBoundingClientRect();
-    if (excludesClassName.indexOf(e.target.className) === -1) {
-      const left = e.clientX - posX - leftOffset.value; // 点击的位置距离刻度0的距离
-      const frameMs = 1000 / fps.value; // 轨道帧率，一帧多少ms.
-      let time = (left + timeLineStateContext.scrollInfo.x.value) * timeLineStateContext.scaleUnit.value; // 得到点击坐标对应的时间
-      time = time < 0 ? 0 : time;
-      time =
-        time > timeLineStateContext.timeLineMaxEndTime.value ? timeLineStateContext.timeLineMaxEndTime.value : time; //  限制0-duration;
-      time = Math.round(time / frameMs) * frameMs; // 对时间进行帧级对齐
-      timeLineStateContext.handleSetCursor(time); // seek时间
-    }
+// 点击时间线
+const handleClick = (event: MouseEvent) => {
+  if (isMouseDown.value && isMouseUp.value) {
+    timeLineStateContext.enginePause();
+    timeLineStateContext.setCursorByPos(event.clientX, leftOffset.value);
     timeLineEditorAreaContext.clearSelected();
   }
-  mouseDown.value = false;
-  mouseUp.value = false;
+  isMouseDown.value = false;
+  isMouseUp.value = false;
 };
 watch(
   [mainRow, mainRowId],
@@ -166,6 +129,21 @@ watchEffect(() => {
   timeLineStateContext.engineRef.value.data = editorData.value;
   unref(timeLineStateContext.engineRef).reRender();
 });
+watchEffect(() => {
+  timeLineStateContext.frameWidth.value = 1000 / unref(fps)! / (unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!);
+});
+watchEffect(() => {
+  timeLineStateContext.scaleUnit.value = unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
+});
+watchEffect(() => {
+  timeLineStateContext.timeLineMaxEndTime.value = unref(editorData).reduce((prev, cur) => {
+    // 通过actions中最大end值计算最大宽度
+    const maxTime = cur.actions.reduce((aPrev: number, aCur: TimelineAction) => {
+      return Math.max(aPrev, aCur.end);
+    }, 0);
+    return Math.max(prev, maxTime);
+  }, 0);
+});
 onMounted(() => {
   unref(timeLineStateContext.engineRef).on('play', () => {
     timeLineStateContext.isPlaying.value = true;
@@ -214,8 +192,10 @@ defineExpose<TimelineExpose>({
     timeLineStateContext.handleSetCursor(time);
   },
   getTime: unref(timeLineStateContext.engineRef).getTime.bind(unref(timeLineStateContext.engineRef)),
-  play: (param: Parameters<TimelineExpose['play']>[0]) => unref(timeLineStateContext.engineRef).play({ ...param }),
-  pause: unref(timeLineStateContext.engineRef).pause.bind(unref(timeLineStateContext.engineRef)),
+  play: (param?: Parameters<TimelineExpose['play']>[0]): boolean => {
+    return timeLineStateContext.enginePlay({ ...param });
+  },
+  pause: timeLineStateContext.enginePause.bind(unref(timeLineStateContext.engineRef)),
   setScrollLeft: timeLineStateContext.setDeltaScrollLeft
 });
 </script>
@@ -231,12 +211,10 @@ defineExpose<TimelineExpose>({
     height: 100%;
     display: flex;
     position: relative;
-
     .timeLine-divider {
       height: 100%;
       width: 1px;
     }
-
     .timeLine-editor-wrap {
       height: 100%;
       width: 100%;

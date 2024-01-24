@@ -16,7 +16,10 @@
     :class="{
       'active-state-cursor': activeStateCursor
     }"
-    @click.stop="() => void 0"
+    @click.stop="handleMouseEvent"
+    @mousedown.stop="handleMouseEvent"
+    @mouseup.stop="handleMouseEvent"
+    @contextmenu.stop="handleContextMenu"
   >
     <div class="cursor-line-top" />
     <div class="cursor-line-area" />
@@ -27,8 +30,8 @@
 <script setup lang="ts">
 import { unref } from 'vue';
 import interact from 'interactjs';
-import { reactiveComputed, useEventListener } from '@vueuse/core';
-import type { DragEvent, Interactable, Point } from '@interactjs/types';
+import { reactiveComputed, useEventListener, whenever } from '@vueuse/core';
+import type { DragEvent, Interactable } from '@interactjs/types';
 import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 import { useActionGuideLine } from '../../hooks';
 defineOptions({
@@ -60,19 +63,16 @@ watch(
     immediate: true
   }
 );
+whenever(
+  () => cursorTime.value > timeLineMaxEndTime.value,
+  () => {
+    handleSetCursor(timeLineMaxEndTime.value);
+  }
+);
 const targetDragEvent = shallowRef<DragEvent | null>(null);
 const isAutoScroll = ref(false);
-// 初始化辅助线
-const handleInitGuideLine = () => {
-  if (unref(cursorAdsorption)) {
-    const assistPositions = defaultGetAllAssistPosition({
-      editorData: editorData!.value!,
-      scaleUnit: scaleUnit.value,
-      extendPos: ['0']
-    });
-    initDragLine({ assistPositions, targetType: 'cursor' });
-  }
-};
+const scrollOffset = ref(0);
+const timeLineEditorInnerRef = ref<HTMLElement | null>();
 const activeStateCursor = computed(() => {
   return (
     dragLineActionLine.isMoving &&
@@ -83,10 +83,9 @@ const activeStateCursor = computed(() => {
     })
   );
 });
-const timeLineEditorWrapRef = ref<HTMLElement | null>();
-const restrictRect = reactiveComputed(() => {
+const restrictRectModifier = reactiveComputed(() => {
   return interact.modifiers.restrict({
-    restriction: timeLineEditorWrapRef.value!,
+    restriction: timeLineEditorInnerRef.value!,
     elementRect: {
       left: 0,
       right: 0,
@@ -95,9 +94,9 @@ const restrictRect = reactiveComputed(() => {
     }
   });
 });
-const guideSnap = reactiveComputed(() => {
+const guideSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
-    origin: timeLineEditorWrapRef.value!,
+    origin: timeLineEditorInnerRef.value!,
     targets: [
       interact.createSnapGrid({
         x: unref(frameWidth),
@@ -113,9 +112,9 @@ const guideSnap = reactiveComputed(() => {
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
-const adsorbSnap = reactiveComputed(() => {
+const adsorbSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
-    origin: timeLineEditorWrapRef.value!,
+    origin: timeLineEditorInnerRef.value!,
     targets: [
       (x, y) => {
         let adsorption = x;
@@ -137,24 +136,13 @@ const adsorbSnap = reactiveComputed(() => {
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
-export interface Offset {
-  x: number;
-  y: number;
-  index: number;
-  relativePoint?: Point | null;
-}
-const scrollOffset = ref(0);
-const calibratingPointerSnap = reactiveComputed(() => {
+const autoScrollSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
-    origin: timeLineEditorWrapRef.value!,
+    origin: timeLineEditorInnerRef.value!,
     targets: [
       (x: number, y: number) => {
         let curX = x;
-        if (isAutoScroll.value) {
-          curX += scrollOffset.value;
-        }
-        console.log(curX, 'curX');
-        console.log(translateX.value, 'translateX');
+        curX += scrollOffset.value;
         return {
           x: curX,
           y
@@ -164,60 +152,32 @@ const calibratingPointerSnap = reactiveComputed(() => {
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
-// const scrollDirection: string | null = null;
-// let scrollTimer: number | null = null;
-// let isAutoScroll = false;
-// const autoScroll = (event: DragEvent) => {
-//   // 检测元素是否接近窗口的边缘
-//   const cursorX = event.clientX;
-//   const tLeft = timeLineEditorRef.value!.getBoundingClientRect().x;
-//   const tRight = tLeft + timeLineEditorRef.value!.getBoundingClientRect().width;
-//   const threshold = 50;
-//   const scrollSpeed = 5;
-//   let distance = unref(frameWidth);
-//   if (cursorX < tLeft + threshold) {
-//     scrollDirection = 'left';
-//     isAutoScroll = true;
-//     distance = tLeft + threshold - cursorX;
-//   } else if (cursorX > tRight - threshold) {
-//     scrollDirection = 'right';
-//     isAutoScroll = true;
-//     distance = cursorX - (tRight - threshold);
-//   } else {
-//     scrollDirection = null;
-//     isAutoScroll = false;
-//   }
-//   // 如果接近边缘则滚动窗口
-//   if (scrollDirection && isAutoScroll) {
-//     const step = scrollSpeed * (scrollDirection === 'left' ? -distance : distance);
-//     // 通过requestAnimationFrame来实现滚动效果 以免卡顿,
-//     const scroll = () => {
-//       timeLineEditorRef.value!.scrollBy(step, 0);
-//       if (scrollDirection === 'left' && timeLineEditorRef.value!.scrollLeft > 0) {
-//         scrollTimer = window.requestAnimationFrame(scroll);
-//       } else if (
-//         scrollDirection === 'right' &&
-//         timeLineEditorRef.value!.scrollLeft <
-//           timeLineEditorRef.value!.scrollWidth - timeLineEditorRef.value!.clientWidth
-//       ) {
-//         scrollTimer = window.requestAnimationFrame(scroll);
-//       } else {
-//         scrollTimer && cancelAnimationFrame(scrollTimer!);
-//       }
-//     };
-//     if (!scrollTimer) {
-//       scrollTimer = window.requestAnimationFrame(scroll);
-//     }
-//   }
-// };
+// 初始化辅助线
+const handleInitGuideLine = () => {
+  if (unref(cursorAdsorption)) {
+    const assistPositions = defaultGetAllAssistPosition({
+      editorData: editorData!.value!,
+      scaleUnit: scaleUnit.value,
+      extendPos: ['0']
+    });
+    initDragLine({ assistPositions, targetType: 'cursor' });
+  }
+};
+// 右键
+const handleContextMenu = (event: MouseEvent) => {
+  event.preventDefault();
+};
+// 点击
+const handleMouseEvent = () => {
+  timeLineStateContext.enginePause();
+};
+// 拖拽开始
 const handleMoveStart = (event: DragEvent) => {
-  console.log(event.type);
-  // isAutoScroll = false;
-  // scrollTimer = null;
-
+  timeLineStateContext.enginePause();
   targetDragEvent.value = event;
   handleInitGuideLine();
 };
+// 拖拽中
 const handleMove = (event: DragEvent) => {
   targetDragEvent.value = event;
   const target = event.target;
@@ -226,17 +186,13 @@ const handleMove = (event: DragEvent) => {
   curLeft = Math.round(curLeft / unref(frameWidth)) * unref(frameWidth);
   handleSetCursor(Math.round(curLeft * unref(scaleUnit)));
 };
-
-const handleMoveEnd = (event: DragEvent) => {
-  console.log(event);
-  // scrollTimer && cancelAnimationFrame(scrollTimer);
+// 拖拽结束
+const handleMoveEnd = () => {
   isAutoScroll.value = false;
-  // scrollTimer = null;
   scrollOffset.value = 0;
   targetDragEvent.value = null;
   disposeDragLine();
 };
-
 const initInteract = () => {
   const interactInst = interact(cursorLineRef.value!, {
     deltaSource: 'client'
@@ -244,7 +200,7 @@ const initInteract = () => {
   interactable.value = interactInst;
   interactInst
     .draggable({
-      modifiers: [restrictRect, calibratingPointerSnap, guideSnap, adsorbSnap],
+      modifiers: [restrictRectModifier, autoScrollSnapModifier, guideSnapModifier, adsorbSnapModifier],
       onstart: handleMoveStart,
       onmove: handleMove,
       onend: handleMoveEnd,
@@ -252,8 +208,7 @@ const initInteract = () => {
       autoScroll: {
         container: timeLineEditorRef.value!,
         margin: 40,
-        speed: 600,
-        enabled: true
+        speed: 500
       }
     })
     .on('autoscroll', event => {
@@ -262,23 +217,11 @@ const initInteract = () => {
     });
 };
 useEventListener(timeLineEditorRef, 'scroll', () => {
-  // 校准拖拽位置
-  if (targetDragEvent.value) {
-    if (isAutoScroll.value) {
-      // let offsetX =
-      //   targetDragEvent.value.clientX - (timeLineEditorRef.value!.getBoundingClientRect().left + leftOffset!.value!);
-      // // if (offsetX < 0) {
-      // //   handleSetCursor(0);
-      // //   return;
-      // // }
-      // // if (offsetX > unref(timeLineMaxEndTime) / unref(scaleUnit)) {
-      // //   handleSetCursor(unref(timeLineMaxEndTime));
-      // //   return;
-      // // }
-      // offsetX = Math.round(offsetX / unref(frameWidth)) * unref(frameWidth);
-      // handleSetCursor(Math.round(offsetX * unref(scaleUnit)));
+  nextTick(() => {
+    if (targetDragEvent.value) {
+      isAutoScroll.value && targetDragEvent.value.interaction.move();
     }
-  }
+  });
 });
 onBeforeUnmount(() => {
   interactable.value?.unset();
@@ -286,7 +229,7 @@ onBeforeUnmount(() => {
 });
 watchEffect(() => {
   nextTick(() => {
-    timeLineEditorWrapRef.value = timeLineEditorRef.value!.firstChild as HTMLElement;
+    timeLineEditorInnerRef.value = timeLineEditorRef.value!.firstChild as HTMLElement;
     initInteract();
   });
 });
@@ -325,7 +268,7 @@ watchEffect(() => {
     border-bottom: none;
   }
   &-area {
-    width: 15px;
+    width: 10px;
     height: 100%;
     cursor: ew-resize;
     position: absolute;

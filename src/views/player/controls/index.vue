@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { watchOnce } from '@vueuse/core';
 import { playerSettings } from '@/settings';
 import { usePlayerStore, useTimeLineStore } from '@/store';
 import type { ControlListOptions, SelectMixOption } from './button/index.vue';
@@ -65,10 +66,10 @@ const playerPlaying = computed(() => {
  * 播放
  */
 const playerPlay = () => {
-  const result = timeLineStore.timeLineRef?.play({ autoEnd: true });
+  const result = timeLineStore.timeLineRef?.play();
   result &&
     playerStore.setPlayerState({
-      isPlaying: !playerPlaying.value
+      isPlaying: true
     });
 };
 /**
@@ -76,9 +77,6 @@ const playerPlay = () => {
  */
 const playerPause = () => {
   timeLineStore.timeLineRef?.pause();
-  playerStore.setPlayerState({
-    isPlaying: !playerPlaying.value
-  });
 };
 /**
  * seek
@@ -161,6 +159,24 @@ const handlePlayerTimeChange = (_time: number) => {
   // 时间更新相关操作
   // console.log(time, 'time');
 };
+watchOnce(
+  () => timeLineStore.timeLineRef,
+  timeLineRef => {
+    if (!timeLineRef) return;
+    timeLineRef?.listener.on('paused', () => {
+      playerStore.setPlayerState({
+        isPlaying: false
+      });
+    });
+  },
+  { immediate: true }
+);
+onBeforeUnmount(() => {
+  if (timeLineStore.timeLineRef) {
+    timeLineStore.timeLineRef?.pause();
+    timeLineStore.timeLineRef?.listener.off('paused');
+  }
+});
 </script>
 
 <style scoped></style>

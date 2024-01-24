@@ -21,7 +21,7 @@
       v-show="timeLineEditorAreaContext.dropzoneInfo.isMoving"
       class="drag-row-line"
       :style="{
-        top: `${timeLineEditorAreaContext.dropzoneInfo.top + scrollInfo.y.value}px`,
+        top: `${timeLineEditorAreaContext.dropzoneInfo.top}px`,
         left: `${scrollInfo.x.value}px`
       }"
     />

@@ -22,12 +22,12 @@ export interface TimelineExpose {
   /** 重新渲染当前时间 */
   reRender: () => void;
   /** 播放 */
-  play: (param: {
+  play: (param?: {
     /** 默认从头运行到尾, 优先级大于autoEnd */
     toTime?: number;
     /** 是否播放完后自动结束 */
     autoEnd?: boolean;
-    /** 运行的actionId列表，不穿默认全部运行 */
+    /** 运行的actionId列表，默认全部运行 */
     runActionIds?: string[];
   }) => boolean;
   /** 暂停 */

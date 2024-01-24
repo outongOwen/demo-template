@@ -14,15 +14,14 @@
     :style="{
       height: rowItem?.rowHeight ? rowItem.rowHeight + 'px' : rowHeight + 'px'
     }"
+    @contextmenu.stop="handleContextMenu"
   >
     <TimeLineAction
       v-for="item in rowItem.actions"
       :key="item.id"
       :action-item="item"
       :row-item="rowItem"
-      :style="{
-        height: rowItem?.rowHeight ? rowItem.rowHeight + 'px' : rowHeight + 'px'
-      }"
+      :action-height="rowItem?.rowHeight ? rowItem.rowHeight : rowHeight!"
     />
   </div>
 </template>
@@ -53,6 +52,12 @@ const { injectTimeLineStateContext } = useTimeLineStateContext();
 const timeLineStateContext = injectTimeLineStateContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
 const rowRef = ref<HTMLElement>();
+// 右键菜单
+const handleContextMenu = (event: MouseEvent) => {
+  event.preventDefault();
+  console.log(event.clientX, event.clientY);
+};
+// 拖拽判断
 const dragJudge = event => {
   const dropzoneElement = event.target;
   const draggableEvent = event.dragEvent;
@@ -108,7 +113,6 @@ const initInteractDropzone = () => {
     },
     overlap: 'pointer',
     ondragenter(event) {
-      console.log('dsfdsfdsfds');
       dragJudge(event);
     },
     ondropmove(event) {
