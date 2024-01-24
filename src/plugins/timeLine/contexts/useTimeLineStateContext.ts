@@ -49,12 +49,6 @@ export interface TimeLineStateContextProps {
    */
   engineRef: ShallowRef<ITimelineEngine>;
   /**
-   * @description 设置scrollLeft
-   * @param {number} delta
-   * @returns {void}
-   */
-  setDeltaScrollLeft(delta: number): void;
-  /**
    * @description 设置光标
    * @param {number} time
    * @param {boolean} updateTime
@@ -100,14 +94,6 @@ export default function useTimeLineStateContext() {
   const timeLineMaxEndTime = ref<number>(0);
   // 时间驱动引擎
   const engineRef = shallowRef<ITimelineEngine>(new TimelineEngine());
-  // 根据delta设置scrollLeft
-  const setDeltaScrollLeft = (delta: number) => {
-    if (!timeLineEditorRef.value) return;
-    const data = timeLineEditorRef.value.scrollLeft + delta;
-    // 当超过最大距离时，禁止自动滚动
-    if (data > timeLineEditorRef.value.scrollWidth - timeLineEditorRef.value.clientWidth) return;
-    timeLineEditorRef.value.scrollLeft = data;
-  };
   /** 处理光标 */
   const handleSetCursor = (time: number, updateTime = true) => {
     let result = true;
@@ -153,7 +139,6 @@ export default function useTimeLineStateContext() {
     frameWidth,
     hasMainRow,
     timeLineEditorRef,
-    setDeltaScrollLeft,
     timeLineMaxEndTime,
     engineRef,
     handleSetCursor,

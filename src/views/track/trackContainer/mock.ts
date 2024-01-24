@@ -143,21 +143,21 @@ export const effects: Record<string, TimelineEffect> = {
     id: 'video',
     name: '视频',
     source: {
-      start: params => {
-        console.log(params, 'start');
-      },
-      enter: params => {
-        console.log(params, 'enter');
-      },
-      update: params => {
-        console.log(params, 'update');
-      },
-      leave: params => {
-        console.log(params, 'leave');
-      },
-      stop: params => {
-        console.log(params, 'stop');
-      }
+      // start: params => {
+      //   console.log(params, 'start');
+      // },
+      // enter: params => {
+      //   console.log(params, 'enter');
+      // },
+      // update: params => {
+      //   console.log(params, 'update');
+      // },
+      // leave: params => {
+      //   console.log(params, 'leave');
+      // },
+      // stop: params => {
+      //   console.log(params, 'stop');
+      // }
     }
   }
 };

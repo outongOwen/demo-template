@@ -38,10 +38,14 @@ import type { TimelineAction, TimelineExpose } from '../../types';
 import { useActionGuideLine } from '../../hooks';
 import { timeLineProps } from './props';
 import { sortTimeLineByType } from './index';
+interface Emits {
+  (event: 'maxEndTimeChange', payload: { time: number }): void;
+}
 defineOptions({
   name: 'TimeLine'
 });
 const props = defineProps(timeLineProps);
+const emits = defineEmits<Emits>();
 const { provideTimeLineContext } = useTimeLineContext();
 const { provideTimeLineStateContext } = useTimeLineStateContext();
 const { provideTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
@@ -68,6 +72,7 @@ const timeLineEditorAreaContext = provideTimeLineEditorAreaContext({
 });
 const isMouseDown = ref(false);
 const isMouseUp = ref(false);
+
 // 注册辅助线
 useActionGuideLine();
 // 点击时间线
@@ -122,6 +127,9 @@ watch(
     immediate: true
   }
 );
+watch(timeLineStateContext.timeLineMaxEndTime, time => {
+  emits('maxEndTimeChange', { time });
+});
 watchEffect(() => {
   timeLineStateContext.engineRef.value.effects = actionEffects.value;
 });
@@ -157,6 +165,11 @@ onMounted(() => {
     const curTime = Math.round(left * timeLineStateContext.scaleUnit.value);
     timeLineStateContext.handleSetCursor(curTime, false);
   });
+});
+onBeforeUnmount(() => {
+  unref(timeLineStateContext.engineRef).off('play');
+  unref(timeLineStateContext.engineRef).off('paused');
+  unref(timeLineStateContext.engineRef).off('setTimeByTick');
 });
 const handleWheel = event => {
   event.preventDefault();
@@ -196,7 +209,9 @@ defineExpose<TimelineExpose>({
     return timeLineStateContext.enginePlay({ ...param });
   },
   pause: timeLineStateContext.enginePause.bind(unref(timeLineStateContext.engineRef)),
-  setScrollLeft: timeLineStateContext.setDeltaScrollLeft
+  setScrollLeft: (val: number) => {
+    timeLineStateContext.timeLineEditorRef.value?.scrollBy(val, 0);
+  }
 });
 </script>
 <style lang="scss" scoped>

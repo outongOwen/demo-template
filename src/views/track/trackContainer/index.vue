@@ -25,6 +25,7 @@
     :scale-large-cell-width="getScaleInfo.scaleLargeCellWidth"
     :scale-small-cell-ms="getScaleInfo.scaleSmallCellMs"
     :get-scale-render="getScaleRender"
+    @max-end-time-change="handleMaxEndTimeChange"
   >
     <!-- <template #sidebar="{ itemRow, sideBarRef }">
       <TimeLineSideBar :time-line-row="itemRow" :side-bar-ref="sideBarRef" />
@@ -58,6 +59,9 @@ const fps = ref(25);
 const { getScaleInfo } = timeLineStore;
 const getScaleRender = (time: number, unit: 'f' | 's') => {
   return formatTime(time, fps.value, unit);
+};
+const handleMaxEndTimeChange = ({ time }) => {
+  timeLineStore.setTimeLineMaxEndTime(time);
 };
 onMounted(() => {
   const timeLineDom = timeLineRef.value?.targetEl;

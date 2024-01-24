@@ -9,7 +9,7 @@
     <div class="h50px w100%">
       <player-progress-bar
         v-model:time="playerCurrentTime"
-        :total-time="125280"
+        :total-time="getTimeLineMaxEndTime"
         :frame-rate="playerSettings.frameRate"
         @change="handlePlayerTimeChange"
       />
@@ -31,7 +31,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { watchOnce } from '@vueuse/core';
 import { playerSettings } from '@/settings';
 import { usePlayerStore, useTimeLineStore } from '@/store';
 import type { ControlListOptions, SelectMixOption } from './button/index.vue';
@@ -41,8 +40,8 @@ defineOptions({ name: 'PlayerControls' });
 const playerStore = usePlayerStore();
 const timeLineStore = useTimeLineStore();
 const { getIsFullscreenState, getProportion, getSpeed, getPlayerState } = storeToRefs(playerStore);
+const { getTimeLineMaxEndTime } = storeToRefs(timeLineStore);
 const playerCurrentTime = ref<number>(0);
-// const playerPlaying = ref<boolean>(false);
 const playerSpeed = computed({
   set: (value: number) => {
     playerStore.setSpeed(value);
@@ -155,11 +154,11 @@ const handleCssFullscreenChange = (state: boolean) => {
 /**
  * 播放器时间更新
  */
-const handlePlayerTimeChange = (_time: number) => {
+const handlePlayerTimeChange = () => {
   // 时间更新相关操作
-  // console.log(time, 'time');
+  timeLineStore.timeLineRef && timeLineStore.timeLineRef.setTime(playerCurrentTime.value);
 };
-watchOnce(
+watch(
   () => timeLineStore.timeLineRef,
   timeLineRef => {
     if (!timeLineRef) return;
@@ -168,13 +167,22 @@ watchOnce(
         isPlaying: false
       });
     });
+    timeLineRef?.listener.on('setTimeByTick', ({ time }) => {
+      playerCurrentTime.value = time * 1000;
+    });
+    timeLineRef?.listener.on('afterSetTime', ({ time }) => {
+      playerCurrentTime.value = time * 1000;
+    });
   },
-  { immediate: true }
+  {
+    immediate: true
+  }
 );
 onBeforeUnmount(() => {
   if (timeLineStore.timeLineRef) {
     timeLineStore.timeLineRef?.pause();
     timeLineStore.timeLineRef?.listener.off('paused');
+    timeLineStore.timeLineRef?.listener.off('setTimeByTick');
   }
 });
 </script>

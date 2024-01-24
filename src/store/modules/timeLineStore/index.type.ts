@@ -8,6 +8,7 @@ interface ScaleInfo {
 }
 interface TimeLineStateType {
   timeLineRef: TimelineExpose | null;
+  timeLineMaxEndTime: number;
   scaleInfo: ScaleInfo;
 }
 export type { TimeLineStateType, ScaleInfo };
