@@ -204,9 +204,8 @@ export default function useTimeLineEditorAreaContext() {
     setActionDragState,
     clearActionDragState
   };
-  const provideTimeLineEditorAreaContext = ({ editorData: timelineData }: Partial<TimeLineEditorAreaContextProps>) => {
-    if (timelineData?.value) editorData.value = timelineData.value;
-    return useProvide(timeLineEditorAreaContextProps);
+  const provideTimeLineEditorAreaContext = (context?: Partial<TimeLineEditorAreaContextProps>) => {
+    return useProvide(Object.assign(timeLineEditorAreaContextProps, context || {}));
   };
   const injectTimeLineEditorAreaContext = () => {
     return useInject();

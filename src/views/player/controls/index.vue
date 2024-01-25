@@ -155,6 +155,7 @@ const handleCssFullscreenChange = (state: boolean) => {
  * 播放器时间更新
  */
 const handlePlayerTimeChange = () => {
+  timeLineStore.timeLineRef?.pause();
   // 时间更新相关操作
   timeLineStore.timeLineRef && timeLineStore.timeLineRef.setTime(playerCurrentTime.value);
 };

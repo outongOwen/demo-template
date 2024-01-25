@@ -34,8 +34,8 @@ import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
 import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
-import type { TimelineAction, TimelineExpose } from '../../types';
 import { useActionGuideLine } from '../../hooks';
+import type { TimelineExpose } from '../../types';
 import { timeLineProps } from './props';
 import { sortTimeLineByType } from './index';
 interface Emits {
@@ -64,26 +64,41 @@ const {
   hideCursor,
   leftOffset
 } = toRefs(props);
-provideTimeLineContext(props);
+const onMaxEndTimeChange = time => {
+  emits('maxEndTimeChange', { time });
+};
+provideTimeLineContext({ ...props, ...{ onMaxEndTimeChange } });
 const timeLineContainerRef = ref<HTMLElement>();
 const timeLineStateContext = provideTimeLineStateContext();
-const timeLineEditorAreaContext = provideTimeLineEditorAreaContext({
-  editorData
-});
+const timeLineEditorAreaContext = provideTimeLineEditorAreaContext();
 const isMouseDown = ref(false);
 const isMouseUp = ref(false);
-
 // 注册辅助线
 useActionGuideLine();
 // 点击时间线
 const handleClick = (event: MouseEvent) => {
   if (isMouseDown.value && isMouseUp.value) {
     timeLineStateContext.enginePause();
-    timeLineStateContext.setCursorByPos(event.clientX, leftOffset.value);
+    timeLineStateContext.setCursorByPos(event.clientX, Number(leftOffset.value));
     timeLineEditorAreaContext.clearSelected();
   }
   isMouseDown.value = false;
   isMouseUp.value = false;
+};
+// 滚动覆盖
+const handleWheel = event => {
+  event.preventDefault();
+  const deltaX = event.deltaX;
+  const deltaY = event.deltaY;
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    nextTick(() => {
+      timeLineStateContext.timeLineEditorRef.value?.scrollBy(deltaX, 0);
+    });
+  } else {
+    nextTick(() => {
+      timeLineStateContext.timeLineEditorRef.value?.scrollBy(0, deltaY);
+    });
+  }
 };
 watch(
   [mainRow, mainRowId],
@@ -105,17 +120,18 @@ watch(
   { immediate: true }
 );
 watch(
-  [editorData, rowSortTypes, mainRowId],
+  [...rowSortTypes.value],
   () => {
-    // 主时间轴排序
-    if (timeLineStateContext.hasMainRow) {
-      const mainRowIds = unref(editorData).filter(item => item.type === mainRowId!.value);
-      if (mainRowIds.length) {
-        const mainRowIndex = unref(editorData).findIndex(item => item.type === mainRowId!.value);
-        unref(editorData).push(unref(editorData)[mainRowIndex]);
-        unref(editorData).splice(mainRowIndex, 1);
-      }
-    }
+    // // 主时间轴排序
+    // if (timeLineStateContext.hasMainRow) {
+    //   const mainRowIds = unref(editorData).filter(item => item.type === mainRowId!.value);
+    //   if (mainRowIds.length) {
+    //     const mainRowIndex = unref(editorData).findIndex(item => item.type === mainRowId!.value);
+    //     unref(editorData).push(unref(editorData)[mainRowIndex]);
+    //     unref(editorData).splice(mainRowIndex, 1);
+    //   }
+    // }
+    console.log('排序——+—1111—+122221232132133111213213');
     // 根据时间轴类型进行排序
     if (rowSortTypes?.value?.length && editorData?.value?.length) {
       const sortedEditorData = sortTimeLineByType(unref(editorData), unref(rowSortTypes)!);
@@ -127,9 +143,23 @@ watch(
     immediate: true
   }
 );
-watch(timeLineStateContext.timeLineMaxEndTime, time => {
-  emits('maxEndTimeChange', { time });
-});
+watch(
+  timeLineStateContext.timeLineMaxEndTime,
+  time => {
+    onMaxEndTimeChange(time);
+  },
+  {
+    immediate: true
+  }
+);
+watch(
+  editorData,
+  () => {
+    timeLineStateContext.editorData.value = unref(editorData);
+    timeLineEditorAreaContext.editorData.value = unref(editorData);
+  },
+  { deep: true, immediate: true }
+);
 watchEffect(() => {
   timeLineStateContext.engineRef.value.effects = actionEffects.value;
 });
@@ -138,20 +168,13 @@ watchEffect(() => {
   unref(timeLineStateContext.engineRef).reRender();
 });
 watchEffect(() => {
-  timeLineStateContext.frameWidth.value = 1000 / unref(fps)! / (unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!);
+  timeLineStateContext.frameWidth.value =
+    1000 / Number(unref(fps)) / (Number(unref(scaleSmallCellMs)) / Number(unref(scaleSmallCellWidth)));
 });
 watchEffect(() => {
-  timeLineStateContext.scaleUnit.value = unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
+  timeLineStateContext.scaleUnit.value = Number(unref(scaleSmallCellMs)) / Number(unref(scaleSmallCellWidth));
 });
-watchEffect(() => {
-  timeLineStateContext.timeLineMaxEndTime.value = unref(editorData).reduce((prev, cur) => {
-    // 通过actions中最大end值计算最大宽度
-    const maxTime = cur.actions.reduce((aPrev: number, aCur: TimelineAction) => {
-      return Math.max(aPrev, aCur.end);
-    }, 0);
-    return Math.max(prev, maxTime);
-  }, 0);
-});
+
 onMounted(() => {
   unref(timeLineStateContext.engineRef).on('play', () => {
     timeLineStateContext.isPlaying.value = true;
@@ -171,20 +194,7 @@ onBeforeUnmount(() => {
   unref(timeLineStateContext.engineRef).off('paused');
   unref(timeLineStateContext.engineRef).off('setTimeByTick');
 });
-const handleWheel = event => {
-  event.preventDefault();
-  const deltaX = event.deltaX;
-  const deltaY = event.deltaY;
-  if (Math.abs(deltaX) > Math.abs(deltaY)) {
-    nextTick(() => {
-      timeLineStateContext.timeLineEditorRef.value?.scrollBy(deltaX, 0);
-    });
-  } else {
-    nextTick(() => {
-      timeLineStateContext.timeLineEditorRef.value?.scrollBy(0, deltaY);
-    });
-  }
-};
+
 defineExpose<TimelineExpose>({
   get targetEl() {
     return timeLineContainerRef.value!;

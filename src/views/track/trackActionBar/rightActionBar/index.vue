@@ -1,6 +1,6 @@
 <template>
   <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item" />
-  <main-form ref="formRef"></main-form>
+  <!-- <main-form ref="formRef"></main-form> -->
 </template>
 
 <script setup lang="ts">
@@ -8,11 +8,11 @@ import { storeToRefs } from 'pinia';
 import { useTimeLineStore } from '@/store';
 import { useIconRender } from '@/hooks';
 import ActionBar from '../actionBar/index.vue';
-import MainForm from './distributeForm/index.vue';
+// import MainForm from './distributeForm/index.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
 const { getScaleInfo } = storeToRefs(timeLineStore);
-const formRef = ref();
+// const formRef = ref();
 const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
     icon: 'mdi-magnet',

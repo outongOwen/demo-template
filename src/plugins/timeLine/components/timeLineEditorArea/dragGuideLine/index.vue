@@ -12,7 +12,7 @@
         :key="index"
         class="drag-column-line"
         :style="{
-          left: `${item + leftOffset!}px`,
+          left: `${item + Number(leftOffset)}px`,
           top: `${scrollInfo.y.value}px`
         }"
       />

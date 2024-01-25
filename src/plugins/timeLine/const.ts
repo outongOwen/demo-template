@@ -28,3 +28,5 @@ export const DEFAULT_GRID_X = 1;
 export const DEFAULT_GUIDE_LINE_SNAP = 6;
 /** 默认帧数 */
 export const DEFAULT_FPS = 25;
+/** 默认可接受的帧率集合 */
+export const DEFAULT_FPS_LIST = [25, 30, 40, 60];

@@ -15,8 +15,8 @@
     <div
       class="sideBar-list"
       :style="{
-        top: -scrollInfo.y.value + scaleHeight! + 'px',
-        minHeight: `calc(100% - ${scaleHeight! - 8}px)`
+        top: -scrollInfo.y.value + Number(scaleHeight) + 'px',
+        minHeight: `calc(100% - ${Number(scaleHeight) - 8}px)`
       }"
     >
       <ul

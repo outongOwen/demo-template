@@ -34,16 +34,18 @@ const { scaleUnit, scrollInfo } = timeLineStateContext;
 const ruleRef = ref(); // canvasDom
 const timeLineRuleRef = ref(); // 刻度尺容器ref
 const ctx = ref(); // canvas上下文对象
-
 const state: any = reactive({
   ruleStartTime: 0,
   pxPerFullScreen: 900 // px
 });
+const offsetLeft = computed(() => {
+  return Number(leftOffset!.value) - scrollInfo.x.value > 0 ? Number(leftOffset!.value) - scrollInfo.x.value : 0;
+});
 const drawRule = () => {
   // 一小格的宽度px cellWidth
-  const cellWidth = unref(scaleSmallCellWidth)!;
+  const cellWidth = Number(unref(scaleSmallCellWidth));
   // 一大格子中小格子数量  cellCount
-  const cellCount = Math.round(unref(scaleLargeCellWidth)! / unref(scaleSmallCellWidth)!);
+  const cellCount = Math.round(Number(unref(scaleLargeCellWidth)) / Number(unref(scaleSmallCellWidth)));
   // ms/px
   const msPerPx = unref(scaleUnit)!;
   const pxPerFullScreen = state.pxPerFullScreen;
@@ -94,7 +96,8 @@ const calcCanvasSize = () => {
 };
 watch(
   () => {
-    const scrollLeft = scrollInfo.x.value > leftOffset!.value! ? scrollInfo.x.value - leftOffset!.value! : 0;
+    const scrollLeft =
+      scrollInfo.x.value > Number(leftOffset!.value) ? scrollInfo.x.value - Number(leftOffset!.value) : 0;
     return scrollLeft;
   },
   scrollLeft => {
@@ -108,9 +111,6 @@ watch(
     drawRule();
   }
 );
-const offsetLeft = computed(() => {
-  return leftOffset!.value! - scrollInfo.x.value > 0 ? leftOffset!.value! - scrollInfo.x.value : 0;
-});
 useResizeObserver(timeLineRuleRef, () => {
   // 浏览器缩放，更新刻度规则
   calcCanvasSize(); // 轨道dom尺寸变化，影响绘制

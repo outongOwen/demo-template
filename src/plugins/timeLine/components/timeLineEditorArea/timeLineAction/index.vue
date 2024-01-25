@@ -52,7 +52,7 @@ type Direction = 'left' | 'right';
 interface Props {
   rowItem: TimelineRow;
   actionItem: TimelineAction;
-  actionHeight: number;
+  actionHeight: number | string;
 }
 defineOptions({
   name: 'TimeLineAction'
@@ -134,8 +134,8 @@ const autoScrollSnapModifier = reactiveComputed(() => {
         if (curX + actionItemSize.width >= timeLineEditorWrapWidth.value) {
           curX = timeLineEditorWrapWidth.value - actionItemSize.width;
         }
-        if (curY + actionHeight.value >= timeLineEditorWrapHeight.value) {
-          curY = timeLineEditorWrapHeight.value - actionHeight.value;
+        if (curY + Number(actionHeight.value) >= timeLineEditorWrapHeight.value) {
+          curY = timeLineEditorWrapHeight.value - Number(actionHeight.value);
         }
         return {
           x: curX,
@@ -158,12 +158,20 @@ const guideSnapModifier = reactiveComputed(() => {
         dragLineActionLine.assistPositions.forEach(item => {
           const dis = Math.abs(item - adsorptionPos);
           const dis2 = Math.abs(item - (adsorptionPos + width));
-          if (dis < unref(guideAdsorptionDistance)! && dis < Number.MAX_SAFE_INTEGER && disListRight.length === 0) {
+          if (
+            dis < Number(unref(guideAdsorptionDistance)) &&
+            dis < Number.MAX_SAFE_INTEGER &&
+            disListRight.length === 0
+          ) {
             disListLeft.push(item);
             const minDis = Math.min(...disListLeft);
             adsorptionPos = minDis;
           }
-          if (dis2 < unref(guideAdsorptionDistance)! && dis2 < Number.MAX_SAFE_INTEGER && disListLeft.length === 0) {
+          if (
+            dis2 < Number(unref(guideAdsorptionDistance)) &&
+            dis2 < Number.MAX_SAFE_INTEGER &&
+            disListLeft.length === 0
+          ) {
             disListRight.push(item);
             const minDis = Math.min(...disListRight);
             adsorptionPos = minDis - width;

@@ -23,7 +23,7 @@
   >
     <div class="cursor-line-top" />
     <div class="cursor-line-area" />
-    <div class="absolute left-5px top-0">{{ translateX }}</div>
+    <div class="absolute left-5px top-0">{{ cursorTime }}</div>
   </div>
 </template>
 
@@ -84,14 +84,8 @@ const activeStateCursor = computed(() => {
   );
 });
 const restrictRectModifier = reactiveComputed(() => {
-  return interact.modifiers.restrict({
-    restriction: timeLineEditorInnerRef.value!,
-    elementRect: {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0
-    }
+  return interact.modifiers.restrictEdges({
+    outer: timeLineEditorInnerRef.value!
   });
 });
 const guideSnapModifier = reactiveComputed(() => {
@@ -121,7 +115,7 @@ const adsorbSnapModifier = reactiveComputed(() => {
         const disList: number[] = [];
         dragLineActionLine.assistPositions.forEach(item => {
           const dis = Math.abs(item - adsorption);
-          if (dis < unref(guideAdsorptionDistance)! && dis < Number.MAX_SAFE_INTEGER) {
+          if (dis < Number(unref(guideAdsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
             disList.push(item);
             const minDis = Math.min(...disList);
             adsorption = minDis;
@@ -217,22 +211,27 @@ const initInteract = () => {
     });
 };
 useEventListener(timeLineEditorRef, 'scroll', () => {
-  nextTick(() => {
-    if (targetDragEvent.value) {
-      isAutoScroll.value && targetDragEvent.value.interaction.move();
-    }
-  });
+  if (targetDragEvent.value) {
+    isAutoScroll.value && targetDragEvent.value.interaction.move();
+  }
 });
 onBeforeUnmount(() => {
   interactable.value?.unset();
   disposeDragLine();
 });
-watchEffect(() => {
-  nextTick(() => {
-    timeLineEditorInnerRef.value = timeLineEditorRef.value!.firstChild as HTMLElement;
-    initInteract();
-  });
-});
+watch(
+  timeLineEditorRef,
+  ref => {
+    if (!ref) return;
+    nextTick(() => {
+      timeLineEditorInnerRef.value = timeLineEditorRef.value!.firstChild as HTMLElement;
+      initInteract();
+    });
+  },
+  {
+    immediate: true
+  }
+);
 </script>
 
 <style scoped lang="scss">
@@ -246,6 +245,7 @@ watchEffect(() => {
   border-right: 1px solid #5297ff;
   background-color: #5297ff;
   z-index: 10;
+  cursor: ew-resize;
   // 禁止选中
   user-select: none;
   &-top::before {
@@ -256,6 +256,7 @@ watchEffect(() => {
     width: 10px;
     height: 10px;
     background-color: #5297ff;
+    cursor: ew-resize;
   }
   &-top::after {
     content: '';
@@ -266,6 +267,7 @@ watchEffect(() => {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: none;
+    cursor: ew-resize;
   }
   &-area {
     width: 10px;

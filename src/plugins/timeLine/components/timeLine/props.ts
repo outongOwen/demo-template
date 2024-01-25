@@ -15,7 +15,8 @@ import {
   SCALE_SMALL_CELL_WIDTH,
   SCALE_SMALL_CELL_MS,
   DEFAULT_GUIDE_LINE_SNAP,
-  DEFAULT_FPS
+  DEFAULT_FPS,
+  DEFAULT_FPS_LIST
 } from '../../const';
 export const timeLineProps = {
   /**
@@ -52,8 +53,11 @@ export const timeLineProps = {
    * @type {number}
    */
   fps: {
-    type: Number,
-    default: DEFAULT_FPS
+    type: [String, Number] as PropType<string | number>,
+    default: DEFAULT_FPS,
+    validator(val) {
+      return DEFAULT_FPS_LIST.includes(Number(val));
+    }
   },
   /**
    * @description 是否开启侧边栏
@@ -112,7 +116,7 @@ export const timeLineProps = {
    * @type {number}
    */
   rowHeight: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: ROW_HEIGHT
   },
   /**
@@ -121,7 +125,7 @@ export const timeLineProps = {
    * @type {number}
    */
   rowSpacing: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: ROW_SPACING
   },
   /**
@@ -157,9 +161,9 @@ export const timeLineProps = {
    * @type {number}
    */
   leftOffset: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: LEFT_OFFSET,
-    validator: (val: number): boolean => val >= 0
+    validator: (val): boolean => Number(val) >= 0
   },
   /**
    * @description 侧边栏宽度
@@ -167,9 +171,9 @@ export const timeLineProps = {
    * @type {number}
    */
   sideBarWidth: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: SIDE_BAR_WIDTH,
-    validator: (val: number): boolean => val > 0
+    validator: (val): boolean => Number(val) > 0
   },
 
   /**
@@ -178,9 +182,9 @@ export const timeLineProps = {
    * @type {number}
    */
   scaleHeight: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: SCALE_HEIGHT,
-    validator: (val: number): boolean => val > 0
+    validator: (val): boolean => Number(val) > 0
   },
   /**
    * @description 小格宽度
@@ -188,9 +192,9 @@ export const timeLineProps = {
    * @type {number}
    */
   scaleSmallCellWidth: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: SCALE_SMALL_CELL_WIDTH,
-    validator: (val: number): boolean => val > 0
+    validator: (val): boolean => Number(val) > 0
   },
   /**
    * @description 大格宽度
@@ -198,9 +202,9 @@ export const timeLineProps = {
    * @type {number}
    */
   scaleLargeCellWidth: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: SCALE_LARGE_CELL_WIDTH,
-    validator: (val: number): boolean => val > 0
+    validator: (val): boolean => Number(val) > 0
   },
   /**
    * @description 小格刻度单位 （ms)
@@ -208,9 +212,9 @@ export const timeLineProps = {
    * @type {number}
    */
   scaleSmallCellMs: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: SCALE_SMALL_CELL_MS,
-    validator: (val: number): boolean => val > 0
+    validator: (val): boolean => Number(val) > 0
   },
   /**
    * @description 是否开启鼠标吸附
@@ -232,7 +236,7 @@ export const timeLineProps = {
    * @description 辅助线吸附距离
    */
   guideAdsorptionDistance: {
-    type: Number,
+    type: [String, Number] as PropType<string | number>,
     default: DEFAULT_GUIDE_LINE_SNAP
   },
   /**

@@ -3,8 +3,12 @@ import { useScroll } from '@vueuse/core';
 import { useContext } from '../hooks';
 import { TimelineEngine } from '../core';
 import type { ITimelineEngine } from '../core';
-import type { TimelineExpose } from '../types';
+import type { TimelineExpose, TimelineRow, TimelineAction } from '../types';
 export interface TimeLineStateContextProps {
+  /**
+   * @description: 时间线数据
+   */
+  editorData: Ref<TimelineRow[] | undefined>;
   /**
    * @description 当前指针时间
    * @default 0
@@ -76,6 +80,8 @@ const { useInject, useProvide } = useContext<TimeLineStateContextProps>('TimeLin
   native: true
 });
 export default function useTimeLineStateContext() {
+  // 时间线数据
+  const editorData = ref<TimelineRow[]>([]);
   // 当前指针时间
   const cursorTime = ref<number>(0);
   // 轨道是否正在运行
@@ -90,10 +96,18 @@ export default function useTimeLineStateContext() {
   const timeLineEditorRef = shallowRef<HTMLElement | null | undefined>(null);
   // 滚动条信息
   const scrollInfo = useScroll(timeLineEditorRef);
-  // 时间线最大时间
-  const timeLineMaxEndTime = ref<number>(0);
   // 时间驱动引擎
   const engineRef = shallowRef<ITimelineEngine>(new TimelineEngine());
+  // 时间线最大时间
+  const timeLineMaxEndTime = computed(() => {
+    return unref(editorData).reduce((prev, cur) => {
+      // 通过actions中最大end值计算最大宽度
+      const maxTime = cur.actions.reduce((aPrev: number, aCur: TimelineAction) => {
+        return Math.max(aPrev, aCur.end);
+      }, 0);
+      return Math.max(prev, maxTime);
+    }, 0);
+  });
   /** 处理光标 */
   const handleSetCursor = (time: number, updateTime = true) => {
     let result = true;
@@ -132,6 +146,7 @@ export default function useTimeLineStateContext() {
     return engineRef.value.isPaused && engineRef.value.play({ ...param });
   };
   const timeLineStateProps: TimeLineStateContextProps = {
+    editorData,
     scrollInfo,
     isPlaying,
     cursorTime,
