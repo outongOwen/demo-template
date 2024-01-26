@@ -8,7 +8,6 @@
 <template>
   <TimeLine
     ref="timeLineRef"
-    class="wh-full time-line"
     :editor-data="editorData"
     :action-effects="effects"
     :side-bars="sideBars"
@@ -38,7 +37,8 @@
 
 <script setup lang="ts">
 import { useThemeVars } from 'naive-ui';
-// import type { TimelineRow } from '@/plugins/timeLine';
+// import type { TimelineRow } from '@/plugins/timeLine'
+import { useParentElement, unrefElement, useResizeObserver } from '@vueuse/core';
 import { useTimeLineStore } from '@/store';
 import { formatTime } from '@/utils/scaleTimeFormat';
 import { TimeLine } from '@/plugins/timeLine';
@@ -63,10 +63,38 @@ const getScaleRender = (time: number, unit: 'f' | 's') => {
 const handleMaxEndTimeChange = ({ time }) => {
   timeLineStore.setTimeLineMaxEndTime(time);
 };
+const parentElement = useParentElement();
+const { scaleWidth, state, initScale, changeScale, changeUpdateScale } = useTrackScale(fps.value);
+watch(
+  () => getScaleInfo.scale,
+  (newScale, oldScale) => {
+    if (newScale === oldScale) return;
+    if (newScale) {
+      changeScale(newScale);
+      timeLineStore.setScaleInfo({
+        scaleSmallCellWidth: state.scaleSmallCellWidth,
+        scaleLargeCellWidth: state.scaleLargeCellWidth,
+        scaleSmallCellMs: state.scaleSmallCellMs
+      });
+    }
+  }
+);
+useResizeObserver(parentElement, () => {
+  scaleWidth.value = unrefElement(parentElement.value)!.getBoundingClientRect().width - sideBarWidth.value;
+  changeUpdateScale((curScale, curState) => {
+    timeLineStore.setScaleInfo({ scale: curScale, scaleStep: curState.scaleStep });
+  });
+});
+
 onMounted(() => {
-  const timeLineDom = timeLineRef.value?.targetEl;
-  useTrackScale(timeLineDom, sideBarWidth.value, fps.value);
   timeLineRef.value && timeLineStore.setTimeLineRef(timeLineRef.value);
+  initScale();
+  timeLineStore.setScaleInfo({
+    scaleStep: state.scaleStep,
+    scaleSmallCellWidth: state.scaleSmallCellWidth,
+    scaleLargeCellWidth: state.scaleLargeCellWidth,
+    scaleSmallCellMs: state.scaleSmallCellMs
+  });
 });
 </script>
 <style lang="scss" scoped>

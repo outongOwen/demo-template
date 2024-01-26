@@ -67,7 +67,7 @@ const {
 const onMaxEndTimeChange = time => {
   emits('maxEndTimeChange', { time });
 };
-provideTimeLineContext({ ...props, ...{ onMaxEndTimeChange } });
+provideTimeLineContext(Object.assign(props, { onMaxEndTimeChange }));
 const timeLineContainerRef = ref<HTMLElement>();
 const timeLineStateContext = provideTimeLineStateContext();
 const timeLineEditorAreaContext = provideTimeLineEditorAreaContext();
@@ -131,7 +131,7 @@ watch(
     //     unref(editorData).splice(mainRowIndex, 1);
     //   }
     // }
-    console.log('排序——+—1111—+122221232132133111213213');
+    console.log('排序——32133111213213');
     // 根据时间轴类型进行排序
     if (rowSortTypes?.value?.length && editorData?.value?.length) {
       const sortedEditorData = sortTimeLineByType(unref(editorData), unref(rowSortTypes)!);
