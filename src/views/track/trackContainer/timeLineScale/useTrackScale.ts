@@ -173,11 +173,11 @@ export default function useTrackScale(fps: number) {
   };
   const initScale = () => {
     state.ruleScope = [];
+    state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
     getCurFpsRule();
     caclInitRule(); // 轨道时长变化，影响绘制
     getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
     getRuleScope(); // 得到刻度列表对应的缩放范围
-    state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
     changeScale(0);
   };
   const changeUpdateScale = callback => {
@@ -186,6 +186,7 @@ export default function useTrackScale(fps: number) {
   };
   return {
     scaleWidth,
+    curScale,
     state,
     initScale,
     changeScale,

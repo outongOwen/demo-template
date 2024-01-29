@@ -59,17 +59,17 @@ const playerProportion = computed({
   }
 });
 const playerPlaying = computed(() => {
-  return getPlayerState.value.isPlaying;
+  return getPlayerState.value.playing && !getPlayerState.value.waiting;
 });
 /**
  * 播放
  */
 const playerPlay = () => {
-  const result = timeLineStore.timeLineRef?.play();
-  result &&
-    playerStore.setPlayerState({
-      isPlaying: true
-    });
+  const result = timeLineStore.timeLineRef?.play({
+    // toTime: unref(getTimeLineMaxEndTime)
+    autoEnd: true
+  });
+  console.log(result);
 };
 /**
  * 暂停
@@ -159,32 +159,53 @@ const handlePlayerTimeChange = () => {
   // 时间更新相关操作
   timeLineStore.timeLineRef && timeLineStore.timeLineRef.setTime(playerCurrentTime.value);
 };
+const handlerPlay = () => {
+  playerStore.setPlayerState({
+    playing: true
+  });
+};
+const handlerPause = () => {
+  playerStore.setPlayerState({
+    playing: false
+  });
+};
+const handlerSetTimeByTick = ({ time }) => {
+  playerCurrentTime.value = time;
+};
+const handlerAfterSetTime = ({ time }) => {
+  playerCurrentTime.value = time;
+};
+// 封装销毁订阅事件
+const destroyListener = () => {
+  if (timeLineStore.timeLineRef) {
+    // 检查是否存在
+    timeLineStore.timeLineRef?.pause();
+    timeLineStore.timeLineRef?.listener.off('play', handlerPlay);
+    timeLineStore.timeLineRef?.listener.off('paused', handlerPause);
+    timeLineStore.timeLineRef?.listener.off('setTimeByTick', handlerSetTimeByTick);
+    timeLineStore.timeLineRef?.listener.off('afterSetTime', handlerAfterSetTime);
+  }
+};
+/**
+ * 销毁订阅事件
+ */
 watch(
   () => timeLineStore.timeLineRef,
   timeLineRef => {
     if (!timeLineRef) return;
-    timeLineRef?.listener.on('paused', () => {
-      playerStore.setPlayerState({
-        isPlaying: false
-      });
-    });
-    timeLineRef?.listener.on('setTimeByTick', ({ time }) => {
-      playerCurrentTime.value = time * 1000;
-    });
-    timeLineRef?.listener.on('afterSetTime', ({ time }) => {
-      playerCurrentTime.value = time * 1000;
-    });
+    destroyListener();
+    timeLineRef.listener.on('play', handlerPlay);
+    timeLineRef.listener.on('paused', handlerPause);
+    timeLineRef.listener.on('setTimeByTick', handlerSetTimeByTick);
+    timeLineRef.listener.on('afterSetTime', handlerAfterSetTime);
   },
   {
-    immediate: true
+    immediate: true,
+    flush: 'post'
   }
 );
 onBeforeUnmount(() => {
-  if (timeLineStore.timeLineRef) {
-    timeLineStore.timeLineRef?.pause();
-    timeLineStore.timeLineRef?.listener.off('paused');
-    timeLineStore.timeLineRef?.listener.off('setTimeByTick');
-  }
+  destroyListener();
 });
 </script>
 

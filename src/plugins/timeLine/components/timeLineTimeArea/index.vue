@@ -9,7 +9,7 @@
     ref="timeLineRuleRef"
     class="timeLine-rule-container"
     :style="{
-      height: `${scaleHeight}px`,
+      height: `${getShareProps.scaleHeight}px`,
       left: `${offsetLeft}px`
     }"
   >
@@ -19,18 +19,11 @@
 
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
-import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-
+import { useTimeLineStore } from '../../store';
 defineOptions({
   name: 'TimeLineTimeArea'
 });
-const { injectTimeLineContext } = useTimeLineContext();
-const { injectTimeLineStateContext } = useTimeLineStateContext();
-const timeLineContext = injectTimeLineContext();
-const timeLineStateContext = injectTimeLineStateContext();
-const { scaleHeight, scaleSmallCellWidth, scaleLargeCellWidth, leftOffset } = toRefs(timeLineContext);
-const { getScaleRender } = timeLineContext;
-const { scaleUnit, scrollInfo } = timeLineStateContext;
+const { getScaleUnit, getShareProps, scrollInfo } = useTimeLineStore();
 const ruleRef = ref(); // canvasDom
 const timeLineRuleRef = ref(); // 刻度尺容器ref
 const ctx = ref(); // canvas上下文对象
@@ -39,15 +32,19 @@ const state: any = reactive({
   pxPerFullScreen: 900 // px
 });
 const offsetLeft = computed(() => {
-  return Number(leftOffset!.value) - scrollInfo.x.value > 0 ? Number(leftOffset!.value) - scrollInfo.x.value : 0;
+  return Number(getShareProps.leftOffset) - scrollInfo.x.value > 0
+    ? Number(getShareProps.leftOffset) - scrollInfo.x.value
+    : 0;
 });
 const drawRule = () => {
   // 一小格的宽度px cellWidth
-  const cellWidth = Number(unref(scaleSmallCellWidth));
+  const cellWidth = Number(unref(getShareProps.scaleSmallCellWidth));
   // 一大格子中小格子数量  cellCount
-  const cellCount = Math.round(Number(unref(scaleLargeCellWidth)) / Number(unref(scaleSmallCellWidth)));
+  const cellCount = Math.round(
+    Number(unref(getShareProps.scaleLargeCellWidth)) / Number(unref(getShareProps.scaleSmallCellWidth))
+  );
   // ms/px
-  const msPerPx = unref(scaleUnit)!;
+  const msPerPx = unref(getScaleUnit)!;
   const pxPerFullScreen = state.pxPerFullScreen;
   const start = state.ruleStartTime;
 
@@ -77,7 +74,7 @@ const drawRule = () => {
       ctx.value.lineTo(x, 0 + 20);
       ctx.value.font = '10px sans-serif';
       const unit = msPerGrid >= 1000 ? 's' : 'f';
-      const timeText = getScaleRender ? getScaleRender(curTime, unit) : curTime;
+      const timeText = getShareProps.getScaleRender ? getShareProps.getScaleRender(curTime, unit) : curTime;
       const textWidth = ctx.value.measureText(timeText).width;
       const textLeft = curTime === 0 ? 0 : textWidth / 2;
       ctx.value.fillText(timeText, x - textLeft, 15);
@@ -97,20 +94,17 @@ const calcCanvasSize = () => {
 watch(
   () => {
     const scrollLeft =
-      scrollInfo.x.value > Number(leftOffset!.value) ? scrollInfo.x.value - Number(leftOffset!.value) : 0;
+      scrollInfo.x.value > Number(getShareProps.leftOffset) ? scrollInfo.x.value - Number(getShareProps.leftOffset) : 0;
     return scrollLeft;
   },
   scrollLeft => {
-    state.ruleStartTime = scrollLeft * unref(scaleUnit)!;
+    state.ruleStartTime = scrollLeft * unref(getScaleUnit)!;
     drawRule();
   }
 );
-watch(
-  () => scaleUnit?.value,
-  () => {
-    drawRule();
-  }
-);
+watch(getScaleUnit, () => {
+  drawRule();
+});
 useResizeObserver(timeLineRuleRef, () => {
   // 浏览器缩放，更新刻度规则
   calcCanvasSize(); // 轨道dom尺寸变化，影响绘制

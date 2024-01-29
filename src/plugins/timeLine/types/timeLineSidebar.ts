@@ -8,5 +8,5 @@ export interface TimelineSideBar {
   /** 侧边栏标志 */
   id: string;
   /** 时间轴渲染render */
-  render?: (row: TimelineRow, options: any) => VNodeChild | Component;
+  render: (row: TimelineRow, options: any) => VNodeChild | Component;
 }

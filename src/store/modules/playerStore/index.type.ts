@@ -1,5 +1,6 @@
 export interface PlayerState {
-  isPlaying: boolean;
+  playing: boolean;
+  waiting: boolean;
 }
 export interface PlayerType {
   isFullscreen: boolean;

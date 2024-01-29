@@ -16,7 +16,7 @@ const { getScaleInfo } = storeToRefs(timeLineStore);
 const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
     icon: 'mdi-magnet',
-    label: '轨道磁吸',
+    label: '主轨道磁吸',
     btnType: 'Button',
     key: 'mainTrackMagnet',
     checked: true,
@@ -87,7 +87,10 @@ const barItemOptions = reactive<Track.ActionBarItem[]>([
       nextTick(() => {
         // consol
       }).then(() => {
-        timeLineStore.timeLineRef && timeLineStore.timeLineRef.setScrollLeft(0); // 滚动到0的位置
+        timeLineStore.timeLineRef &&
+          timeLineStore.timeLineRef.scrollTo({
+            left: 0
+          }); // 滚动到0的位置
       });
     }
   },

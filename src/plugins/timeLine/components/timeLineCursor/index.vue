@@ -7,72 +7,59 @@
 <template>
   <div
     ref="cursorLineRef"
-    class="cursor-line"
+    class="timeLine-cursor-line"
     :data-x="translateX"
     :style="{
-      transform: `translateX(${translateX - unref(scrollInfo.x)}px)`,
-      left: `${leftOffset}px`
+      transform: `translateX(${translateX - scrollInfo.x.value}px)`,
+      left: `${Number(getShareProps.leftOffset!) - 1}px`,
+      top: `${Number(getShareProps.scaleHeight) / 2}px`,
+      height: `calc(100% - ${Number(getShareProps.scaleHeight) / 2 + getScrollDomSize.height}px)`
     }"
     :class="{
       'active-state-cursor': activeStateCursor
     }"
-    @click.stop="handleMouseEvent"
-    @mousedown.stop="handleMouseEvent"
-    @mouseup.stop="handleMouseEvent"
-    @contextmenu.stop="handleContextMenu"
+    @mousedown.stop="handleMousedown"
+    @mouseup.stop="handlerMouseup"
   >
-    <div class="cursor-line-top" />
-    <div class="cursor-line-area" />
-    <div class="absolute left-5px top-0">{{ cursorTime }}</div>
+    <div class="timeLine-cursor-line-top" />
+    <div class="timeLine-cursor-line-area" />
+    <div class="absolute left-5px top-0">{{ getCursorTime }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { unref } from 'vue';
 import interact from 'interactjs';
-import { reactiveComputed, useEventListener, whenever } from '@vueuse/core';
+import { reactiveComputed, useEventListener } from '@vueuse/core';
 import type { DragEvent, Interactable } from '@interactjs/types';
-import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
 import { useActionGuideLine } from '../../hooks';
+import { useTimeLineStore } from '../../store';
 defineOptions({
   name: 'TimeLineCursor'
 });
-const { injectTimeLineContext } = useTimeLineContext();
-const { injectTimeLineStateContext } = useTimeLineStateContext();
-const timeLineContext = injectTimeLineContext();
-const timeLineStateContext = injectTimeLineStateContext();
-const { leftOffset, guideAdsorptionDistance, cursorAdsorption, editorData } = toRefs(timeLineContext);
-const { scaleUnit, timeLineEditorRef, frameWidth, cursorTime, scrollInfo, handleSetCursor, timeLineMaxEndTime } =
-  timeLineStateContext;
-const cursorLineRef = ref<HTMLElement>();
-const translateX = ref(0);
-const interactable = shallowRef<Interactable>();
+const {
+  getShareProps,
+  getTimeLineEditorData,
+  getScaleUnit,
+  getFrameWidth,
+  scrollInfo,
+  getCursorTime,
+  timeLineEditorDomSize,
+  scrollTo,
+  getTimeLineEditorDomRef,
+  setCursorTime,
+  getTimeLineMaxEndTime,
+  enginePause,
+  getScrollDomSize,
+  setPreviewCursorState
+} = useTimeLineStore();
 const { dragLineActionLine, defaultGetAllAssistPosition, initDragLine, disposeDragLine } = useActionGuideLine();
-watch(scaleUnit, () => {
-  translateX.value = unref(cursorTime) / unref(scaleUnit);
-  nextTick(() => {
-    unref(timeLineEditorRef)!.scrollLeft = translateX.value - unref(timeLineEditorRef)!.clientWidth / 2;
-  });
-});
-watch(
-  cursorTime,
-  () => {
-    translateX.value = unref(cursorTime) / unref(scaleUnit);
-  },
-  {
-    immediate: true
-  }
-);
-whenever(
-  () => cursorTime.value > timeLineMaxEndTime.value,
-  () => {
-    handleSetCursor(timeLineMaxEndTime.value);
-  }
-);
-const targetDragEvent = shallowRef<DragEvent | null>(null);
-const isAutoScroll = ref(false);
-const scrollOffset = ref(0);
+const cursorLineRef = ref<HTMLElement>();
 const timeLineEditorInnerRef = ref<HTMLElement | null>();
+const targetDragEvent = shallowRef<DragEvent | null>(null);
+const interactable = shallowRef<Interactable>();
+const translateX = ref(0);
+const scrollOffsetX = ref(0);
+const recordScrollOriginX = ref<number | null>(null);
 const activeStateCursor = computed(() => {
   return (
     dragLineActionLine.isMoving &&
@@ -85,7 +72,13 @@ const activeStateCursor = computed(() => {
 });
 const restrictRectModifier = reactiveComputed(() => {
   return interact.modifiers.restrictEdges({
-    outer: timeLineEditorInnerRef.value!
+    outer: timeLineEditorInnerRef.value!,
+    offset: {
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0
+    }
   });
 });
 const guideSnapModifier = reactiveComputed(() => {
@@ -93,16 +86,20 @@ const guideSnapModifier = reactiveComputed(() => {
     origin: timeLineEditorInnerRef.value!,
     targets: [
       interact.createSnapGrid({
-        x: unref(frameWidth),
+        x: unref(getFrameWidth),
         y: 1,
         limits: {
           left: 0,
-          right: unref(timeLineMaxEndTime) / unref(scaleUnit),
+          right: unref(getTimeLineMaxEndTime) / unref(getScaleUnit),
           bottom: Infinity,
           top: -Infinity
         }
       })
     ],
+    offset: {
+      x: -1,
+      y: 0
+    },
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
@@ -115,19 +112,23 @@ const adsorbSnapModifier = reactiveComputed(() => {
         const disList: number[] = [];
         dragLineActionLine.assistPositions.forEach(item => {
           const dis = Math.abs(item - adsorption);
-          if (dis < Number(unref(guideAdsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
+          if (dis < Number(unref(getShareProps.guideAdsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
             disList.push(item);
             const minDis = Math.min(...disList);
             adsorption = minDis;
           }
         });
         return {
-          x: adsorption,
+          x: scrollInfo.isScrolling.value ? x : adsorption,
           y
         };
       }
     ],
-    relativePoints: [{ x: 0, y: 0 }]
+    relativePoints: [{ x: 0, y: 0 }],
+    offset: {
+      x: -1,
+      y: 0
+    }
   });
 });
 const autoScrollSnapModifier = reactiveComputed(() => {
@@ -136,38 +137,44 @@ const autoScrollSnapModifier = reactiveComputed(() => {
     targets: [
       (x: number, y: number) => {
         let curX = x;
-        curX += scrollOffset.value;
+        curX += scrollOffsetX.value;
         return {
           x: curX,
           y
         };
       }
     ],
-    relativePoints: [{ x: 0, y: 0 }]
+    relativePoints: [{ x: 0, y: 0 }],
+    offset: {
+      x: -1,
+      y: 0
+    }
   });
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (unref(cursorAdsorption)) {
+  if (unref(getShareProps.cursorAdsorption)) {
     const assistPositions = defaultGetAllAssistPosition({
-      editorData: editorData!.value!,
-      scaleUnit: scaleUnit.value,
-      extendPos: ['0']
+      editorData: toRaw(unref(getTimeLineEditorData)),
+      scaleUnit: unref(getScaleUnit),
+      extendPos: [0]
     });
     initDragLine({ assistPositions, targetType: 'cursor' });
   }
 };
-// 右键
-const handleContextMenu = (event: MouseEvent) => {
-  event.preventDefault();
+// 鼠标按下
+const handleMousedown = () => {
+  enginePause();
+  setPreviewCursorState({ state: false });
 };
-// 点击
-const handleMouseEvent = () => {
-  timeLineStateContext.enginePause();
+// 鼠标抬起
+const handlerMouseup = () => {
+  enginePause();
+  setPreviewCursorState({ state: true });
 };
 // 拖拽开始
 const handleMoveStart = (event: DragEvent) => {
-  timeLineStateContext.enginePause();
+  enginePause();
   targetDragEvent.value = event;
   handleInitGuideLine();
 };
@@ -177,69 +184,82 @@ const handleMove = (event: DragEvent) => {
   const target = event.target;
   const { x } = target.dataset;
   let curLeft = parseFloat(x || '0') + event.dx;
-  curLeft = Math.round(curLeft / unref(frameWidth)) * unref(frameWidth);
-  handleSetCursor(Math.round(curLeft * unref(scaleUnit)));
+  curLeft = Math.round(curLeft / unref(getFrameWidth)) * unref(getFrameWidth);
+  setCursorTime(Math.round(curLeft * unref(getScaleUnit)));
 };
 // 拖拽结束
 const handleMoveEnd = () => {
-  isAutoScroll.value = false;
-  scrollOffset.value = 0;
+  scrollOffsetX.value = 0;
+  recordScrollOriginX.value = null;
   targetDragEvent.value = null;
   disposeDragLine();
 };
+// 初始化
 const initInteract = () => {
   const interactInst = interact(cursorLineRef.value!, {
     deltaSource: 'client'
   });
   interactable.value = interactInst;
-  interactInst
-    .draggable({
-      modifiers: [restrictRectModifier, autoScrollSnapModifier, guideSnapModifier, adsorbSnapModifier],
-      onstart: handleMoveStart,
-      onmove: handleMove,
-      onend: handleMoveEnd,
-      cursorChecker: () => 'ew-resize',
-      autoScroll: {
-        container: timeLineEditorRef.value!,
-        margin: 40,
-        speed: 500
-      }
-    })
-    .on('autoscroll', event => {
-      !isAutoScroll.value && (isAutoScroll.value = true);
-      scrollOffset.value += event.delta.x;
-    });
+  interactable.value.draggable({
+    modifiers: [restrictRectModifier, autoScrollSnapModifier, guideSnapModifier, adsorbSnapModifier],
+    onstart: handleMoveStart,
+    onmove: handleMove,
+    onend: handleMoveEnd,
+    autoScroll: {
+      container: getTimeLineEditorDomRef.value!,
+      ...toRaw(getShareProps.autoScrollOptions)
+    },
+    cursorChecker: () => 'ew-resize'
+  });
 };
-useEventListener(timeLineEditorRef, 'scroll', () => {
+// 监听滚动
+useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
   if (targetDragEvent.value) {
-    isAutoScroll.value && targetDragEvent.value.interaction.move();
+    if (!recordScrollOriginX.value) {
+      recordScrollOriginX.value = scrollInfo.x.value;
+    }
+    nextTick(() => {
+      scrollOffsetX.value = scrollInfo.x.value - Number(recordScrollOriginX.value);
+      targetDragEvent.value!.interaction.move();
+    });
   }
 });
-onBeforeUnmount(() => {
-  interactable.value?.unset();
-  disposeDragLine();
-});
-watch(
-  timeLineEditorRef,
-  ref => {
-    if (!ref) return;
-    nextTick(() => {
-      timeLineEditorInnerRef.value = timeLineEditorRef.value!.firstChild as HTMLElement;
+watchEffect(() => {
+  nextTick(() => {
+    if (getTimeLineEditorDomRef.value) {
+      timeLineEditorInnerRef.value = getTimeLineEditorDomRef.value.firstChild as HTMLElement;
+      interactable.value && interactable.value.unset();
       initInteract();
-    });
+    }
+  });
+});
+// 监听刻度尺缩放
+watch(getScaleUnit, unit => {
+  translateX.value = unref(getCursorTime) / unit;
+  nextTick(() => {
+    scrollTo({ left: translateX.value - timeLineEditorDomSize.width.value / 2 });
+  });
+});
+// 监听当前指针时间
+watch(
+  getCursorTime,
+  (time: number) => {
+    translateX.value = time / unref(getScaleUnit);
   },
   {
     immediate: true
   }
 );
+// dom卸载之前
+onBeforeUnmount(() => {
+  interactable.value?.unset();
+});
 </script>
 
 <style scoped lang="scss">
-.cursor-line {
+.timeLine-cursor-line {
   cursor: ew-resize !important;
   position: absolute;
-  top: 28px;
-  height: calc(100% - 36px);
   box-sizing: border-box;
   border-left: 1px solid #5297ff;
   border-right: 1px solid #5297ff;
@@ -248,20 +268,22 @@ watch(
   cursor: ew-resize;
   // 禁止选中
   user-select: none;
+
   &-top::before {
     content: '';
     position: absolute;
-    top: -10px;
+    top: 0px;
     left: -5px;
     width: 10px;
     height: 10px;
     background-color: #5297ff;
     cursor: ew-resize;
   }
+
   &-top::after {
     content: '';
     position: absolute;
-    top: 0;
+    top: 10px;
     left: -5px;
     border-top: 5px solid #5297ff;
     border-left: 5px solid transparent;
@@ -269,6 +291,7 @@ watch(
     border-bottom: none;
     cursor: ew-resize;
   }
+
   &-area {
     width: 10px;
     height: 100%;
@@ -279,13 +302,16 @@ watch(
     transform: translateX(-50%);
   }
 }
+
 .active-state-cursor {
   border-left: 1px solid #fff !important;
   border-right: 1px solid #fff !important;
   background-color: #fff !important;
+
   .cursor-line-top::before {
     background-color: #fff !important;
   }
+
   .cursor-line-top::after {
     border-top: 5px solid #fff !important;
   }

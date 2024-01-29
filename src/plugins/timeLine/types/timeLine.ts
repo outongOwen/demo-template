@@ -1,7 +1,7 @@
 import type { Emitter } from '../core/emitter';
 import type { EventTypes } from '../core/events';
 import type { timeLineProps } from '../components/timeLine/props';
-
+import type { TimeLineEditorShareEmits } from '../components/timeLine/emits';
 export interface TimelineExpose {
   /** dom节点 */
   targetEl: HTMLElement;
@@ -33,7 +33,7 @@ export interface TimelineExpose {
   /** 暂停 */
   pause: () => void;
   // /** 设置scroll left */
-  setScrollLeft: (val: number) => void;
+  scrollTo: (options: ScrollToOptions) => void;
   // /** 设置scroll top */
   // setScrollTop: (val: number) => void;
 }
@@ -47,4 +47,5 @@ type RemoveReadonly<T> = {
   -readonly [key in keyof T]: T[key];
 };
 type ExtractPublicPropTypes<T> = Partial<RemoveReadonly<ExtractPropTypes<T>>>;
-export type TimelineEditorProps = ExtractPublicPropTypes<typeof timeLineProps>;
+export type TimeLineEditorProps = ExtractPublicPropTypes<typeof timeLineProps>;
+export type TimeLineEditorEmits = Partial<TimeLineEditorShareEmits>;

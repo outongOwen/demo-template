@@ -12,7 +12,7 @@ export default function useActionGuideLine() {
   const defaultGetAllAssistPosition = (data: {
     editorData: TimelineRow[];
     scaleUnit: number;
-    extendPos?: string[] | number[];
+    extendPos?: number[];
   }) => {
     const { editorData, scaleUnit, extendPos } = data;
     const otherActions: TimelineAction[] = [];

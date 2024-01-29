@@ -5,33 +5,40 @@
  * index.vue
 -->
 <template>
-  <div class="timeLine-sideBar-container" :style="{ width: sideBarWidth + 'px' }">
+  <div
+    class="timeLine-sideBar-container"
+    :style="{ width: getShareProps.sideBarWidth + 'px' }"
+    @wheel="
+      e => {
+        e.preventDefault();
+      }
+    "
+  >
     <div
       class="top-cover"
       :style="{
-        height: scaleHeight! + 'px'
+        height: getShareProps.scaleHeight! + 'px'
       }"
     />
     <div
       class="sideBar-list"
       :style="{
-        top: -scrollInfo.y.value + Number(scaleHeight) + 'px',
-        minHeight: `calc(100% - ${Number(scaleHeight) - 8}px)`
+        top: -scrollInfo.y.value + Number(getShareProps.scaleHeight) + 'px',
+        minHeight: `calc(100% - ${Number(getShareProps.scaleHeight)}px)`
       }"
     >
       <ul
         class="sideBar-ul"
         :style="{
-          rowGap: rowSpacing + 'px'
+          rowGap: getShareProps.rowSpacing + 'px'
         }"
       >
         <li
-          v-for="item in editorData"
+          v-for="item in getTimeLineEditorData"
           :key="item.id"
           :style="{
-            height: item?.rowHeight ? item.rowHeight + 'px' : rowHeight + 'px'
+            height: item?.rowHeight ? item.rowHeight + 'px' : getShareProps.rowHeight + 'px'
           }"
-          class="sideBar-ul-li"
         >
           <component
             :is="renderSideBarComponent(item)"
@@ -49,7 +56,7 @@
 </template>
 <script setup lang="ts">
 import type { VNodeChild } from 'vue';
-import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
+import { useTimeLineStore } from '../../store';
 // import { useMainRow } from '../../hooks';
 import type { TimelineRow } from '../../types';
 interface Expose {
@@ -61,30 +68,18 @@ interface Expose {
 defineOptions({
   name: 'TimeLineBar'
 });
-const { injectTimeLineContext } = useTimeLineContext();
-const { injectTimeLineStateContext } = useTimeLineStateContext();
-const timeLineStateContext = injectTimeLineStateContext();
-const timeLineContext = injectTimeLineContext();
 // const mainRowRef = ref<HTMLElement | null>();
-const { sideBarWidth, editorData, rowHeight, sideBars, scaleHeight, rowSpacing, mainRowId, background } =
-  toRefs(timeLineContext);
-const { scrollInfo } = timeLineStateContext;
-// const getMainRowRef = (el: HTMLElement | null, rowItem: TimelineRow) => {
-//   if (el && timeLineStateContext.hasMainRow.value && rowItem.type === unref(mainRowId)) {
-//     mainRowRef.value = el;
-//   }
-// };
+const { getShareProps, getTimeLineEditorData, scrollInfo } = useTimeLineStore();
 // 获取当前组件实例
 const currentInstance = getCurrentInstance();
-// const { checkMainRowBottom } = useMainRow(mainRowRef);
 // 删除行
 const clearRow = (row: TimelineRow) => {
   console.log('删除行', row);
-  if (row.type === unref(mainRowId)) {
+  if (row.type === unref(getShareProps.mainRowId)) {
     row.actions = [];
   } else {
-    const rowIndex = unref(editorData)!.findIndex(item => item.id === row.id);
-    unref(editorData)!.splice(rowIndex, 1);
+    const rowIndex = unref(getTimeLineEditorData)!.findIndex(item => item.id === row.id);
+    unref(getTimeLineEditorData)!.splice(rowIndex, 1);
   }
 };
 //  隐藏行
@@ -103,7 +98,10 @@ const setMuteRow = (row: TimelineRow) => {
   console.log(row, '静音');
 };
 const renderSideBarComponent = (item: TimelineRow): VNodeChild | Component | null => {
-  return (sideBars?.value?.[item.sideBarId!]?.render && sideBars.value?.[item.sideBarId!]?.render!(item, {})) ?? null;
+  if (!getShareProps.sideBars) return null;
+  if (!item.sideBarId) return null;
+  if (!getShareProps.sideBars[item.sideBarId]) return null;
+  return getShareProps.sideBars[item.sideBarId].render!(item, {});
 };
 defineExpose<Expose>({
   setHideRow,
@@ -129,7 +127,7 @@ defineExpose<Expose>({
     left: 0;
     right: 0;
     z-index: 99;
-    background-color: v-bind('background');
+    background-color: v-bind('getShareProps.background');
   }
   .bottom-cover {
     position: absolute;
@@ -138,7 +136,7 @@ defineExpose<Expose>({
     left: 0;
     right: 0;
     z-index: 99;
-    background-color: v-bind('background');
+    background-color: v-bind('getShareProps.background');
   }
   .sideBar-list {
     align-items: stretch;

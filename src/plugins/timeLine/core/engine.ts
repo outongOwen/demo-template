@@ -248,9 +248,8 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
   private _tick(data: { now: number; autoEnd?: boolean; to?: number }) {
     if (this.isPaused && !this._prev) return;
     const { now, autoEnd, to } = data;
-
     // 计算当前时间
-    let currentTime = this.getTime() + (Math.min(1000, now - this._prev!) / 1000) * this._playRate;
+    let currentTime = this.getTime() + (now - this._prev!) * this._playRate;
     this._prev = now;
     // 设置当前时间
     if (to && to <= currentTime) currentTime = to;
@@ -261,6 +260,7 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
     // 自动停止情况下，判断是否所有动作执行完毕
     if (!to && autoEnd && this._next >= this._actionSortIds.length && this._activeActionIds.length === 0) {
       this._end();
+
       return;
     }
 
@@ -376,5 +376,7 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
     });
     this._actionMap = actionMap;
     this._actionSortIds = actionSortIds;
+    console.log(this._actionMap, 'this._actionMap');
+    console.log(this._actionSortIds, 'this._actionSortIds');
   }
 }

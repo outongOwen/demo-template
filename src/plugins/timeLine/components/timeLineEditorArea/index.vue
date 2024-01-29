@@ -10,53 +10,48 @@
     ref="timeLineRef"
     class="timeLine-editor-area-container"
     :style="{
-      top: `${scaleHeight}px`
+      top: `${getShareProps.scaleHeight}px`
     }"
     @contextmenu.stop="handleContextMenu"
   >
     <div
-      v-if="editorData?.length"
+      v-if="getTimeLineEditorData?.length"
+      ref="timeLineInnerRef"
       class="timeLine-editor-area-wrapper"
       :style="{
-        left: `${leftOffset}px`
+        left: `${getShareProps.leftOffset}px`
       }"
     >
       <div
-        ref="timeLineInnerRef"
         class="timeLine-editor-area-inner"
-        :style="{ width: timeLineInnerWidth + 'px', rowGap: rowSpacing + 'px' }"
+        :style="{ width: timeLineInnerWidth + 'px', rowGap: getShareProps.rowSpacing + 'px' }"
       >
-        <TimeLineRow v-for="item in editorData" :key="item.id" :row-item="item" />
+        <TimeLineRow v-for="item in getTimeLineEditorData" :key="item.id" :row-item="item" />
       </div>
     </div>
-    <blank-placeholder v-else />
-    <DragGuideLine v-if="guideLine" />
+    <!-- <blank-placeholder v-else /> -->
+    <DragGuideLine v-if="getShareProps.guideLine" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core';
-import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
-// import type { TimelineAction, TimelineRow } from '../../types';
 import { useActionGuideLine } from '../../hooks';
+import { useTimeLineStore } from '../../store';
 import DragGuideLine from './dragGuideLine/index.vue';
 import TimeLineRow from './timeLineRow/index.vue';
-import BlankPlaceholder from './blankPlaceholder/index.vue';
+// import BlankPlaceholder from './blankPlaceholder/index.vue';
 defineOptions({
   name: 'TimeLineEditorArea'
 });
-// const props = defineProps<Props>();
-const { injectTimeLineContext } = useTimeLineContext();
-const timeLineContext = injectTimeLineContext();
-const { injectTimeLineStateContext } = useTimeLineStateContext();
-const timeLineStateContext = injectTimeLineStateContext();
-const { scaleHeight, editorData, rowSpacing, leftOffset, guideLine } = toRefs(timeLineContext);
-const { scaleUnit } = timeLineStateContext;
 const timeLineRef = ref<HTMLElement>();
+const timeLineInnerRef = ref<HTMLElement>();
 // const minRowRef = ref<HTMLElement | null>();
 const { width: timeLineRefWidth } = useElementSize(timeLineRef);
+const { setTimeLineEditorDomRef, getShareProps, getTimeLineEditorData, getScaleUnit, getTimeLineMaxEndTime } =
+  useTimeLineStore();
 const timeLineInnerWidth = computed(() => {
-  return unref(timeLineStateContext.timeLineMaxEndTime) / unref(scaleUnit) + unref(timeLineRefWidth);
+  return unref(timeLineRefWidth) + unref(getTimeLineMaxEndTime) / unref(getScaleUnit) - unref(timeLineRefWidth) / 4;
 });
 // 右键菜单
 const handleContextMenu = (event: MouseEvent) => {
@@ -64,16 +59,13 @@ const handleContextMenu = (event: MouseEvent) => {
 };
 // 注册辅助线
 useActionGuideLine();
-
 onMounted(() => {
-  timeLineStateContext.timeLineEditorRef.value = timeLineRef.value;
+  setTimeLineEditorDomRef(timeLineRef.value);
 });
 </script>
 
 <style scoped lang="scss">
-@mixin timeLineScrollbar($color: rgba(255, 255, 255, 0.2), $hover: rgba(255, 255, 255, 0.3), $size: 5px) {
-  scrollbar-width: thin;
-  scrollbar-color: $color transparent;
+@mixin timeLineScrollbar($color: rgba(255, 255, 255, 0.2), $hover: rgba(255, 255, 255, 0.3), $size: 10px) {
   &::-webkit-scrollbar-thumb {
     background-color: $color;
   }
@@ -83,9 +75,7 @@ onMounted(() => {
   &::-webkit-scrollbar {
     width: $size;
     height: $size;
-    // position: relative;
   }
-
   &::-webkit-scrollbar-track-piece {
     border-radius: 0;
   }
@@ -93,12 +83,7 @@ onMounted(() => {
     background: transparent;
   }
 }
-
 #__TIME_LINE_SCROLL_EL_BAR__ {
-  @include timeLineScrollbar(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.3), 8px);
-}
-
-.dark #__TIME_LINE_SCROLL_EL_BAR__ {
   @include timeLineScrollbar(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.3), 8px);
 }
 .timeLine-editor-area-container {
@@ -109,14 +94,6 @@ onMounted(() => {
   bottom: 0;
   right: 0;
   overflow: auto;
-  .drag-row-line {
-    position: absolute;
-    width: 100%;
-    height: 1px;
-    background-color: #fff;
-    pointer-events: none;
-    z-index: 9999999;
-  }
   .timeLine-editor-area-wrapper {
     align-items: stretch;
     display: flex;

@@ -1,4 +1,5 @@
 import type { TimelineRow } from '../../types';
+
 /**
  * @description 时间轴按照类型排序
  */

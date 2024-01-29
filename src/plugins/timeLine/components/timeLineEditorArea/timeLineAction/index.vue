@@ -44,8 +44,9 @@ import { reactiveComputed, unrefElement, useEventListener, useElementSize } from
 import type { DragEvent, ResizeEvent, Interactable } from '@interactjs/types';
 import { useActionGuideLine } from '../../../hooks';
 import type { TimelineAction, TimelineRow } from '../../../types';
-import { useTimeLineStateContext, useTimeLineContext, useTimeLineEditorAreaContext } from '../../../contexts';
+import { useTimeLineEditorAreaContext } from '../../../contexts';
 import { parserTimeToTransform, parserTransformToTime } from '../../../utils';
+import { useTimeLineStore } from '../../../store';
 import { useDropAction } from './index';
 // import { isActionCollision } from './helper';
 type Direction = 'left' | 'right';
@@ -60,14 +61,20 @@ defineOptions({
 const props = defineProps<Props>();
 const { actionItem, rowItem, actionHeight } = toRefs(props);
 const actionRef = ref<HTMLElement>();
-const { injectTimeLineStateContext } = useTimeLineStateContext();
-const { injectTimeLineContext } = useTimeLineContext();
 const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
-const timeLineStateContext = injectTimeLineStateContext();
-const timeLineContext = injectTimeLineContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
-const { scaleUnit, timeLineEditorRef, frameWidth, cursorTime } = timeLineStateContext;
-const { guideLine, editorData, hideCursor, guideAdsorptionDistance } = toRefs(timeLineContext);
+const {
+  enginePause,
+  getScaleUnit,
+  getTimeLineEditorDomRef,
+  getFrameWidth,
+  getCursorTime,
+  getShareProps,
+  getShareEmits,
+  getTimeLineEditorData,
+  scrollInfo,
+  setPreviewCursorState
+} = useTimeLineStore();
 // 辅助线hook
 const {
   dragLineActionLine,
@@ -84,15 +91,17 @@ const interactable = shallowRef<Interactable>();
 const timeLineEditorInnerRef = ref<HTMLElement>();
 // 拖拽Y轴距离
 const deltaY = ref(0);
-const interactActionType = ref<string | null>(null);
 const actionLeftStretchRef = ref<HTMLElement>();
 const actionRightStretchRef = ref<HTMLElement>();
-const targetDragEvent = shallowRef<DragEvent | null>(null);
+const targetDragEvent = shallowRef<DragEvent | ResizeEvent | null>(null);
 const scrollOffset = reactive({
   x: 0,
   y: 0
 });
-const isAutoScroll = ref(false);
+const recordScrollOrigin = ref<{
+  x: number;
+  y: number;
+} | null>(null);
 const isSelected = computed(() => {
   return Boolean(timeLineEditorAreaContext.selectedActionIds.value.includes(unref(actionItem).id));
 });
@@ -108,12 +117,12 @@ const actionItemSize = reactiveComputed(() => {
       start: actionItem.value.start,
       end: actionItem.value.end
     },
-    scaleUnit.value
+    unref(getScaleUnit)
   );
 });
 const draggableRestrictRectModifier = reactiveComputed(() => {
   return interact.modifiers.restrictEdges({
-    outer: timeLineEditorInnerRef.value,
+    outer: unrefElement(timeLineEditorInnerRef),
     offset: {
       left: 0,
       right: 0,
@@ -124,7 +133,7 @@ const draggableRestrictRectModifier = reactiveComputed(() => {
 });
 const autoScrollSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
-    origin: timeLineEditorInnerRef.value!,
+    origin: unrefElement(timeLineEditorInnerRef.value),
     targets: [
       (x: number, y: number) => {
         let curX = x;
@@ -148,7 +157,7 @@ const autoScrollSnapModifier = reactiveComputed(() => {
 });
 const guideSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
-    origin: timeLineEditorInnerRef.value!,
+    origin: unrefElement(timeLineEditorInnerRef),
     targets: [
       (x, y) => {
         let adsorptionPos = x;
@@ -159,7 +168,7 @@ const guideSnapModifier = reactiveComputed(() => {
           const dis = Math.abs(item - adsorptionPos);
           const dis2 = Math.abs(item - (adsorptionPos + width));
           if (
-            dis < Number(unref(guideAdsorptionDistance)) &&
+            dis < Number(unref(getShareProps).guideAdsorptionDistance) &&
             dis < Number.MAX_SAFE_INTEGER &&
             disListRight.length === 0
           ) {
@@ -168,7 +177,7 @@ const guideSnapModifier = reactiveComputed(() => {
             adsorptionPos = minDis;
           }
           if (
-            dis2 < Number(unref(guideAdsorptionDistance)) &&
+            dis2 < Number(unref(getShareProps).guideAdsorptionDistance) &&
             dis2 < Number.MAX_SAFE_INTEGER &&
             disListLeft.length === 0
           ) {
@@ -188,7 +197,7 @@ const guideSnapModifier = reactiveComputed(() => {
 });
 const resizeRestrictRectModifier = reactiveComputed(() => {
   return interact.modifiers.restrictEdges({
-    outer: timeLineEditorInnerRef.value,
+    outer: unrefElement(timeLineEditorInnerRef),
     offset: {
       left: 0,
       right: 0,
@@ -200,17 +209,17 @@ const resizeRestrictRectModifier = reactiveComputed(() => {
 const restrictSizeModifier = reactiveComputed(() => {
   return interact.modifiers.restrictSize({
     min: {
-      width: unref(frameWidth),
+      width: unref(getFrameWidth),
       height: 0
     }
   });
 });
 const snapResizeModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
-    origin: timeLineEditorInnerRef.value!,
+    origin: unrefElement(timeLineEditorInnerRef),
     targets: [
       (x, y) => {
-        const newX = Math.round(x / unref(frameWidth)) * unref(frameWidth);
+        const newX = Math.round(x / unref(getFrameWidth)) * unref(getFrameWidth);
         return {
           x: newX,
           y
@@ -223,10 +232,10 @@ const snapResizeModifier = reactiveComputed(() => {
 const snapDraggableModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
     endOnly: true,
-    origin: timeLineEditorInnerRef.value!,
+    origin: unrefElement(timeLineEditorInnerRef),
     targets: [
       interact.createSnapGrid({
-        x: unref(frameWidth),
+        x: unref(getFrameWidth),
         y: 1
       })
     ],
@@ -234,39 +243,37 @@ const snapDraggableModifier = reactiveComputed(() => {
   });
 });
 // 点击动作
-const handleClick = event => {
-  console.log(event, 'event');
+const handleClick = () => {
+  timeLineEditorAreaContext.setSelectedActionId(unref(actionItem).id);
 };
 // 鼠标按下动作
 const handleMouseDown = () => {
-  timeLineStateContext.enginePause();
   const el = unrefElement(actionRef);
   if (!el) return;
   el.style.zIndex = '9';
-  timeLineEditorAreaContext.setSelectedActionId(unref(actionItem).id);
+  setPreviewCursorState({ state: false });
 };
 // 鼠标移动抬起
 const handleMouseUp = () => {
   const el = unrefElement(actionRef);
   if (!el) return;
   el.style.zIndex = 'auto';
+  setPreviewCursorState({ state: true });
 };
 // 右键菜单
 const handleContextMenu = (e: MouseEvent) => {
   e.preventDefault();
-  // if (timeLineContext.onActionContextMenu)
-  //   timeLineContext.onActionContextMenu({ action: actionItem.value, row: rowItem.value });
 };
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (guideLine) {
+  if (getShareProps.guideLine) {
     const assistPositions = defaultGetAssistPosition({
-      editorData: editorData!.value!,
+      editorData: unref(getTimeLineEditorData),
       action: actionItem.value,
       row: rowItem.value,
-      scaleUnit: scaleUnit.value,
-      hideCursor: Boolean(unref(hideCursor)),
-      cursorLeft: unref(cursorTime) / unref(scaleUnit),
+      scaleUnit: unref(getScaleUnit),
+      hideCursor: Boolean(unref(getShareProps.hideCursor)),
+      cursorLeft: unref(getCursorTime) / unref(getScaleUnit),
       extendPos: ['0']
     });
     initDragLine({ assistPositions });
@@ -274,11 +281,11 @@ const handleInitGuideLine = () => {
 };
 // 更新辅助线
 const handleUpdateGuideLine = ({ start, end }: { start: number; end: number }) => {
-  if (unref(guideLine)) {
+  if (unref(getShareProps.guideLine)) {
     const movePositions = defaultGetMovePosition({
       start,
       end,
-      scaleUnit: scaleUnit.value
+      scaleUnit: unref(getScaleUnit)
     });
     updateDragLine({ movePositions });
   }
@@ -299,9 +306,10 @@ const handleUpdateLeft = (left: number) => {
 };
 // 开始拖拽移动
 const handleMoveStart = (e: DragEvent) => {
-  timeLineStateContext.enginePause();
+  handleInitGuideLine();
+  timeLineEditorAreaContext.setSelectedActionId(unref(actionItem).id);
+  enginePause();
   targetDragEvent.value = e;
-  interactActionType.value = 'move';
   timeLineEditorAreaContext.dropzoneInfo.isMoving = true;
   timeLineEditorAreaContext.dropzoneInfo.dragId = actionItem.value.id;
   timeLineEditorAreaContext.setActionDragState({
@@ -310,10 +318,8 @@ const handleMoveStart = (e: DragEvent) => {
     isMoving: true,
     isResizing: false
   });
-  // initAutoScroll();
-  handleInitGuideLine();
-  if (timeLineContext.onActionMoveStart)
-    timeLineContext.onActionMoveStart({ action: actionItem.value, row: rowItem.value });
+  if (getShareEmits.onActionMoveStart)
+    getShareEmits.onActionMoveStart({ action: actionItem.value, row: rowItem.value });
 };
 // 拖拽移动中
 const handleMove = (e: DragEvent) => {
@@ -324,10 +330,10 @@ const handleMove = (e: DragEvent) => {
   const preWidth = parseFloat(width);
   const curLeft = preLeft + e.dx;
   deltaY.value += e.dy;
-  const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, scaleUnit.value);
+  const { start, end } = parserTransformToTime({ left: curLeft, width: preWidth }, unref(getScaleUnit));
   handleUpdateGuideLine({ start, end });
-  if (timeLineContext.onActionMoving) {
-    const ret = timeLineContext.onActionMoving({
+  if (getShareEmits.onActionMoving) {
+    const ret = getShareEmits.onActionMoving({
       action: actionItem.value,
       row: rowItem.value,
       start,
@@ -340,21 +346,11 @@ const handleMove = (e: DragEvent) => {
 };
 // 拖拽移动结束
 const handleMoveEnd = (e: DragEvent) => {
-  deltaY.value = 0;
-  interactActionType.value = null;
-  targetDragEvent.value = null;
-  isAutoScroll.value = false;
-  scrollOffset.x = 0;
-  scrollOffset.y = 0;
-  timeLineEditorAreaContext.dropzoneInfo.isMoving = false;
-  timeLineEditorAreaContext.dropzoneInfo.dragId = '';
-  timeLineEditorAreaContext.clearActionDragState();
-  disposeDragLine();
   const target = e.target;
   const { left, width } = target.dataset;
   target.style.transform = `translateY(0px)`;
-  const curLeft = Math.round(Number(left) / unref(frameWidth)) * unref(frameWidth);
-  const { start, end } = parserTransformToTime({ left: curLeft, width: Number(width) }, scaleUnit.value);
+  const curLeft = Math.round(Number(left) / unref(getFrameWidth)) * unref(getFrameWidth);
+  const { start, end } = parserTransformToTime({ left: curLeft, width: Number(width) }, unref(getScaleUnit));
   actionItem.value.start = start;
   actionItem.value.end = end;
   // 选中动作行为进行数据操作
@@ -363,18 +359,27 @@ const handleMoveEnd = (e: DragEvent) => {
     targetRowId: timeLineEditorAreaContext.dropzoneInfo.rowId,
     fromRowId: rowItem.value.id,
     action: actionItem.value,
-    editorData: unref(editorData)!
+    editorData: unref(getTimeLineEditorData)!
   });
-  if (timeLineContext.onActionMoveEnd)
+  deltaY.value = 0;
+  targetDragEvent.value = null;
+  recordScrollOrigin.value = null;
+  scrollOffset.x = 0;
+  scrollOffset.y = 0;
+  timeLineEditorAreaContext.dropzoneInfo.isMoving = false;
+  timeLineEditorAreaContext.dropzoneInfo.dragId = '';
+  timeLineEditorAreaContext.clearActionDragState();
+  disposeDragLine();
+  if (getShareEmits.onActionMoveEnd)
     // 触发回调
-    timeLineContext.onActionMoveEnd({ action: actionItem.value, row: rowItem.value, start, end });
+    getShareEmits.onActionMoveEnd({ action: actionItem.value, row: rowItem.value, start, end });
 };
 // 开始拖拽缩放
 const handleResizeStart = (e: ResizeEvent) => {
+  targetDragEvent.value = e;
   const dir = e.edges?.left ? 'left' : 'right';
-  interactActionType.value = 'resize';
-  timeLineStateContext.enginePause();
-  // initAutoScroll();
+  timeLineEditorAreaContext.setSelectedActionId(unref(actionItem).id);
+  enginePause();
   handleInitGuideLine();
   timeLineEditorAreaContext.setActionDragState({
     actionId: actionItem.value.id,
@@ -383,40 +388,43 @@ const handleResizeStart = (e: ResizeEvent) => {
     isResizing: true
   });
   // 触发开始缩放回调
-  if (timeLineContext.onActionResizeStart)
-    timeLineContext.onActionResizeStart({ action: actionItem.value, row: rowItem.value, dir });
+  if (getShareEmits.onActionResizeStart)
+    getShareEmits.onActionResizeStart({ action: actionItem.value, row: rowItem.value, dir });
 };
 // 拖拽缩放结束
 const handleResizeEnd = (e: ResizeEvent) => {
-  interactActionType.value = null;
-  disposeDragLine();
-  timeLineEditorAreaContext.clearActionDragState();
+  targetDragEvent.value = null;
+  scrollOffset.x = 0;
+  scrollOffset.y = 0;
   const target = e.target;
   const { left, width } = target.dataset;
   const dir: Direction = e.edges?.right ? 'right' : 'left';
-  const { start, end } = parserTransformToTime({ left: Number(left), width: Number(width) }, scaleUnit.value);
+  const { start, end } = parserTransformToTime({ left: Number(left), width: Number(width) }, unref(getScaleUnit));
   actionItem.value.start = start;
   actionItem.value.end = end;
+  disposeDragLine();
+  timeLineEditorAreaContext.clearActionDragState();
+  recordScrollOrigin.value = null;
   // 触发回调
-  if (timeLineContext.onActionResizeEnd)
-    timeLineContext.onActionResizeEnd({ action: actionItem.value, row: rowItem.value, start, end, dir });
+  if (getShareEmits.onActionResizeEnd)
+    getShareEmits.onActionResizeEnd({ action: actionItem.value, row: rowItem.value, start, end, dir });
 };
 // 拖拽缩放中
 const handleResize = (e: ResizeEvent) => {
+  targetDragEvent.value = e;
   const target = e.target;
   const dir = e.edges?.left ? 'left' : 'right';
-  const { left, width } = target.dataset;
+  const { left } = target.dataset;
   const preLeft = parseFloat(left || '0');
-  const preWidth = parseFloat(width || '0');
   if (dir === 'left') {
     let curLeft = preLeft + e.deltaRect!.left!;
-    curLeft = Math.round(curLeft / unref(frameWidth)) * unref(frameWidth);
-    const tempRight = preLeft + preWidth;
-    const curWidth = tempRight - curLeft;
-    const { start, end } = parserTransformToTime({ left: curLeft, width: curWidth }, scaleUnit.value);
+    let curWidth = e.rect.width;
+    curLeft = Math.round(curLeft / unref(getFrameWidth)) * unref(getFrameWidth);
+    curWidth = Math.round(curWidth / unref(getFrameWidth)) * unref(getFrameWidth);
+    const { start, end } = parserTransformToTime({ left: curLeft, width: curWidth }, unref(getScaleUnit));
     handleUpdateGuideLine({ start, end });
-    if (timeLineContext.onActionResizing) {
-      const ret = timeLineContext.onActionResizing({
+    if (getShareEmits.onActionResizing) {
+      const ret = getShareEmits.onActionResizing({
         action: actionItem.value,
         row: rowItem.value,
         start,
@@ -430,12 +438,12 @@ const handleResize = (e: ResizeEvent) => {
   }
   if (dir === 'right') {
     // 拖动右侧
-    let curWidth = preWidth + e.deltaRect!.right!;
-    curWidth = Math.round(curWidth / unref(frameWidth)) * unref(frameWidth);
-    const { start, end } = parserTransformToTime({ left: preLeft, width: curWidth }, scaleUnit.value);
+    let curWidth = e.rect.width;
+    curWidth = Math.round(curWidth / unref(getFrameWidth)) * unref(getFrameWidth);
+    const { start, end } = parserTransformToTime({ left: preLeft, width: curWidth }, unref(getScaleUnit));
     handleUpdateGuideLine({ start, end });
-    if (timeLineContext.onActionResizing) {
-      const ret = timeLineContext.onActionResizing({
+    if (getShareEmits.onActionResizing) {
+      const ret = getShareEmits.onActionResizing({
         action: actionItem.value,
         row: rowItem.value,
         start,
@@ -455,11 +463,8 @@ const initDraggable = (interactInst: Interactable) => {
     onmove: handleMove,
     onend: handleMoveEnd,
     autoScroll: {
-      container: timeLineEditorRef.value!,
-      margin: 30,
-      distance: 10,
-      interval: 10,
-      speed: 400
+      container: unrefElement(getTimeLineEditorDomRef),
+      ...toRaw(getShareProps.autoScrollOptions)
     }
   });
 };
@@ -476,16 +481,21 @@ const initDragResize = (interactInst: Interactable) => {
     ],
     onstart: handleResizeStart,
     onmove: handleResize,
-    onend: handleResizeEnd
+    onend: handleResizeEnd,
+    autoScroll: {
+      container: unrefElement(getTimeLineEditorDomRef),
+      ...toRaw(getShareProps.autoScrollOptions)
+    }
   });
 };
 // 初始化自动滚动监听事件
 const initAutoScroll = (interactInst: Interactable) => {
   interactInst &&
     interactInst.on('autoscroll', event => {
-      !isAutoScroll.value && (isAutoScroll.value = true);
-      scrollOffset.x += event.delta.x;
-      scrollOffset.y += event.delta.y;
+      if (targetDragEvent.value!.type === 'resizemove') {
+        scrollOffset.x += event.delta.x;
+        targetDragEvent.value!.interaction?.move();
+      }
     });
 };
 // 初始化互动
@@ -500,21 +510,30 @@ const initInteractable = () => {
   initDragResize(interactInst);
   initAutoScroll(interactInst);
 };
-useEventListener(timeLineEditorRef, 'scroll', () => {
-  nextTick(() => {
-    if (targetDragEvent.value) {
-      isAutoScroll.value && targetDragEvent.value.interaction?.move();
+useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
+  if (targetDragEvent.value && targetDragEvent.value.type === 'dragmove') {
+    if (!recordScrollOrigin.value) {
+      recordScrollOrigin.value = {
+        x: scrollInfo.x.value,
+        y: scrollInfo.y.value
+      };
     }
+    nextTick(() => {
+      scrollOffset.x = scrollInfo.x.value - (recordScrollOrigin.value?.x ? Number(recordScrollOrigin.value.x) : 0);
+      scrollOffset.y = scrollInfo.y.value - (recordScrollOrigin.value?.y ? Number(recordScrollOrigin.value.y) : 0);
+      targetDragEvent.value!.interaction?.move();
+    });
+  }
+});
+onMounted(() => {
+  nextTick(() => {
+    if (!unrefElement(getTimeLineEditorDomRef)) return;
+    timeLineEditorInnerRef.value = unrefElement(getTimeLineEditorDomRef)!.firstChild as HTMLElement;
+    initInteractable();
   });
 });
 onBeforeUnmount(() => {
   interactable.value?.unset();
-});
-onMounted(() => {
-  nextTick(() => {
-    timeLineEditorInnerRef.value = timeLineEditorRef.value!.firstChild as HTMLElement;
-    initInteractable();
-  });
 });
 </script>
 

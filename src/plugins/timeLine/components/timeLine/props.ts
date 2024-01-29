@@ -1,5 +1,6 @@
 import type { VNodeChild } from 'vue';
-import type { TimelineRow, TimelineEffect, TimelineSideBar, TimelineAction } from '../../types';
+import type { AutoScrollOptions } from '@interactjs/auto-scroll/plugin';
+import type { TimelineRow, TimelineEffect, TimelineSideBar } from '../../types';
 import type { ITimelineEngine } from '../../core/engine';
 import {
   BACKGROUND,
@@ -173,7 +174,7 @@ export const timeLineProps = {
   sideBarWidth: {
     type: [String, Number] as PropType<string | number>,
     default: SIDE_BAR_WIDTH,
-    validator: (val): boolean => Number(val) > 0
+    validator: (val): boolean => Number(val) >= 0
   },
 
   /**
@@ -240,13 +241,30 @@ export const timeLineProps = {
     default: DEFAULT_GUIDE_LINE_SNAP
   },
   /**
-   * @description 是否隐藏光标
+   * @description 开启主光标
    * @default false
    * @type {boolean}
    */
   hideCursor: {
     type: Boolean,
     default: false
+  },
+  /**
+   * @description 开启预览光标
+   */
+  previewCursor: {
+    type: Boolean,
+    default: false
+  },
+  /**
+   * @description 是否自动滚动
+   * @abstract   #NOTE 此属性只在初始化时生效，无法动态修改(之后在文档中特殊标注)
+   * @default false
+   * @type {boolean}
+   */
+  autoScrollOptions: {
+    type: Object as PropType<Partial<Omit<AutoScrollOptions, 'container'>>>,
+    default: null
   },
   /**
    * @description 禁止全部动作区域拖动
@@ -291,156 +309,6 @@ export const timeLineProps = {
    */
   getCursorRender: {
     type: Function as PropType<() => VNodeChild | Component>,
-    default: null
-  },
-  /**
-   * @description 动作开始移动回调
-   * @default null
-   * @type {Function}
-   */
-  onActionMoveStart: {
-    type: Function as PropType<(params: { action: TimelineAction; row: TimelineRow }) => void>,
-    default: null
-  },
-  /**
-   * @description 动作移动回调
-   * @abstract return false可阻止移动
-   * @default null
-   * @type {Function}
-   */
-  onActionMoving: {
-    type: Function as PropType<
-      (params: { action: TimelineAction; row: TimelineRow; start: number; end: number }) => void | boolean
-    >,
-    default: null
-  },
-  /**
-   * @description 动作移动结束回调
-   * @default null
-   * @type {Function}
-   */
-  onActionMoveEnd: {
-    type: Function as PropType<
-      (params: { action: TimelineAction; row: TimelineRow; start: number; end: number }) => void
-    >,
-    default: null
-  },
-  /**
-   * @description 开始改变大小回调
-   * @default null
-   * @type {Function}
-   */
-  onActionResizeStart: {
-    type: Function as PropType<(params: { action: TimelineAction; row: TimelineRow; dir: 'right' | 'left' }) => void>,
-    default: null
-  },
-  /**
-   * @description 开始大小回调（return false可阻止改变）
-   * @default null
-   * @type {Function}
-   */
-  onActionResizing: {
-    type: Function as PropType<
-      (params: {
-        action: TimelineAction;
-        row: TimelineRow;
-        start: number;
-        end: number;
-        dir: 'right' | 'left';
-      }) => void | boolean
-    >,
-    default: null
-  },
-  /**
-   * @description 改变大小结束回调
-   * @default null
-   * @type {Function}
-   */
-  onActionResizeEnd: {
-    type: Function as PropType<
-      (params: { action: TimelineAction; row: TimelineRow; start: number; end: number; dir: 'right' | 'left' }) => void
-    >,
-    default: null
-  },
-  /**
-   * @description 行点击回调
-   * @default null
-   * @type {Function}
-   */
-  onClickRow: {
-    type: Function as PropType<(e: MouseEvent, param: { row: TimelineRow; time: number }) => void>,
-    default: null
-  },
-  /**
-   * @description 动作点击回调
-   * @default null
-   * @type {Function}
-   */
-  onClickAction: {
-    type: Function as PropType<(e: MouseEvent, param: { action: TimelineRow; row: TimelineRow; time: number }) => void>,
-    default: null
-  },
-  /**
-   * @description 动作点击回调（触发drag时不执行）
-   * @default null
-   * @type {Function}
-   */
-  onClickActionOnly: {
-    type: Function as PropType<(e: MouseEvent, param: { action: TimelineRow; row: TimelineRow; time: number }) => void>,
-    default: null
-  },
-  /**
-   * @description 右键行回调
-   * @default null
-   * @type {Function}
-   */
-  onContextMenuRow: {
-    type: Function as PropType<(e: MouseEvent, param: { row: TimelineRow; time: number }) => void>,
-    default: null
-  },
-  /**
-   * @description 右键动作回调
-   * @default null
-   * @type {Function}
-   */
-  onContextMenuAction: {
-    type: Function as PropType<(e: MouseEvent, param: { action: TimelineRow; row: TimelineRow; time: number }) => void>,
-    default: null
-  },
-  /**
-   * @description cursor开始拖拽事件
-   * @default null
-   * @type {Function}
-   */
-  onCursorDragStart: {
-    type: Function as PropType<(time: number) => void>,
-    default: null
-  },
-  /**
-   * @description cursor拖拽事件
-   * @default null
-   * @type {Function}
-   */
-  onCursorDragging: {
-    type: Function as PropType<(time: number) => void>,
-    default: null
-  },
-  /**
-   * @description cursor拖拽结束事件
-   * @default null
-   * @type {Function}
-   */
-  onCursorDragEnd: {
-    type: Function as PropType<(time: number) => void>,
-    default: null
-  },
-  /**
-   * @description 点击时间区域事件, 返回false时阻止设置时间
-   * @default null
-   * @type {Function}
-   */
-  onClickTimeArea: {
-    type: Function as PropType<(time: number) => void | boolean>,
     default: null
   }
 } as const;

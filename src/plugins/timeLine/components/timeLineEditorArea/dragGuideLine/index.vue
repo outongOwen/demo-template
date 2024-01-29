@@ -12,7 +12,7 @@
         :key="index"
         class="drag-column-line"
         :style="{
-          left: `${item + Number(leftOffset)}px`,
+          left: `${item + Number(getShareProps.leftOffset)}px`,
           top: `${scrollInfo.y.value}px`
         }"
       />
@@ -21,7 +21,7 @@
       v-show="timeLineEditorAreaContext.dropzoneInfo.isMoving"
       class="drag-row-line"
       :style="{
-        top: `${timeLineEditorAreaContext.dropzoneInfo.top}px`,
+        top: `${timeLineEditorAreaContext.dropzoneInfo.top - 0.5}px`,
         left: `${scrollInfo.x.value}px`
       }"
     />
@@ -29,25 +29,21 @@
 </template>
 
 <script setup lang="ts">
-import { useTimeLineContext, useTimeLineStateContext, useTimeLineEditorAreaContext } from '../../../contexts';
+import { useTimeLineEditorAreaContext } from '../../../contexts';
 import { useActionGuideLine } from '../../../hooks';
+import { useTimeLineStore } from '../../../store';
 defineOptions({
   name: 'DragGuideLine'
 });
-const { injectTimeLineContext } = useTimeLineContext();
-const timeLineContext = injectTimeLineContext();
-const { injectTimeLineStateContext } = useTimeLineStateContext();
 const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
-const timeLineStateContext = injectTimeLineStateContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
-const { leftOffset } = toRefs(timeLineContext);
-const { scrollInfo, cursorTime, scaleUnit } = timeLineStateContext;
+const { getCursorTime, getScaleUnit, getShareProps, scrollInfo } = useTimeLineStore();
 const { dragLineActionLine } = useActionGuideLine();
 const lineList = computed(() => {
   return dragLineActionLine.movePositions.filter(mItem => {
     return dragLineActionLine.assistPositions.some(dItem => {
       const dis = Math.abs(mItem - dItem);
-      const dis2 = Math.abs(dItem - unref(cursorTime) / unref(scaleUnit));
+      const dis2 = Math.abs(dItem - unref(getCursorTime) / unref(getScaleUnit));
       return Math.round(dis) <= 0.001 && Math.round(dis2) > 0.001;
     });
   });
@@ -57,11 +53,13 @@ const lineList = computed(() => {
 <style scoped lang="scss">
 .drag-guide-line-container {
   position: absolute;
-  left: 0px;
+  left: -0.5px;
   top: 0;
   bottom: 0;
   right: 0;
   pointer-events: none;
+  user-select: none;
+  touch-action: none;
   .drag-column-line {
     position: absolute;
     width: 0;

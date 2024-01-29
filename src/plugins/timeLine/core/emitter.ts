@@ -16,7 +16,6 @@ export class Emitter<EventTypes> {
       }
       this.events[name].push(handler);
     });
-
     return this;
   }
 
