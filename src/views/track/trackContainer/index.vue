@@ -14,7 +14,7 @@
     show-side-bar
     :main-row="true"
     :guide-line="true"
-    :preview-cursor="true"
+    :preview-cursor="previewCurrentState"
     cursor-adsorption
     main-row-id="main"
     :row-sort-types="['text', 'video', 'main', 'audio']"
@@ -61,7 +61,7 @@ const timeLineRef = ref<TimelineExpose>();
 const timeLineStore = useTimeLineStore();
 const sideBarWidth = ref(150);
 const fps = ref(25);
-const { getScaleInfo } = storeToRefs(timeLineStore);
+const { getScaleInfo, previewCurrentState } = storeToRefs(timeLineStore);
 const getScaleRender = (time: number, unit: 'f' | 's') => {
   return formatTime(time, fps.value, unit);
 };

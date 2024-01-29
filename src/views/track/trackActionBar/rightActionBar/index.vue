@@ -11,7 +11,7 @@ import ActionBar from '../actionBar/index.vue';
 // import MainForm from './distributeForm/index.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
-const { getScaleInfo } = storeToRefs(timeLineStore);
+const { getScaleInfo, previewCurrentState } = storeToRefs(timeLineStore);
 // const formRef = ref();
 const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
@@ -71,8 +71,8 @@ const barItemOptions = reactive<Track.ActionBarItem[]>([
     btnType: 'Button',
     key: 'previewAxis',
     checked: true,
-    change: key => {
-      console.log(key);
+    change: (state: boolean) => {
+      previewCurrentState.value = state;
     }
   },
   {
