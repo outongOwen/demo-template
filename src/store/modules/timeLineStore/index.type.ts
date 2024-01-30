@@ -11,5 +11,6 @@ interface TimeLineStateType {
   timeLineMaxEndTime: number;
   scaleInfo: ScaleInfo;
   previewCurrentState: boolean;
+  autoAdsorptionState: boolean;
 }
 export type { TimeLineStateType, ScaleInfo };

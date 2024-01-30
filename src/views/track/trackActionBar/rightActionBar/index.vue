@@ -11,7 +11,7 @@ import ActionBar from '../actionBar/index.vue';
 // import MainForm from './distributeForm/index.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
-const { getScaleInfo, previewCurrentState } = storeToRefs(timeLineStore);
+const { getScaleInfo, previewCurrentState, autoAdsorptionState } = storeToRefs(timeLineStore);
 // const formRef = ref();
 const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
@@ -61,8 +61,8 @@ const barItemOptions = reactive<Track.ActionBarItem[]>([
     btnType: 'Button',
     key: 'autoAlign',
     checked: true,
-    change: key => {
-      console.log(key);
+    change: (_key, state: boolean) => {
+      autoAdsorptionState.value = state;
     }
   },
   {

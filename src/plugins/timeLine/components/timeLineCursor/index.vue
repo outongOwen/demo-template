@@ -109,7 +109,7 @@ const adsorptionSnapModifier = reactiveComputed(() => {
       (x, y) => {
         let adsorption = x;
         const disList: number[] = [];
-        if (getShareProps.adsorption) {
+        if (getShareProps.autoAdsorption) {
           dragLineActionLine.assistPositions.forEach(item => {
             const dis = Math.abs(item - adsorption);
             if (dis < Number(unref(getShareProps.adsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
@@ -154,7 +154,7 @@ const autoScrollSnapModifier = reactiveComputed(() => {
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (getShareProps.adsorption || getShareProps.guideLine) {
+  if (getShareProps.autoAdsorption || getShareProps.guideLine) {
     const assistPositions = defaultGetAllAssistPosition({
       editorData: toRaw(unref(getTimeLineEditorData)),
       scaleUnit: unref(getScaleUnit),

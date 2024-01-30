@@ -221,7 +221,7 @@ export const timeLineProps = {
    * @default false
    * @type {boolean}
    */
-  adsorption: {
+  autoAdsorption: {
     type: Boolean,
     default: false
   },

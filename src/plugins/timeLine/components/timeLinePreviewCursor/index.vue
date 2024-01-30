@@ -45,7 +45,7 @@ const previewTime = computed(() => {
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (unref(getShareProps.adsorption)) {
+  if (unref(getShareProps.autoAdsorption)) {
     const assistPositions = defaultGetAllAssistPosition({
       editorData: toRaw(unref(getTimeLineEditorData)),
       scaleUnit: unref(getScaleUnit),
@@ -95,7 +95,7 @@ useEventListener(parentElement, 'mousemove', (event: MouseEvent) => {
   const realClientX =
     event.clientX - Number(getShareProps.leftOffset) - timeLineEditorViewSize.left.value + scrollInfo.x.value;
   updateTranslateX(realClientX);
-  handleAdsorption();
+  getShareProps.autoAdsorption && handleAdsorption();
 });
 useEventListener(parentElement, 'mouseleave', () => {
   isMoving.value = false;

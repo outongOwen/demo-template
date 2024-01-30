@@ -12,11 +12,10 @@
     :action-effects="effects"
     :side-bars="sideBars"
     show-side-bar
-    :adsorption="true"
+    :auto-adsorption="autoAdsorptionState"
+    :guide-line="autoAdsorptionState"
     :main-row="true"
-    :guide-line="true"
     :preview-cursor="previewCurrentState"
-    cursor-adsorption
     main-row-id="main"
     :row-sort-types="['text', 'video', 'main', 'audio']"
     :side-bar-width="sideBarWidth"
@@ -62,7 +61,7 @@ const timeLineRef = ref<TimelineExpose>();
 const timeLineStore = useTimeLineStore();
 const sideBarWidth = ref(150);
 const fps = ref(25);
-const { getScaleInfo, previewCurrentState } = storeToRefs(timeLineStore);
+const { getScaleInfo, previewCurrentState, autoAdsorptionState } = storeToRefs(timeLineStore);
 const getScaleRender = (time: number, unit: 'f' | 's') => {
   return formatTime(time, fps.value, unit);
 };

@@ -98,10 +98,6 @@ const scrollOffset = reactive({
   x: 0,
   y: 0
 });
-const recordScrollOrigin = ref<{
-  x: number;
-  y: number;
-} | null>(null);
 const isSelected = computed(() => {
   return Boolean(timeLineEditorAreaContext.selectedActionIds.value.includes(unref(actionItem).id));
 });
@@ -164,7 +160,7 @@ const adsorptionSnapModifier = reactiveComputed(() => {
         const width = actionItemSize.width;
         const disListLeft: number[] = [];
         const disListRight: number[] = [];
-        if (getShareProps.adsorption) {
+        if (getShareProps.autoAdsorption) {
           dragLineActionLine.assistPositions.forEach(item => {
             const dis = Math.abs(item - adsorptionPos);
             const dis2 = Math.abs(item - (adsorptionPos + width));
@@ -269,7 +265,7 @@ const handleContextMenu = (e: MouseEvent) => {
 };
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (getShareProps.guideLine || getShareProps.adsorption) {
+  if (getShareProps.guideLine || getShareProps.autoAdsorption) {
     const assistPositions = defaultGetAssistPosition({
       editorData: unref(getTimeLineEditorData),
       action: actionItem.value,
@@ -284,7 +280,7 @@ const handleInitGuideLine = () => {
 };
 // 更新辅助线
 const handleUpdateGuideLine = ({ start, end }: { start: number; end: number }) => {
-  if (getShareProps.guideLine || getShareProps.adsorption) {
+  if (getShareProps.guideLine || getShareProps.autoAdsorption) {
     const movePositions = defaultGetMovePosition({
       start,
       end,
@@ -366,7 +362,6 @@ const handleMoveEnd = (e: DragEvent) => {
   });
   deltaY.value = 0;
   targetDragEvent.value = null;
-  recordScrollOrigin.value = null;
   scrollOffset.x = 0;
   scrollOffset.y = 0;
   timeLineEditorAreaContext.dropzoneInfo.isMoving = false;
@@ -407,7 +402,6 @@ const handleResizeEnd = (e: ResizeEvent) => {
   actionItem.value.end = end;
   disposeDragLine();
   timeLineEditorAreaContext.clearActionDragState();
-  recordScrollOrigin.value = null;
   // 触发回调
   if (getShareEmits.onActionResizeEnd)
     getShareEmits.onActionResizeEnd({ action: actionItem.value, row: rowItem.value, start, end, dir });

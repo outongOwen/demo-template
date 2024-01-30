@@ -6,6 +6,7 @@ export const useTimeLineStore = defineStore('useTimeLineStore', {
     timeLineRef: null,
     timeLineMaxEndTime: 0,
     previewCurrentState: false,
+    autoAdsorptionState: false,
     scaleInfo: {
       scale: 0,
       scaleStep: 0.01,
