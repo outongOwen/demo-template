@@ -520,17 +520,15 @@ const initInteractable = () => {
   initDragResize(interactInst);
   initAutoScroll(interactInst);
 };
+watch([() => scrollInfo.x.value, () => scrollInfo.y.value], ([newXValue, newYValue], [preXValue, preYValue]) => {
+  if (targetDragEvent.value) {
+    scrollOffset.x += newXValue - preXValue;
+    scrollOffset.y += newYValue - preYValue;
+  }
+});
 useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
   if (targetDragEvent.value && targetDragEvent.value.type === 'dragmove') {
-    if (!recordScrollOrigin.value) {
-      recordScrollOrigin.value = {
-        x: scrollInfo.x.value,
-        y: scrollInfo.y.value
-      };
-    }
     nextTick(() => {
-      scrollOffset.x = scrollInfo.x.value - (recordScrollOrigin.value?.x ? Number(recordScrollOrigin.value.x) : 0);
-      scrollOffset.y = scrollInfo.y.value - (recordScrollOrigin.value?.y ? Number(recordScrollOrigin.value.y) : 0);
       targetDragEvent.value!.interaction?.move();
     });
   }
