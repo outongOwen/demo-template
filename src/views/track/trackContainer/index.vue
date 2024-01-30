@@ -12,6 +12,7 @@
     :action-effects="effects"
     :side-bars="sideBars"
     show-side-bar
+    :adsorption="true"
     :main-row="true"
     :guide-line="true"
     :preview-cursor="previewCurrentState"
@@ -21,7 +22,7 @@
     :side-bar-width="sideBarWidth"
     :scale-height="40"
     :fps="fps"
-    :auto-scroll-options="autoScrollOptions"
+    :auto-scroll="autoScrollOptions"
     :scale-small-cell-width="getScaleInfo.scaleSmallCellWidth"
     :scale-large-cell-width="getScaleInfo.scaleLargeCellWidth"
     :scale-small-cell-ms="getScaleInfo.scaleSmallCellMs"

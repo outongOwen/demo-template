@@ -18,6 +18,8 @@
     :class="{
       'active-state-cursor': activeStateCursor
     }"
+    @mousedown.stop="void 0"
+    @mouseup.stop="void 0"
   >
     <div class="timeLine-cursor-line-top" />
     <div class="timeLine-cursor-line-area" />
@@ -27,7 +29,7 @@
 
 <script setup lang="ts">
 import interact from 'interactjs';
-import { reactiveComputed, useEventListener } from '@vueuse/core';
+import { reactiveComputed, useEventListener, unrefElement } from '@vueuse/core';
 import type { DragEvent, Interactable } from '@interactjs/types';
 import { useActionGuideLine } from '../../hooks';
 import { useTimeLineStore } from '../../store';
@@ -57,7 +59,6 @@ const targetDragEvent = shallowRef<DragEvent | null>(null);
 const interactable = shallowRef<Interactable>();
 const translateX = ref(0);
 const scrollOffsetX = ref(0);
-const recordScrollOriginX = ref<number | null>(null);
 const activeStateCursor = computed(() => {
   return (
     dragLineActionLine.isMoving &&
@@ -101,21 +102,23 @@ const guideSnapModifier = reactiveComputed(() => {
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
-const adsorbSnapModifier = reactiveComputed(() => {
+const adsorptionSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
     origin: timeLineEditorInnerRef.value!,
     targets: [
       (x, y) => {
         let adsorption = x;
         const disList: number[] = [];
-        dragLineActionLine.assistPositions.forEach(item => {
-          const dis = Math.abs(item - adsorption);
-          if (dis < Number(unref(getShareProps.guideAdsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
-            disList.push(item);
-            const minDis = Math.min(...disList);
-            adsorption = minDis;
-          }
-        });
+        if (getShareProps.adsorption) {
+          dragLineActionLine.assistPositions.forEach(item => {
+            const dis = Math.abs(item - adsorption);
+            if (dis < Number(unref(getShareProps.adsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
+              disList.push(item);
+              const minDis = Math.min(...disList);
+              adsorption = minDis;
+            }
+          });
+        }
         return {
           x: scrollInfo.isScrolling.value ? x : adsorption,
           y
@@ -151,7 +154,7 @@ const autoScrollSnapModifier = reactiveComputed(() => {
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (unref(getShareProps.cursorAdsorption)) {
+  if (getShareProps.adsorption || getShareProps.guideLine) {
     const assistPositions = defaultGetAllAssistPosition({
       editorData: toRaw(unref(getTimeLineEditorData)),
       scaleUnit: unref(getScaleUnit),
@@ -180,7 +183,6 @@ const handleMove = (event: DragEvent) => {
 // 拖拽结束
 const handleMoveEnd = () => {
   scrollOffsetX.value = 0;
-  recordScrollOriginX.value = null;
   targetDragEvent.value = null;
   disposeDragLine();
   setPreviewCursorState({ state: true });
@@ -192,38 +194,18 @@ const initInteract = () => {
   });
   interactable.value = interactInst;
   interactable.value.draggable({
-    modifiers: [restrictRectModifier, autoScrollSnapModifier, guideSnapModifier, adsorbSnapModifier],
+    modifiers: [restrictRectModifier, autoScrollSnapModifier, guideSnapModifier, adsorptionSnapModifier],
     onstart: handleMoveStart,
     onmove: handleMove,
     onend: handleMoveEnd,
     autoScroll: {
-      container: getTimeLineEditorDomRef.value!,
-      ...toRaw(getShareProps.autoScrollOptions)
+      container: unrefElement(getTimeLineEditorDomRef),
+      ...toRaw(getShareProps.autoScroll),
+      ...{ enabled: Boolean(getShareProps.autoScroll?.enabled) }
     },
     cursorChecker: () => 'ew-resize'
   });
 };
-// 监听滚动
-useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
-  if (targetDragEvent.value) {
-    if (!recordScrollOriginX.value) {
-      recordScrollOriginX.value = scrollInfo.x.value;
-    }
-    nextTick(() => {
-      scrollOffsetX.value = scrollInfo.x.value - Number(recordScrollOriginX.value);
-      targetDragEvent.value!.interaction.move();
-    });
-  }
-});
-watchEffect(() => {
-  nextTick(() => {
-    if (getTimeLineEditorDomRef.value) {
-      timeLineEditorInnerRef.value = getTimeLineEditorDomRef.value.firstChild as HTMLElement;
-      interactable.value && interactable.value.unset();
-      initInteract();
-    }
-  });
-});
 // 监听刻度尺缩放
 watch(getScaleUnit, unit => {
   translateX.value = unref(getCursorTime) / unit;
@@ -241,6 +223,29 @@ watch(
     immediate: true
   }
 );
+watchEffect(() => {
+  nextTick(() => {
+    if (getTimeLineEditorDomRef.value) {
+      timeLineEditorInnerRef.value = getTimeLineEditorDomRef.value.firstChild as HTMLElement;
+      interactable.value && interactable.value.unset();
+      initInteract();
+    }
+  });
+});
+watch(
+  () => scrollInfo.x.value,
+  (newValue, oldValue) => {
+    if (targetDragEvent.value) {
+      scrollOffsetX.value += newValue - oldValue;
+    }
+  }
+);
+// 监听滚动
+useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
+  if (targetDragEvent.value) {
+    targetDragEvent.value!.interaction.move();
+  }
+});
 // dom卸载之前
 onBeforeUnmount(() => {
   interactable.value?.unset();

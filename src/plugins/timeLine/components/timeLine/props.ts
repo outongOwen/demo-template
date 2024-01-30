@@ -1,6 +1,5 @@
 import type { VNodeChild } from 'vue';
-import type { AutoScrollOptions } from '@interactjs/auto-scroll/plugin';
-import type { TimelineRow, TimelineEffect, TimelineSideBar } from '../../types';
+import type { TimelineRow, TimelineEffect, TimelineSideBar, AutoScrollOptions } from '../../types';
 import type { ITimelineEngine } from '../../core/engine';
 import {
   BACKGROUND,
@@ -15,7 +14,7 @@ import {
   SCALE_LARGE_CELL_WIDTH,
   SCALE_SMALL_CELL_WIDTH,
   SCALE_SMALL_CELL_MS,
-  DEFAULT_GUIDE_LINE_SNAP,
+  DEFAULT_ADSORPTION_DISTANCE,
   DEFAULT_FPS,
   DEFAULT_FPS_LIST
 } from '../../const';
@@ -218,11 +217,21 @@ export const timeLineProps = {
     validator: (val): boolean => Number(val) > 0
   },
   /**
-   * @description 是否开启鼠标吸附
+   * @description 开启吸附
+   * @default false
+   * @type {boolean}
    */
-  cursorAdsorption: {
+  adsorption: {
     type: Boolean,
     default: false
+  },
+  /**
+   * @description 吸附距离
+   */
+  adsorptionDistance: {
+    type: [String, Number] as PropType<string | number>,
+    default: DEFAULT_ADSORPTION_DISTANCE,
+    validator: (val): boolean => Number(val) >= 0
   },
   /**
    * @description 是否开启辅助线
@@ -232,13 +241,6 @@ export const timeLineProps = {
   guideLine: {
     type: Boolean,
     default: false
-  },
-  /**
-   * @description 辅助线吸附距离
-   */
-  guideAdsorptionDistance: {
-    type: [String, Number] as PropType<string | number>,
-    default: DEFAULT_GUIDE_LINE_SNAP
   },
   /**
    * @description 开启主光标
@@ -262,8 +264,8 @@ export const timeLineProps = {
    * @default false
    * @type {boolean}
    */
-  autoScrollOptions: {
-    type: Object as PropType<Partial<Omit<AutoScrollOptions, 'container'>>>,
+  autoScroll: {
+    type: Object as PropType<AutoScrollOptions>,
     default: null
   },
   /**

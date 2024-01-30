@@ -144,7 +144,8 @@ export const useTimeLineStore = createGlobalState(() => {
      * @returns {void}
      */
     setCursorTimeByPos: (clientX: number) => {
-      const posX = clientX - getters.getTimeLineEditorOriginCoords.left + scrollInfo.x.value;
+      const posX =
+        clientX - (timeLineEditorViewSize.left.value + Number(shareProps.value.leftOffset!)) + scrollInfo.x.value;
       const curX = Math.round(posX / Number(getters.getFrameWidth.value)) * Number(getters.getFrameWidth.value);
       let time = curX * Number(getters.getScaleUnit.value);
       time = time < 0 ? 0 : time;

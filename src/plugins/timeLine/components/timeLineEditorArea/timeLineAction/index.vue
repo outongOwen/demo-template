@@ -120,7 +120,7 @@ const actionItemSize = reactiveComputed(() => {
     unref(getScaleUnit)
   );
 });
-const draggableRestrictRectModifier = reactiveComputed(() => {
+const restrictEdgesDraggableModifier = reactiveComputed(() => {
   return interact.modifiers.restrictEdges({
     outer: unrefElement(timeLineEditorInnerRef),
     offset: {
@@ -155,7 +155,7 @@ const autoScrollSnapModifier = reactiveComputed(() => {
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
-const guideSnapModifier = reactiveComputed(() => {
+const adsorptionSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
     origin: unrefElement(timeLineEditorInnerRef),
     targets: [
@@ -164,28 +164,31 @@ const guideSnapModifier = reactiveComputed(() => {
         const width = actionItemSize.width;
         const disListLeft: number[] = [];
         const disListRight: number[] = [];
-        dragLineActionLine.assistPositions.forEach(item => {
-          const dis = Math.abs(item - adsorptionPos);
-          const dis2 = Math.abs(item - (adsorptionPos + width));
-          if (
-            dis < Number(unref(getShareProps).guideAdsorptionDistance) &&
-            dis < Number.MAX_SAFE_INTEGER &&
-            disListRight.length === 0
-          ) {
-            disListLeft.push(item);
-            const minDis = Math.min(...disListLeft);
-            adsorptionPos = minDis;
-          }
-          if (
-            dis2 < Number(unref(getShareProps).guideAdsorptionDistance) &&
-            dis2 < Number.MAX_SAFE_INTEGER &&
-            disListLeft.length === 0
-          ) {
-            disListRight.push(item);
-            const minDis = Math.min(...disListRight);
-            adsorptionPos = minDis - width;
-          }
-        });
+        if (getShareProps.adsorption) {
+          dragLineActionLine.assistPositions.forEach(item => {
+            const dis = Math.abs(item - adsorptionPos);
+            const dis2 = Math.abs(item - (adsorptionPos + width));
+            if (
+              dis < Number(unref(getShareProps).adsorptionDistance) &&
+              dis < Number.MAX_SAFE_INTEGER &&
+              disListRight.length === 0
+            ) {
+              disListLeft.push(item);
+              const minDis = Math.min(...disListLeft);
+              adsorptionPos = minDis;
+            }
+            if (
+              dis2 < Number(unref(getShareProps).adsorptionDistance) &&
+              dis2 < Number.MAX_SAFE_INTEGER &&
+              disListLeft.length === 0
+            ) {
+              disListRight.push(item);
+              const minDis = Math.min(...disListRight);
+              adsorptionPos = minDis - width;
+            }
+          });
+        }
+
         return {
           x: adsorptionPos,
           y
@@ -214,7 +217,7 @@ const restrictSizeModifier = reactiveComputed(() => {
     }
   });
 });
-const snapResizeModifier = reactiveComputed(() => {
+const resizeSnapModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
     origin: unrefElement(timeLineEditorInnerRef),
     targets: [
@@ -229,7 +232,7 @@ const snapResizeModifier = reactiveComputed(() => {
     relativePoints: [{ x: 0, y: 0 }]
   });
 });
-const snapDraggableModifier = reactiveComputed(() => {
+const snapGridDraggableModifier = reactiveComputed(() => {
   return interact.modifiers.snap({
     endOnly: true,
     origin: unrefElement(timeLineEditorInnerRef),
@@ -266,7 +269,7 @@ const handleContextMenu = (e: MouseEvent) => {
 };
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (getShareProps.guideLine) {
+  if (getShareProps.guideLine || getShareProps.adsorption) {
     const assistPositions = defaultGetAssistPosition({
       editorData: unref(getTimeLineEditorData),
       action: actionItem.value,
@@ -281,7 +284,7 @@ const handleInitGuideLine = () => {
 };
 // 更新辅助线
 const handleUpdateGuideLine = ({ start, end }: { start: number; end: number }) => {
-  if (unref(getShareProps.guideLine)) {
+  if (getShareProps.guideLine || getShareProps.adsorption) {
     const movePositions = defaultGetMovePosition({
       start,
       end,
@@ -458,13 +461,19 @@ const handleResize = (e: ResizeEvent) => {
 // 初始化拖拽移动
 const initDraggable = (interactInst: Interactable) => {
   interactInst.draggable({
-    modifiers: [draggableRestrictRectModifier, autoScrollSnapModifier, snapDraggableModifier, guideSnapModifier],
+    modifiers: [
+      restrictEdgesDraggableModifier,
+      autoScrollSnapModifier,
+      snapGridDraggableModifier,
+      adsorptionSnapModifier
+    ],
     onstart: handleMoveStart,
     onmove: handleMove,
     onend: handleMoveEnd,
     autoScroll: {
       container: unrefElement(getTimeLineEditorDomRef),
-      ...toRaw(getShareProps.autoScrollOptions)
+      ...toRaw(getShareProps.autoScroll),
+      ...{ enabled: Boolean(getShareProps.autoScroll?.enabled) }
     }
   });
 };
@@ -475,8 +484,8 @@ const initDragResize = (interactInst: Interactable) => {
     modifiers: [
       resizeRestrictRectModifier,
       autoScrollSnapModifier,
-      snapResizeModifier,
-      guideSnapModifier,
+      resizeSnapModifier,
+      adsorptionSnapModifier,
       restrictSizeModifier
     ],
     onstart: handleResizeStart,
@@ -484,7 +493,8 @@ const initDragResize = (interactInst: Interactable) => {
     onend: handleResizeEnd,
     autoScroll: {
       container: unrefElement(getTimeLineEditorDomRef),
-      ...toRaw(getShareProps.autoScrollOptions)
+      ...toRaw(getShareProps.autoScroll),
+      ...{ enabled: Boolean(getShareProps.autoScroll?.enabled) }
     }
   });
 };
@@ -492,7 +502,7 @@ const initDragResize = (interactInst: Interactable) => {
 const initAutoScroll = (interactInst: Interactable) => {
   interactInst &&
     interactInst.on('autoscroll', event => {
-      if (targetDragEvent.value!.type === 'resizemove') {
+      if (targetDragEvent.value!.type === 'resizemove' && Boolean(getShareProps.autoScroll?.enabled)) {
         scrollOffset.x += event.delta.x;
         targetDragEvent.value!.interaction?.move();
       }

@@ -1,3 +1,4 @@
+import type { AutoScrollOptions as AutoScrollPluginOptions } from '@interactjs/auto-scroll/plugin';
 import type { Emitter } from '../core/emitter';
 import type { EventTypes } from '../core/events';
 import type { timeLineProps } from '../components/timeLine/props';
@@ -49,3 +50,7 @@ type RemoveReadonly<T> = {
 type ExtractPublicPropTypes<T> = Partial<RemoveReadonly<ExtractPropTypes<T>>>;
 export type TimeLineEditorProps = ExtractPublicPropTypes<typeof timeLineProps>;
 export type TimeLineEditorEmits = Partial<TimeLineEditorShareEmits>;
+
+export interface AutoScrollOptions extends Omit<AutoScrollPluginOptions, 'container'> {
+  enabled?: boolean;
+}

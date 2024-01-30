@@ -45,7 +45,7 @@ const previewTime = computed(() => {
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
-  if (unref(getShareProps.cursorAdsorption)) {
+  if (unref(getShareProps.adsorption)) {
     const assistPositions = defaultGetAllAssistPosition({
       editorData: toRaw(unref(getTimeLineEditorData)),
       scaleUnit: unref(getScaleUnit),
@@ -59,7 +59,7 @@ const handleAdsorption = () => {
   const disList: number[] = [];
   dragLineActionLine.assistPositions.forEach(item => {
     const dis = Math.abs(item - (translateX.value + unref(scrollInfo.x.value)));
-    if (dis < Number(unref(getShareProps.guideAdsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
+    if (dis < Number(unref(getShareProps.adsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
       disList.push(item);
       const minDis = Math.min(...disList);
       translateX.value = minDis - unref(scrollInfo.x.value);
@@ -80,7 +80,7 @@ const updateTranslateX = realClientX => {
 watchEffect(() => {
   const state =
     Math.abs(unref(getCursorTime) - unref(previewTime)) >
-    unref(getScaleUnit) * Number(getShareProps.guideAdsorptionDistance);
+    unref(getScaleUnit) * Number(getShareProps.adsorptionDistance);
   isShowPreviewCursor.value = state;
 });
 watch(
