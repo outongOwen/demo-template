@@ -71,7 +71,7 @@ const barItemOptions = reactive<Track.ActionBarItem[]>([
     btnType: 'Button',
     key: 'previewAxis',
     checked: true,
-    change: (state: boolean) => {
+    change: (_key, state: boolean) => {
       previewCurrentState.value = state;
     }
   },

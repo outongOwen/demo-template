@@ -4,7 +4,7 @@
     ref="previewCursorRef"
     class="timeLine-preview-cursor-line"
     :style="{
-      transform: `translateX(${translateX}px)`,
+      transform: `translateX(${translateX - scrollInfo.x.value}px)`,
       left: `${Number(getShareProps.leftOffset) - 1}px`,
       top: `${Number(getShareProps.scaleHeight) / 2}px`,
       height: `calc(100% - ${Number(getShareProps.scaleHeight) / 2 + getScrollDomSize.height}px)`
@@ -38,9 +38,10 @@ const isMoving = ref(false);
 const translateX = ref(0);
 const parentElement = useParentElement();
 const previewCursorRef = ref<HTMLElement>();
-// const { left } = useElementBounding(previewCursorRef);
+// 滚动增量
+const scrollDelta = ref(0);
 const previewTime = computed(() => {
-  return Math.round((translateX.value + scrollInfo.x.value) * unref(getScaleUnit));
+  return Math.round(translateX.value * unref(getScaleUnit));
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
@@ -82,11 +83,16 @@ watchEffect(() => {
     unref(getScaleUnit) * Number(getShareProps.guideAdsorptionDistance);
   isShowPreviewCursor.value = state;
 });
-const lastScrollLeft = ref(0);
+watch(
+  () => scrollInfo.x.value,
+  (newValue, oldValue) => {
+    scrollDelta.value = newValue - oldValue;
+  }
+);
 useEventListener(parentElement, 'mousemove', (event: MouseEvent) => {
   isMoving.value = true;
-  lastScrollLeft.value = 0;
-  const realClientX = event.clientX - Number(getShareProps.leftOffset) - timeLineEditorViewSize.left.value;
+  const realClientX =
+    event.clientX - Number(getShareProps.leftOffset) - timeLineEditorViewSize.left.value + scrollInfo.x.value;
   updateTranslateX(realClientX);
   handleAdsorption();
 });
@@ -95,14 +101,8 @@ useEventListener(parentElement, 'mouseleave', () => {
 });
 
 useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
-  const curTranslateX =
-    Math.round((translateX.value + scrollInfo.x.value) * unref(getFrameWidth)) / unref(getFrameWidth);
-  const curPreviewTime = Math.round(curTranslateX * unref(getScaleUnit));
-  if (curPreviewTime <= unref(getTimeLineMaxEndTime)) {
-    setPreviewCursorState({ time: unref(curPreviewTime) });
-  } else {
-    setPreviewCursorState({ time: unref(getTimeLineMaxEndTime) });
-  }
+  const curTranslateX = translateX.value + scrollDelta.value;
+  updateTranslateX(curTranslateX);
 });
 onMounted(() => {
   handleInitGuideLine();
