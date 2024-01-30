@@ -41,7 +41,7 @@ const previewCursorRef = ref<HTMLElement>();
 // 滚动增量
 const scrollDelta = ref(0);
 const previewTime = computed(() => {
-  return Math.round(translateX.value * unref(getScaleUnit));
+  return Math.abs(translateX.value * unref(getScaleUnit));
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
@@ -91,6 +91,7 @@ watch(
 );
 useEventListener(parentElement, 'mousemove', (event: MouseEvent) => {
   isMoving.value = true;
+  scrollDelta.value = 0;
   const realClientX =
     event.clientX - Number(getShareProps.leftOffset) - timeLineEditorViewSize.left.value + scrollInfo.x.value;
   updateTranslateX(realClientX);
@@ -99,7 +100,6 @@ useEventListener(parentElement, 'mousemove', (event: MouseEvent) => {
 useEventListener(parentElement, 'mouseleave', () => {
   isMoving.value = false;
 });
-
 useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
   const curTranslateX = translateX.value + scrollDelta.value;
   updateTranslateX(curTranslateX);

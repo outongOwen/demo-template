@@ -24,7 +24,6 @@
           @mouseenter="handleMouseEnter"
           @mouseleave="handleMouseLeave"
         >
-          {{ getShareProps.previewCursor }}
           <TimeLineTimeArea />
           <TimeLineEditorArea />
           <TimeLineCursor v-if="editorData.length && !hideCursor" />
@@ -75,8 +74,7 @@ const {
   getScaleUnit,
   setPreviewCursorState,
   getPreviewCursorState,
-  getCursorTime,
-  getShareProps
+  getCursorTime
 } = useTimeLineStore();
 const shareEmits = useDefineEmits(emits);
 const timeLineContainerRef = ref<HTMLElement>();

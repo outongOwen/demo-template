@@ -18,8 +18,6 @@
     :class="{
       'active-state-cursor': activeStateCursor
     }"
-    @mousedown.stop="handleMousedown"
-    @mouseup.stop="handlerMouseup"
   >
     <div class="timeLine-cursor-line-top" />
     <div class="timeLine-cursor-line-area" />
@@ -162,21 +160,13 @@ const handleInitGuideLine = () => {
     initDragLine({ assistPositions, targetType: 'cursor' });
   }
 };
-// 鼠标按下
-const handleMousedown = () => {
-  enginePause();
-  setPreviewCursorState({ state: false });
-};
-// 鼠标抬起
-const handlerMouseup = () => {
-  enginePause();
-  setPreviewCursorState({ state: true });
-};
 // 拖拽开始
 const handleMoveStart = (event: DragEvent) => {
   enginePause();
   targetDragEvent.value = event;
   handleInitGuideLine();
+  setPreviewCursorState({ state: false });
+  enginePause();
 };
 // 拖拽中
 const handleMove = (event: DragEvent) => {
@@ -193,6 +183,7 @@ const handleMoveEnd = () => {
   recordScrollOriginX.value = null;
   targetDragEvent.value = null;
   disposeDragLine();
+  setPreviewCursorState({ state: true });
 };
 // 初始化
 const initInteract = () => {
