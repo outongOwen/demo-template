@@ -74,7 +74,9 @@ const {
   getScaleUnit,
   setPreviewCursorState,
   getPreviewCursorState,
-  getCursorTime
+  getCursorTime,
+  getInteractState,
+  getEngineState
 } = useTimeLineStore();
 const shareEmits = useDefineEmits(emits);
 const timeLineContainerRef = ref<HTMLElement>();
@@ -88,13 +90,17 @@ const handlerMouseDown = () => {
 };
 const handlerMouseUp = () => {
   isMouseup.value = true;
-  !isMousedown.value && setPreviewCursorState({ state: true });
 };
 // 点击事件
 const handleClick = (event: MouseEvent) => {
   if (isMousedown.value && isMouseup.value) {
+    if (getPreviewCursorState.state && getEngineState.isPaused) {
+      setCursorTime(getPreviewCursorState.time);
+    } else {
+      const curTime = setCursorTimeByPos(event.clientX);
+      setPreviewCursorState({ time: curTime });
+    }
     enginePause();
-    setCursorTimeByPos(event.clientX);
     timeLineEditorAreaContext.clearSelected();
   }
   isMousedown.value = false;
@@ -121,12 +127,15 @@ const handleEmitterLayerWheel = (event: WheelEvent) => {
 };
 // 鼠标移入事件
 const handleMouseEnter = () => {
-  setPreviewCursorState({ state: true });
+  if (!getInteractState.active) {
+    setPreviewCursorState({ state: true });
+  }
 };
 // 鼠标移出事件
 const handleMouseLeave = () => {
-  setPreviewCursorState({ state: false });
-  setCursorTime(unref(getCursorTime));
+  if (!getInteractState.active) {
+    setPreviewCursorState({ state: false, time: unref(getCursorTime) });
+  }
 };
 // watch(
 //   [mainRow, mainRowId],
@@ -147,6 +156,13 @@ const handleMouseLeave = () => {
 //   },
 //   { immediate: true }
 // );
+const sortEditorDataByRowSortTypes = () => {
+  if (rowSortTypes?.value?.length && editorData?.value?.length) {
+    const sortedEditorData = sortTimeLineByType(unref(editorData), unref(rowSortTypes)!);
+    unref(editorData).splice(0, unref(editorData).length);
+    unref(editorData).push(...sortedEditorData);
+  }
+};
 watchArray(
   rowSortTypes,
   (newList, oldList) => {
@@ -160,15 +176,19 @@ watchArray(
     //   }
     // }
     if (!isEqual(newList, oldList)) {
-      if (rowSortTypes?.value?.length && editorData?.value?.length) {
-        const sortedEditorData = sortTimeLineByType(unref(editorData), unref(rowSortTypes)!);
-        unref(editorData).splice(0, unref(editorData).length);
-        unref(editorData).push(...sortedEditorData);
-      }
+      sortEditorDataByRowSortTypes();
     }
   },
   {
     immediate: true
+  }
+);
+watch(
+  () => unref(editorData).length,
+  () => {
+    if (unref(editorData).length) {
+      sortEditorDataByRowSortTypes();
+    }
   }
 );
 watch(

@@ -1,6 +1,6 @@
 <template>
   <div
-    v-show="isShowPreviewCursor && isMoving"
+    v-show="isShowPreviewCursor"
     ref="previewCursorRef"
     class="timeLine-preview-cursor-line"
     :style="{
@@ -29,19 +29,17 @@ const {
   getTimeLineMaxEndTime,
   getCursorTime,
   getTimeLineEditorData,
-  scrollInfo,
-  getTimeLineEditorDomRef
+  scrollInfo
 } = useTimeLineStore();
 const { dragLineActionLine, defaultGetAllAssistPosition, initDragLine, disposeDragLine } = useActionGuideLine();
 const isShowPreviewCursor = ref(true);
-const isMoving = ref(false);
 const translateX = ref(0);
 const parentElement = useParentElement();
 const previewCursorRef = ref<HTMLElement>();
 // 滚动增量
-const scrollDelta = ref(0);
+// const scrollDelta = ref(0);
 const previewTime = computed(() => {
-  return Math.abs(translateX.value * unref(getScaleUnit));
+  return Math.round(translateX.value * unref(getScaleUnit));
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
@@ -49,22 +47,10 @@ const handleInitGuideLine = () => {
     const assistPositions = defaultGetAllAssistPosition({
       editorData: toRaw(unref(getTimeLineEditorData)),
       scaleUnit: unref(getScaleUnit),
-      extendPos: [unref(getCursorTime) / unref(getScaleUnit)]
+      extendPos: [0, unref(getCursorTime) / unref(getScaleUnit)]
     });
     initDragLine({ assistPositions });
   }
-};
-// 吸附功能
-const handleAdsorption = () => {
-  const disList: number[] = [];
-  dragLineActionLine.assistPositions.forEach(item => {
-    const dis = Math.abs(item - (translateX.value + unref(scrollInfo.x.value)));
-    if (dis < Number(unref(getShareProps.adsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
-      disList.push(item);
-      const minDis = Math.min(...disList);
-      translateX.value = minDis - unref(scrollInfo.x.value);
-    }
-  });
 };
 // 鼠标移动更新预览光标位置
 const updateTranslateX = realClientX => {
@@ -77,39 +63,51 @@ const updateTranslateX = realClientX => {
     setPreviewCursorState({ time: unref(getTimeLineMaxEndTime) });
   }
 };
+// 吸附功能
+const handleAdsorption = () => {
+  const disList: number[] = [];
+  dragLineActionLine.assistPositions.forEach(item => {
+    const dis = Math.abs(item - translateX.value);
+    if (dis < Number(unref(getShareProps.adsorptionDistance)) && dis < Number.MAX_SAFE_INTEGER) {
+      disList.push(item);
+      const minDis = Math.min(...disList);
+      const curTranslateX = minDis;
+      updateTranslateX(curTranslateX);
+    }
+  });
+};
+
 watchEffect(() => {
   const state =
     Math.abs(unref(getCursorTime) - unref(previewTime)) >
     unref(getScaleUnit) * Number(getShareProps.adsorptionDistance);
   isShowPreviewCursor.value = state;
 });
-watch(
-  () => scrollInfo.x.value,
-  (newValue, oldValue) => {
-    scrollDelta.value = newValue - oldValue;
-  }
-);
+// watch(
+//   () => scrollInfo.x.value,
+//   (newValue, oldValue) => {
+//     scrollDelta.value = newValue - oldValue;
+//   }
+// );
 useEventListener(parentElement, 'mousemove', (event: MouseEvent) => {
-  isMoving.value = true;
-  scrollDelta.value = 0;
+  // scrollDelta.value = 0;
   const realClientX =
     event.clientX - Number(getShareProps.leftOffset) - timeLineEditorViewSize.left.value + scrollInfo.x.value;
   updateTranslateX(realClientX);
   getShareProps.autoAdsorption && handleAdsorption();
 });
-useEventListener(parentElement, 'mouseleave', () => {
-  isMoving.value = false;
-});
-useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
-  const curTranslateX = translateX.value + scrollDelta.value;
-  updateTranslateX(curTranslateX);
-});
+// useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
+//   const curTranslateX = translateX.value + scrollDelta.value;
+//   updateTranslateX(curTranslateX);
+// });
 onMounted(() => {
-  handleInitGuideLine();
-});
-onBeforeUnmount(() => {
   disposeDragLine();
+  handleInitGuideLine();
+  translateX.value = unref(getCursorTime) / unref(getScaleUnit);
 });
+// onBeforeUnmount(() => {
+//   disposeDragLine();
+// });
 </script>
 
 <style scoped lang="scss">

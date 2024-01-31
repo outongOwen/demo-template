@@ -36,7 +36,6 @@
 
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core';
-import { useActionGuideLine } from '../../hooks';
 import { useTimeLineStore } from '../../store';
 import DragGuideLine from './dragGuideLine/index.vue';
 import TimeLineRow from './timeLineRow/index.vue';
@@ -57,8 +56,7 @@ const timeLineInnerWidth = computed(() => {
 const handleContextMenu = (event: MouseEvent) => {
   event.preventDefault();
 };
-// 注册辅助线
-useActionGuideLine();
+
 onMounted(() => {
   setTimeLineEditorDomRef(timeLineRef.value);
 });

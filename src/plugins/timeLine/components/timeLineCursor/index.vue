@@ -50,7 +50,7 @@ const {
   getTimeLineMaxEndTime,
   enginePause,
   getScrollDomSize,
-  setPreviewCursorState
+  setInteractState
 } = useTimeLineStore();
 const { dragLineActionLine, defaultGetAllAssistPosition, initDragLine, disposeDragLine } = useActionGuideLine();
 const cursorLineRef = ref<HTMLElement>();
@@ -74,7 +74,7 @@ const restrictRectModifier = reactiveComputed(() => {
     outer: timeLineEditorInnerRef.value!,
     offset: {
       top: 0,
-      left: 0,
+      left: -1,
       bottom: 0,
       right: 0
     }
@@ -165,27 +165,39 @@ const handleInitGuideLine = () => {
 };
 // 拖拽开始
 const handleMoveStart = (event: DragEvent) => {
+  setInteractState({
+    target: 'cursor',
+    type: 'dragmove',
+    stage: 'start',
+    active: true
+  });
   enginePause();
   targetDragEvent.value = event;
   handleInitGuideLine();
-  setPreviewCursorState({ state: false });
   enginePause();
 };
 // 拖拽中
 const handleMove = (event: DragEvent) => {
+  setInteractState({
+    stage: 'move'
+  });
   targetDragEvent.value = event;
   const target = event.target;
-  const { x } = target.dataset;
-  let curLeft = parseFloat(x || '0') + event.dx;
+  const { x = '0' } = target.dataset;
+  let curLeft = parseFloat(x) + event.dx;
   curLeft = Math.round(curLeft / unref(getFrameWidth)) * unref(getFrameWidth);
   setCursorTime(Math.round(curLeft * unref(getScaleUnit)));
 };
 // 拖拽结束
 const handleMoveEnd = () => {
+  setInteractState({
+    target: '',
+    stage: 'end',
+    active: false
+  });
   scrollOffsetX.value = 0;
   targetDragEvent.value = null;
   disposeDragLine();
-  setPreviewCursorState({ state: true });
 };
 // 初始化
 const initInteract = () => {
@@ -224,13 +236,9 @@ watch(
   }
 );
 watchEffect(() => {
-  nextTick(() => {
-    if (getTimeLineEditorDomRef.value) {
-      timeLineEditorInnerRef.value = getTimeLineEditorDomRef.value.firstChild as HTMLElement;
-      interactable.value && interactable.value.unset();
-      initInteract();
-    }
-  });
+  if (getCursorTime.value > getTimeLineMaxEndTime.value) {
+    setCursorTime(getTimeLineMaxEndTime.value);
+  }
 });
 watch(
   () => scrollInfo.x.value,
@@ -245,6 +253,15 @@ useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
   if (targetDragEvent.value) {
     targetDragEvent.value!.interaction.move();
   }
+});
+onMounted(() => {
+  nextTick(() => {
+    if (getTimeLineEditorDomRef.value) {
+      timeLineEditorInnerRef.value = getTimeLineEditorDomRef.value.firstChild as HTMLElement;
+      interactable.value && interactable.value.unset();
+      initInteract();
+    }
+  });
 });
 // dom卸载之前
 onBeforeUnmount(() => {

@@ -7,6 +7,17 @@ interface PreviewCursorState {
   state: boolean;
   time: number;
 }
+interface InteractState {
+  target: 'action' | 'cursor' | '';
+  type: 'dragmove' | 'resizemove' | '';
+  stage: 'start' | 'move' | 'end' | '';
+  active: boolean;
+  id: string;
+}
+interface EngineState {
+  isPlaying: boolean;
+  isPaused: boolean;
+}
 export const useTimeLineStore = createGlobalState(() => {
   // 共享props数据
   const shareProps = ref<TimeLineEditorProps>({});
@@ -15,9 +26,22 @@ export const useTimeLineStore = createGlobalState(() => {
   // 时间引擎
   const engine = shallowRef<ITimelineEngine>(new TimelineEngine());
   // 时间引擎状态
-  const engineState = reactive({
+  const engineState = reactive<EngineState>({
     isPlaying: false,
     isPaused: true
+  });
+  // 交互状态
+  const interactState = reactive<InteractState>({
+    target: '',
+    type: '',
+    stage: '',
+    active: false,
+    id: ''
+  });
+  // 预览指针开启状态
+  const previewCursorState = reactive<PreviewCursorState>({
+    state: false,
+    time: 0
   });
   // 时间线数据
   const timeLineEditorData = ref<TimelineRow[]>([]);
@@ -31,11 +55,6 @@ export const useTimeLineStore = createGlobalState(() => {
   const timeLineEditorDomSize = useElementSize(timeLineEditorDomRef);
   // 剪辑区域视图信息
   const timeLineEditorViewSize = useElementBounding(timeLineEditorDomRef);
-  // 预览指针状态
-  const previewCursorState = reactive<PreviewCursorState>({
-    state: false,
-    time: 0
-  });
   /** *******************getters**************************/
 
   const getters = {
@@ -81,12 +100,13 @@ export const useTimeLineStore = createGlobalState(() => {
       return Number(shareProps.value.scaleSmallCellMs) / Number(shareProps.value.scaleSmallCellWidth);
     }),
     getPreviewCursorState: reactiveComputed(() => {
-      const state = previewCursorState.state && shareProps.value.previewCursor && !engineState.isPlaying;
       return {
-        state,
+        state:
+          previewCursorState.state && shareProps.value.previewCursor && engineState.isPaused && !interactState.active,
         time: previewCursorState.time
       };
-    })
+    }),
+    getInteractState: reactiveComputed(() => interactState)
   };
 
   /** ********************actions*************************/
@@ -101,9 +121,10 @@ export const useTimeLineStore = createGlobalState(() => {
     setEngine: outerEngine => {
       engine.value = outerEngine;
     },
-    setEngineState: ({ isPlaying, isPaused }: { isPlaying?: boolean; isPaused?: boolean }) => {
-      isPlaying !== undefined && (engineState.isPlaying = isPlaying);
-      isPaused !== undefined && (engineState.isPaused = isPaused);
+    setEngineState: (state: EngineState) => {
+      const { isPaused, isPlaying } = state;
+      engineState.isPlaying = isPlaying ?? engineState.isPlaying;
+      engineState.isPaused = isPaused ?? engineState.isPaused;
     },
     setTimeLineEditorData: data => {
       timeLineEditorData.value = data;
@@ -112,12 +133,26 @@ export const useTimeLineStore = createGlobalState(() => {
       timeLineEditorDomRef.value = dom;
     },
     /**
+     * @description 设置交互状态
+     * @param state
+     * @returns
+     */
+    setInteractState: (state: Partial<InteractState>) => {
+      const { target, type, stage, active, id } = state;
+      interactState.type = type ?? interactState.type;
+      interactState.stage = stage ?? interactState.stage;
+      interactState.active = active ?? interactState.active;
+      interactState.id = id ?? interactState.id;
+      interactState.target = target ?? interactState.target;
+    },
+    /**
      * @description 设置预览指针状态
      */
-    setPreviewCursorState: ({ state, time }: Partial<PreviewCursorState>) => {
-      state !== undefined && (previewCursorState.state = state);
-      time !== undefined && (previewCursorState.time = time);
+    setPreviewCursorState: (state: Partial<PreviewCursorState>) => {
+      const { state: cursorSate, time } = state;
+      previewCursorState.state = cursorSate ?? previewCursorState.state;
       if (time !== undefined) {
+        previewCursorState.time = time;
         const result = engine.value.setTime(time);
         result && engine.value.reRender();
       }
@@ -141,9 +176,9 @@ export const useTimeLineStore = createGlobalState(() => {
      * @description 根据位置设置光标
      * @param posX 当前位置
      * @type {number}
-     * @returns {void}
+     * @returns {number} 当前时间
      */
-    setCursorTimeByPos: (clientX: number) => {
+    setCursorTimeByPos: (clientX: number): number => {
       const posX =
         clientX - (timeLineEditorViewSize.left.value + Number(shareProps.value.leftOffset!)) + scrollInfo.x.value;
       const curX = Math.round(posX / Number(getters.getFrameWidth.value)) * Number(getters.getFrameWidth.value);
@@ -151,6 +186,7 @@ export const useTimeLineStore = createGlobalState(() => {
       time = time < 0 ? 0 : time;
       time = time > getters.getTimeLineMaxEndTime.value ? getters.getTimeLineMaxEndTime.value : time; //  限制0-duration;
       actions.setCursorTime(Math.round(time)); // seek时间
+      return Math.round(time);
     },
     /**
      * @description 引擎播放

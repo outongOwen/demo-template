@@ -21,19 +21,20 @@
       <div ref="actionRightStretchRef" class="action-right-stretch" />
     </div>
     <div class="wh-full">
-      <!-- 随机背景色 -->
-      <!-- <p class="of-hidden wh-full">
+      <!-- 随机背景色  -->
+      <p class="of-hidden wh-full">
         {{ actionItem.start }}
         {{ actionItem.end }}
         {{ actionItem.end - actionItem.start }}
-        {{ frameWidth }}
-      </p> -->
+        {{ getCursorTime }}
+        <!-- {{ frameWidth }} -->
+      </p>
 
       <!-- <n-slider /> -->
-      <img
+      <!-- <img
         src="https://dao-library.54traveler.com/dcr-our/video/gaojiasuo.jpeg"
         class="wh-full object-cover overflow-hidden border-rd-2px"
-      />
+      /> -->
     </div>
   </div>
 </template>
@@ -73,7 +74,7 @@ const {
   getShareEmits,
   getTimeLineEditorData,
   scrollInfo,
-  setPreviewCursorState
+  setInteractState
 } = useTimeLineStore();
 // 辅助线hook
 const {
@@ -100,11 +101,6 @@ const scrollOffset = reactive({
 });
 const isSelected = computed(() => {
   return Boolean(timeLineEditorAreaContext.selectedActionIds.value.includes(unref(actionItem).id));
-});
-watch(isSelected, state => {
-  state
-    ? timeLineEditorAreaContext.selectedActionRefs.set(actionItem.value.id, actionRef.value!)
-    : timeLineEditorAreaContext.selectedActionRefs.delete(actionItem.value.id);
 });
 const { width: timeLineEditorWrapWidth, height: timeLineEditorWrapHeight } = useElementSize(timeLineEditorInnerRef);
 const actionItemSize = reactiveComputed(() => {
@@ -157,10 +153,10 @@ const adsorptionSnapModifier = reactiveComputed(() => {
     targets: [
       (x, y) => {
         let adsorptionPos = x;
-        const width = actionItemSize.width;
-        const disListLeft: number[] = [];
-        const disListRight: number[] = [];
         if (getShareProps.autoAdsorption) {
+          const width = actionItemSize.width;
+          const disListLeft: number[] = [];
+          const disListRight: number[] = [];
           dragLineActionLine.assistPositions.forEach(item => {
             const dis = Math.abs(item - adsorptionPos);
             const dis2 = Math.abs(item - (adsorptionPos + width));
@@ -250,14 +246,12 @@ const handleMouseDown = () => {
   const el = unrefElement(actionRef);
   if (!el) return;
   el.style.zIndex = '9';
-  setPreviewCursorState({ state: false });
 };
 // 鼠标移动抬起
 const handleMouseUp = () => {
   const el = unrefElement(actionRef);
   if (!el) return;
   el.style.zIndex = 'auto';
-  setPreviewCursorState({ state: true });
 };
 // 右键菜单
 const handleContextMenu = (e: MouseEvent) => {
@@ -305,6 +299,13 @@ const handleUpdateLeft = (left: number) => {
 };
 // 开始拖拽移动
 const handleMoveStart = (e: DragEvent) => {
+  setInteractState({
+    target: 'action',
+    type: 'dragmove',
+    stage: 'start',
+    active: true,
+    id: actionItem.value.id
+  });
   handleInitGuideLine();
   timeLineEditorAreaContext.setSelectedActionId(unref(actionItem).id);
   enginePause();
@@ -322,6 +323,9 @@ const handleMoveStart = (e: DragEvent) => {
 };
 // 拖拽移动中
 const handleMove = (e: DragEvent) => {
+  setInteractState({
+    stage: 'move'
+  });
   const target = e.target;
   targetDragEvent.value = e;
   const { left = '0', width = '0' } = target.dataset;
@@ -345,6 +349,12 @@ const handleMove = (e: DragEvent) => {
 };
 // 拖拽移动结束
 const handleMoveEnd = (e: DragEvent) => {
+  setInteractState({
+    stage: 'end',
+    active: false,
+    id: '',
+    target: ''
+  });
   const target = e.target;
   const { left, width } = target.dataset;
   target.style.transform = `translateY(0px)`;
@@ -360,8 +370,8 @@ const handleMoveEnd = (e: DragEvent) => {
     action: actionItem.value,
     editorData: unref(getTimeLineEditorData)!
   });
-  deltaY.value = 0;
   targetDragEvent.value = null;
+  deltaY.value = 0;
   scrollOffset.x = 0;
   scrollOffset.y = 0;
   timeLineEditorAreaContext.dropzoneInfo.isMoving = false;
@@ -374,6 +384,13 @@ const handleMoveEnd = (e: DragEvent) => {
 };
 // 开始拖拽缩放
 const handleResizeStart = (e: ResizeEvent) => {
+  setInteractState({
+    type: 'resizemove',
+    stage: 'start',
+    active: true,
+    id: actionItem.value.id,
+    target: 'action'
+  });
   targetDragEvent.value = e;
   const dir = e.edges?.left ? 'left' : 'right';
   timeLineEditorAreaContext.setSelectedActionId(unref(actionItem).id);
@@ -391,6 +408,12 @@ const handleResizeStart = (e: ResizeEvent) => {
 };
 // 拖拽缩放结束
 const handleResizeEnd = (e: ResizeEvent) => {
+  setInteractState({
+    stage: 'end',
+    active: false,
+    id: '',
+    target: ''
+  });
   targetDragEvent.value = null;
   scrollOffset.x = 0;
   scrollOffset.y = 0;
@@ -408,6 +431,9 @@ const handleResizeEnd = (e: ResizeEvent) => {
 };
 // 拖拽缩放中
 const handleResize = (e: ResizeEvent) => {
+  setInteractState({
+    stage: 'move'
+  });
   targetDragEvent.value = e;
   const target = e.target;
   const dir = e.edges?.left ? 'left' : 'right';
@@ -464,6 +490,7 @@ const initDraggable = (interactInst: Interactable) => {
     onstart: handleMoveStart,
     onmove: handleMove,
     onend: handleMoveEnd,
+    enabled: !actionItem.value.disable,
     autoScroll: {
       container: unrefElement(getTimeLineEditorDomRef),
       ...toRaw(getShareProps.autoScroll),
@@ -485,6 +512,7 @@ const initDragResize = (interactInst: Interactable) => {
     onstart: handleResizeStart,
     onmove: handleResize,
     onend: handleResizeEnd,
+    enabled: !actionItem.value.disable,
     autoScroll: {
       container: unrefElement(getTimeLineEditorDomRef),
       ...toRaw(getShareProps.autoScroll),
@@ -514,6 +542,11 @@ const initInteractable = () => {
   initDragResize(interactInst);
   initAutoScroll(interactInst);
 };
+watch(isSelected, state => {
+  state
+    ? timeLineEditorAreaContext.selectedActionRefs.set(actionItem.value.id, actionRef.value!)
+    : timeLineEditorAreaContext.selectedActionRefs.delete(actionItem.value.id);
+});
 watch([() => scrollInfo.x.value, () => scrollInfo.y.value], ([newXValue, newYValue], [preXValue, preYValue]) => {
   if (targetDragEvent.value) {
     scrollOffset.x += newXValue - preXValue;
@@ -528,11 +561,10 @@ useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
   }
 });
 onMounted(() => {
-  nextTick(() => {
-    if (!unrefElement(getTimeLineEditorDomRef)) return;
-    timeLineEditorInnerRef.value = unrefElement(getTimeLineEditorDomRef)!.firstChild as HTMLElement;
-    initInteractable();
-  });
+  if (!unrefElement(getTimeLineEditorDomRef)) return;
+  interactable.value?.unset();
+  timeLineEditorInnerRef.value = unrefElement(getTimeLineEditorDomRef)!.firstChild as HTMLElement;
+  initInteractable();
 });
 onBeforeUnmount(() => {
   interactable.value?.unset();
