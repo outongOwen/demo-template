@@ -9,7 +9,7 @@
     <div class="h50px w100%">
       <player-progress-bar
         v-model:time="playerCurrentTime"
-        :total-time="125280"
+        :total-time="getTimeLineMaxEndTime"
         :frame-rate="playerSettings.frameRate"
         @change="handlePlayerTimeChange"
       />
@@ -40,8 +40,8 @@ defineOptions({ name: 'PlayerControls' });
 const playerStore = usePlayerStore();
 const timeLineStore = useTimeLineStore();
 const { getIsFullscreenState, getProportion, getSpeed, getPlayerState } = storeToRefs(playerStore);
+const { getTimeLineMaxEndTime } = storeToRefs(timeLineStore);
 const playerCurrentTime = ref<number>(0);
-// const playerPlaying = ref<boolean>(false);
 const playerSpeed = computed({
   set: (value: number) => {
     playerStore.setSpeed(value);
@@ -59,26 +59,23 @@ const playerProportion = computed({
   }
 });
 const playerPlaying = computed(() => {
-  return getPlayerState.value.isPlaying;
+  return getPlayerState.value.playing && !getPlayerState.value.waiting;
 });
 /**
  * 播放
  */
 const playerPlay = () => {
-  const result = timeLineStore.timeLineRef?.play({ autoEnd: true });
-  result &&
-    playerStore.setPlayerState({
-      isPlaying: !playerPlaying.value
-    });
+  const result = timeLineStore.timeLineRef?.play({
+    // toTime: unref(getTimeLineMaxEndTime)
+    autoEnd: true
+  });
+  console.log(result);
 };
 /**
  * 暂停
  */
 const playerPause = () => {
   timeLineStore.timeLineRef?.pause();
-  playerStore.setPlayerState({
-    isPlaying: !playerPlaying.value
-  });
 };
 /**
  * seek
@@ -157,10 +154,59 @@ const handleCssFullscreenChange = (state: boolean) => {
 /**
  * 播放器时间更新
  */
-const handlePlayerTimeChange = (_time: number) => {
+const handlePlayerTimeChange = () => {
+  timeLineStore.timeLineRef?.pause();
   // 时间更新相关操作
-  // console.log(time, 'time');
+  timeLineStore.timeLineRef && timeLineStore.timeLineRef.setTime(playerCurrentTime.value);
 };
+const handlerPlay = () => {
+  playerStore.setPlayerState({
+    playing: true
+  });
+};
+const handlerPause = () => {
+  playerStore.setPlayerState({
+    playing: false
+  });
+};
+const handlerSetTimeByTick = ({ time }) => {
+  playerCurrentTime.value = time;
+};
+const handlerAfterSetTime = ({ time }) => {
+  playerCurrentTime.value = time;
+};
+// 封装销毁订阅事件
+const destroyListener = () => {
+  if (timeLineStore.timeLineRef) {
+    // 检查是否存在
+    timeLineStore.timeLineRef?.pause();
+    timeLineStore.timeLineRef?.listener.off('play', handlerPlay);
+    timeLineStore.timeLineRef?.listener.off('paused', handlerPause);
+    timeLineStore.timeLineRef?.listener.off('setTimeByTick', handlerSetTimeByTick);
+    timeLineStore.timeLineRef?.listener.off('afterSetTime', handlerAfterSetTime);
+  }
+};
+/**
+ * 销毁订阅事件
+ */
+watch(
+  () => timeLineStore.timeLineRef,
+  timeLineRef => {
+    if (!timeLineRef) return;
+    destroyListener();
+    timeLineRef.listener.on('play', handlerPlay);
+    timeLineRef.listener.on('paused', handlerPause);
+    timeLineRef.listener.on('setTimeByTick', handlerSetTimeByTick);
+    timeLineRef.listener.on('afterSetTime', handlerAfterSetTime);
+  },
+  {
+    immediate: true,
+    flush: 'post'
+  }
+);
+onBeforeUnmount(() => {
+  destroyListener();
+});
 </script>
 
 <style scoped></style>

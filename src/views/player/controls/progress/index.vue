@@ -45,7 +45,7 @@ interface Props {
 }
 interface Emits {
   (event: 'update:time', value: number): void;
-  (event: 'change', time: number): void;
+  (event: 'change'): void;
 }
 const props = withDefaults(defineProps<Props>(), {
   style: () => ({}),
@@ -64,7 +64,7 @@ const progressStep = computed(() => {
   return Math.round((1000 / frameRate.value) * 100000) / 100000;
 });
 const handleTimeChange = () => {
-  emits('change', currentTime.value);
+  emits('change');
 };
 </script>
 <style lang="scss" scoped>

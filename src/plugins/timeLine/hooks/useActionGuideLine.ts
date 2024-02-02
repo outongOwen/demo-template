@@ -1,6 +1,6 @@
 import { parserActionsToPositions, parserTimeToTransform } from '../utils';
 import type { TimelineAction, TimelineRow } from '../types';
-import type { DragActionGuideLine, TargetType } from '../components/timeLineEditorArea/dragGuideLine/index';
+import type { DragActionGuideLine, TargetType } from '../components/timeLineClipArea/dragGuideLine/index';
 const dragLineActionLine = reactive<DragActionGuideLine>({
   isMoving: false,
   targetType: 'action',
@@ -12,7 +12,7 @@ export default function useActionGuideLine() {
   const defaultGetAllAssistPosition = (data: {
     editorData: TimelineRow[];
     scaleUnit: number;
-    extendPos?: string[] | number[];
+    extendPos?: number[] | string[];
   }) => {
     const { editorData, scaleUnit, extendPos } = data;
     const otherActions: TimelineAction[] = [];
@@ -25,7 +25,8 @@ export default function useActionGuideLine() {
     if (extendPos?.length) {
       positions.push(...extendPos.map(item => Number(item)));
     }
-    return positions;
+    // 去重
+    return Array.from(new Set(positions));
   };
   /** 获取辅助线 */
   const defaultGetAssistPosition = (data: {
@@ -36,7 +37,7 @@ export default function useActionGuideLine() {
     hideCursor: boolean;
     cursorLeft: number;
     assistActionIds?: string[];
-    extendPos?: string[];
+    extendPos?: string[] | number[];
   }) => {
     const { editorData, assistActionIds, action, row, scaleUnit, cursorLeft, hideCursor, extendPos } = data;
     const otherActions: TimelineAction[] = [];
@@ -65,7 +66,7 @@ export default function useActionGuideLine() {
       positions.push(...extendPos.map(item => Number(item)));
     }
     positions.sort((a, b) => a - b);
-    return positions;
+    return Array.from(new Set(positions));
   };
   /** 获取当前移动标记 */
   const defaultGetMovePosition = (data: { start: number; end: number; scaleUnit: number; dir?: 'right' | 'left' }) => {

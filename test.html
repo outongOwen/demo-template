@@ -2,33 +2,46 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Interact.js 多元素吸附功能</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InteractJS Autoscroll</title>
+    <script src="https://unpkg.com/interactjs@1.10.11/dist/interact.min.js"></script>
   </head>
 
-  <body>
-    <div id="container">
-      <div class="item">1</div>
-      <div class="item">2</div>
-      <div class="item">3</div>
+  <body style="height: 200vh">
+    <!-- 添加足够的滚动高度 -->
+
+    <div
+      id="drag-element"
+      class="draggable"
+      style="
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background-color: lightblue;
+      "
+    >
+      Drag me!
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/3.1.7/interact.min.js"></script>
-
     <script>
-      const container = document.getElementById("container");
+      // 启用 autoScroll 插件
+      interact(".draggable").draggable({
+        autoScroll: true,
+        onmove: function (event) {
+          // 获取当前滚动位置
+          const scrollX =
+            window.pageXOffset || document.documentElement.scrollLeft;
+          const scrollY =
+            window.pageYOffset || document.documentElement.scrollTop;
 
-      const items = container.querySelectorAll(".item");
+          // 计算元素新的位置
+          const x = event.clientX + scrollX - event.clientX0;
+          const y = event.clientY + scrollY - event.clientY0;
 
-      // 创建一个网格
-      const grid = interact.snappers.grid({
-        x: 100,
-        y: 100,
+          // 更新元素位置
+          event.target.style.transform = `translate(${x}px, ${y}px)`;
+        },
       });
-
-      // 为每个元素添加吸附配置
-      for (const item of items) {
-        interact(item).snap(grid);
-      }
     </script>
   </body>
 </html>

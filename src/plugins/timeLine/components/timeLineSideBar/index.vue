@@ -5,32 +5,32 @@
  * index.vue
 -->
 <template>
-  <div class="timeLine-sideBar-container" :style="{ width: sideBarWidth + 'px', paddingTop: scaleHeight! + 'px' }">
+  <div class="timeLine-sideBar-container" :style="{ width: getShareProps.sideBarWidth + 'px' }">
     <div
-      ref="sideBarListRef"
+      class="top-cover"
+      :style="{
+        height: getShareProps.scaleHeight! + 'px'
+      }"
+    />
+    <div
       class="sideBar-list"
-      :class="{
-        'pos-center': !isOutRange
+      :style="{
+        top: -getScrollInfo.y + Number(getShareProps.scaleHeight) + 'px',
+        minHeight: `calc(100% - ${Number(getShareProps.scaleHeight)}px)`
       }"
     >
       <ul
-        ref="sideBarUlRef"
         class="sideBar-ul"
-        :class="{
-          'add-cover': isOutRange
-        }"
         :style="{
-          top: -scrollInfo.y.value + 'px',
-          rowGap: rowSpacing + 'px'
+          rowGap: getShareProps.rowSpacing + 'px'
         }"
       >
         <li
-          v-for="item in editorData"
+          v-for="item in getTimeLineEditorData"
           :key="item.id"
           :style="{
-            height: item?.rowHeight ? item.rowHeight + 'px' : rowHeight + 'px'
+            height: item?.rowHeight ? item.rowHeight + 'px' : getShareProps.rowHeight + 'px'
           }"
-          class="sideBar-ul-li"
         >
           <component
             :is="renderSideBarComponent(item)"
@@ -42,13 +42,12 @@
         </li>
       </ul>
     </div>
-    <div class="timeLine-divider" />
+    <div class="bottom-cover" />
   </div>
 </template>
 <script setup lang="ts">
 import type { VNodeChild } from 'vue';
-import { useResizeObserver } from '@vueuse/core';
-import { useTimeLineContext, useTimeLineStateContext } from '../../contexts';
+import { useTimeLineStore } from '../../store';
 // import { useMainRow } from '../../hooks';
 import type { TimelineRow } from '../../types';
 interface Expose {
@@ -60,32 +59,18 @@ interface Expose {
 defineOptions({
   name: 'TimeLineBar'
 });
-const { injectTimeLineContext } = useTimeLineContext();
-const { injectTimeLineStateContext } = useTimeLineStateContext();
-const timeLineStateContext = injectTimeLineStateContext();
-const timeLineContext = injectTimeLineContext();
-const isOutRange = ref(false);
 // const mainRowRef = ref<HTMLElement | null>();
-const sideBarListRef = ref<HTMLElement | null>();
-const sideBarUlRef = ref<HTMLElement | null>();
-const { sideBarWidth, editorData, rowHeight, sideBars, scaleHeight, rowSpacing, mainRowId } = toRefs(timeLineContext);
-const { scrollInfo } = timeLineStateContext;
-// const getMainRowRef = (el: HTMLElement | null, rowItem: TimelineRow) => {
-//   if (el && timeLineStateContext.hasMainRow.value && rowItem.type === unref(mainRowId)) {
-//     mainRowRef.value = el;
-//   }
-// };
+const { getShareProps, getTimeLineEditorData, getScrollInfo } = useTimeLineStore();
 // 获取当前组件实例
 const currentInstance = getCurrentInstance();
-// const { checkMainRowBottom } = useMainRow(mainRowRef);
 // 删除行
 const clearRow = (row: TimelineRow) => {
   console.log('删除行', row);
-  if (row.type === unref(mainRowId)) {
+  if (row.type === unref(getShareProps.mainRowId)) {
     row.actions = [];
   } else {
-    const rowIndex = unref(editorData)!.findIndex(item => item.id === row.id);
-    unref(editorData)!.splice(rowIndex, 1);
+    const rowIndex = unref(getTimeLineEditorData)!.findIndex(item => item.id === row.id);
+    unref(getTimeLineEditorData)!.splice(rowIndex, 1);
   }
 };
 //  隐藏行
@@ -104,12 +89,11 @@ const setMuteRow = (row: TimelineRow) => {
   console.log(row, '静音');
 };
 const renderSideBarComponent = (item: TimelineRow): VNodeChild | Component | null => {
-  return (sideBars?.value?.[item.sideBarId!]?.render && sideBars.value?.[item.sideBarId!]?.render!(item, {})) ?? null;
+  if (!getShareProps.sideBars) return null;
+  if (!item.sideBarId) return null;
+  if (!getShareProps.sideBars[item.sideBarId]) return null;
+  return getShareProps.sideBars[item.sideBarId].render!(item, {});
 };
-useResizeObserver([sideBarListRef, sideBarUlRef], () => {
-  isOutRange.value = sideBarUlRef.value!.clientHeight + 40 >= sideBarListRef.value!.clientHeight;
-  // checkMainRowBottom();
-});
 defineExpose<Expose>({
   setHideRow,
   setLockRow,
@@ -121,33 +105,43 @@ defineExpose<Expose>({
 <style scoped lang="scss">
 .timeLine-sideBar-container {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 8px;
-  // margin-right: 5px;
-  border-right: 1px solid #000;
+  align-items: flex-start;
+  position: relative;
+  justify-content: flex-start;
+  top: 0;
+  left: 0;
   box-shadow: 0 0 5px #000;
-  z-index: 999;
-  .pos-center {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
+  .top-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9;
+    background-color: v-bind('getShareProps.background');
   }
-  .add-cover {
-    margin: 20px 0;
+  .bottom-cover {
+    position: absolute;
+    height: 8px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background-color: v-bind('getShareProps.background');
   }
   .sideBar-list {
-    height: 100%;
-    overflow: hidden;
+    align-items: stretch;
+    display: flex;
+    flex-grow: 1;
+    flex-shrink: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 20px 0;
     .sideBar-ul {
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      position: relative;
-      .sideBar-ul-li {
-        overflow: hidden;
-      }
     }
   }
 }

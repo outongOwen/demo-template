@@ -9,7 +9,8 @@ export const usePlayerStore = defineStore('usePlayerStore', {
     resolution: defaultResolution,
     speed,
     playerState: {
-      isPlaying: false
+      playing: false,
+      waiting: false
     }
   }),
   getters: {
@@ -52,8 +53,8 @@ export const usePlayerStore = defineStore('usePlayerStore', {
       this.speed = speedValue;
     },
     // 设置播放状态
-    setPlayerState({ isPlaying }: PlayerState) {
-      this.playerState.isPlaying = isPlaying;
+    setPlayerState({ playing, waiting }: Partial<PlayerState>) {
+      this.playerState = { playing, waiting };
     }
   }
 });

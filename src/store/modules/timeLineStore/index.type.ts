@@ -8,6 +8,9 @@ interface ScaleInfo {
 }
 interface TimeLineStateType {
   timeLineRef: TimelineExpose | null;
+  timeLineMaxEndTime: number;
   scaleInfo: ScaleInfo;
+  previewCurrentState: boolean;
+  autoAdsorptionState: boolean;
 }
 export type { TimeLineStateType, ScaleInfo };

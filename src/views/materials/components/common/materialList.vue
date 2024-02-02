@@ -24,8 +24,8 @@
           :is="renderComponent"
           v-if="renderComponent"
           :item="item"
-          @getPreStatus="getPreStatus"
           @preview="handlePreview"
+          @preStatus="getPreStatus"
         />
       </template>
     </virtual-grid>
@@ -38,7 +38,11 @@
   <material-preview-modal
     v-model:showModal="showModal"
     :material-data="previewMaterial"
-    :material-type="options.key as PlayerType"
+    :material-type="
+      () => {
+        return options.key! as PlayerType;
+      }
+    "
   />
 </template>
 

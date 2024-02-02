@@ -7,204 +7,280 @@
 -->
 <template>
   <div ref="timeLineContainerRef" class="timeLine-container">
+    <TestPanel />
     <div class="timeLine-inner-wrap">
       <TimeLineSideBar v-if="showSideBar" />
       <div
-        ref="timelineEditorWrapRef"
-        class="timeLine-editor-wrap"
+        class="timeLine-editor-emitter-layer"
         :style="{
           width: showSideBar ? `calc(100% - ${sideBarWidth}px)` : '100%'
         }"
-        @click="handleWrapClick($event)"
-        @mousedown="handleMouseDown"
-        @mouseup="handleMouseUp"
       >
-        <TimeLineTimeArea />
-        <TimeLineCursor />
-        <TimeLineEditorArea>
-          <template #blankPlaceholder>
-            <slot name="blankPlaceholder" />
-          </template>
-        </TimeLineEditorArea>
+        <div
+          class="timeLine-editor-wrap"
+          @click="handleClick"
+          @wheel="handleEmitterLayerWheel"
+          @mousedown="handlerMouseDown"
+          @mouseup="handlerMouseUp"
+          @mouseenter="handleMouseEnter"
+          @mouseleave="handleMouseLeave"
+        >
+          <!-- <TimeLineTimeArea /> -->
+          <TimeLineScaleArea />
+          <TimeLineClipArea />
+          <TimeLineCursor v-if="editorData.length && !hideCursor" />
+          <TimeLinePreviewCursor v-if="getPreviewCursorState.state" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { consola } from 'consola';
-import { useTimeLineContext, useTimeLineStateContext, useTimeLineEditorAreaContext } from '../../contexts';
-import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
-import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
+import { isEqual } from 'lodash';
+import { watchArray } from '@vueuse/core';
+import { useTimeLineEditorAreaContext } from '../../contexts';
+// import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
+import TimeLineScaleArea from '../timeLineScaleArea/index.vue';
+import TimeLineClipArea from '../timeLineClipArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
-import type { TimelineAction, TimelineExpose } from '../../types';
+import TimeLinePreviewCursor from '../timeLinePreviewCursor/index.vue';
 import { useActionGuideLine } from '../../hooks';
+import type { TimelineExpose } from '../../types';
+import { useTimeLineStore, useTimeLineScaleStore } from '../../store';
+import TestPanel from './testPanel.vue';
 import { timeLineProps } from './props';
+import { useDefineEmits } from './emits';
+import type { TimelineEditorEmits } from './emits';
 import { sortTimeLineByType } from './index';
 defineOptions({
   name: 'TimeLine'
 });
 const props = defineProps(timeLineProps);
-const { provideTimeLineContext } = useTimeLineContext();
-const { provideTimeLineStateContext } = useTimeLineStateContext();
+const emits = defineEmits<TimelineEditorEmits>();
 const { provideTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
+const { showSideBar, sideBarWidth, editorData, actionEffects, background, rowSortTypes, hideCursor } = toRefs(props);
 const {
-  showSideBar,
-  sideBarWidth,
-  editorData,
-  actionEffects,
-  mainRow,
-  mainRowId,
-  background,
-  rowSortTypes,
-  scaleSmallCellMs,
-  scaleSmallCellWidth,
-  fps,
-  leftOffset
-} = toRefs(props);
-provideTimeLineContext(props);
-const timelineEditorWrapRef = ref<HTMLElement | null>();
-const mouseDown = ref(false);
-const mouseUp = ref(false);
+  setTimeLineEditorData,
+  setShareProps,
+  setShareEmits,
+  setCursorTime,
+  setCursorTimeByPos,
+  enginePause,
+  getEngine,
+  enginePlay,
+  getTimeLineMaxEndTime,
+  scrollBy,
+  scrollTo,
+  setEngineState,
+  getFrameWidth,
+  getScaleUnit,
+  setPreviewCursorState,
+  getPreviewCursorState,
+  getCursorTime,
+  getInteractState,
+  getEngineState
+} = useTimeLineStore();
+const { setSharePropsToScale } = useTimeLineScaleStore();
+const shareEmits = useDefineEmits(emits);
 const timeLineContainerRef = ref<HTMLElement>();
-const timeLineStateContext = provideTimeLineStateContext({
-  scaleUnit: computed(() => {
-    return unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!;
-  }),
-  frameWidth: computed(() => {
-    return 1000 / unref(fps)! / (unref(scaleSmallCellMs)! / unref(scaleSmallCellWidth)!);
-  }),
-  timeLineMaxEndTime: computed(() => {
-    if (unref(editorData)) {
-      const maxEnd = unref(unref(editorData)).reduce((prev, cur) => {
-        // 通过actions中最大end值计算最大宽度
-        const maxTime = cur.actions.reduce((aPrev: number, aCur: TimelineAction) => {
-          return Math.max(aPrev, aCur.end);
-        }, 0);
-        return Math.max(prev, maxTime);
-      }, 0);
-      return maxEnd;
-    }
-    return 0;
-  })
-});
-const timeLineEditorAreaContext = provideTimeLineEditorAreaContext({
-  editorData
-});
+const timeLineEditorAreaContext = provideTimeLineEditorAreaContext();
+const isMousedown = ref(false);
+const isMouseup = ref(false);
 // 注册辅助线
 useActionGuideLine();
-const handleMouseDown = () => {
-  mouseDown.value = true;
+const handlerMouseDown = () => {
+  isMousedown.value = true;
 };
-const handleMouseUp = () => {
-  mouseUp.value = true;
+const handlerMouseUp = () => {
+  isMouseup.value = true;
 };
-const handleWrapClick = e => {
-  if (mouseDown.value && mouseUp.value) {
-    const excludesClassName = ['timeLine-editor-action', 'left-handle', 'right-handle', 'cursor-line']; // 过滤轨道中不触发的dom类名
-    const { x: posX } = timelineEditorWrapRef.value!.getBoundingClientRect();
-    if (excludesClassName.indexOf(e.target.className) === -1) {
-      const left = e.clientX - posX - leftOffset.value; // 点击的位置距离刻度0的距离
-      const frameMs = 1000 / fps.value; // 轨道帧率，一帧多少ms.
-      let time = (left + timeLineStateContext.scrollInfo.x.value) * timeLineStateContext.scaleUnit.value; // 得到点击坐标对应的时间
-      time = time < 0 ? 0 : time;
-      time =
-        time > timeLineStateContext.timeLineMaxEndTime.value ? timeLineStateContext.timeLineMaxEndTime.value : time; //  限制0-duration;
-      time = Math.round(time / frameMs) * frameMs; // 对时间进行帧级对齐
-      timeLineStateContext.handleSetCursor(time); // seek时间
+// 点击事件
+const handleClick = (event: MouseEvent) => {
+  if (isMousedown.value && isMouseup.value) {
+    if (getPreviewCursorState.state && getEngineState.isPaused) {
+      setCursorTime(getPreviewCursorState.time);
+    } else {
+      const curTime = setCursorTimeByPos(event.clientX);
+      setPreviewCursorState({ time: curTime });
     }
+    enginePause();
     timeLineEditorAreaContext.clearSelected();
   }
-  mouseDown.value = false;
-  mouseUp.value = false;
+  isMousedown.value = false;
+  isMouseup.value = false;
 };
-watch(
-  [mainRow, mainRowId],
-  () => {
-    if (!mainRow.value) return;
-    if (mainRow.value && !mainRowId.value) {
-      consola.warn('mainRowId must be set');
-      return;
-    }
-    const findMainRow = Array.from(unref(editorData).filter(item => item.type === mainRowId?.value)).length;
-    if (findMainRow > 1) {
-      consola.warn('mainRowId must be unique');
-    }
-    if (findMainRow === 0) {
-      consola.warn('not find matched mainRowId in editorData');
-    }
-    timeLineStateContext.hasMainRow.value = findMainRow === 1;
-  },
-  { immediate: true }
-);
-watch(
-  [editorData, rowSortTypes, mainRowId],
-  () => {
-    // 主时间轴排序
-    if (timeLineStateContext.hasMainRow) {
-      const mainRowIds = unref(editorData).filter(item => item.type === mainRowId!.value);
-      if (mainRowIds.length) {
-        const mainRowIndex = unref(editorData).findIndex(item => item.type === mainRowId!.value);
-        unref(editorData).push(unref(editorData)[mainRowIndex]);
-        unref(editorData).splice(mainRowIndex, 1);
-      }
-    }
-    // 根据时间轴类型进行排序
-    if (rowSortTypes?.value?.length && editorData?.value?.length) {
-      const sortedEditorData = sortTimeLineByType(unref(editorData), unref(rowSortTypes)!);
-      unref(editorData).splice(0, unref(editorData).length);
-      unref(editorData).push(...sortedEditorData);
+// 滚轮事件
+const handleEmitterLayerWheel = (event: WheelEvent) => {
+  event.preventDefault();
+  const deltaX = event.deltaX;
+  const deltaY = event.deltaY;
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    nextTick(() => {
+      scrollBy({
+        left: deltaX
+      });
+    });
+  } else {
+    nextTick(() => {
+      scrollBy({
+        top: deltaY
+      });
+    });
+  }
+};
+// 鼠标移入事件
+const handleMouseEnter = () => {
+  if (!getInteractState.active) {
+    setPreviewCursorState({ state: true });
+  }
+};
+// 鼠标移出事件
+const handleMouseLeave = () => {
+  if (!getInteractState.active) {
+    setPreviewCursorState({ state: false, time: unref(getCursorTime) });
+  }
+};
+// watch(
+//   [mainRow, mainRowId],
+//   () => {
+//     if (!mainRow.value) return;
+//     if (mainRow.value && !mainRowId.value) {
+//       consola.warn('mainRowId must be set');
+//       return;
+//     }
+//     const findMainRow = Array.from(unref(editorData).filter(item => item.type === mainRowId?.value)).length;
+//     if (findMainRow > 1) {
+//       consola.warn('mainRowId must be unique');
+//     }
+//     if (findMainRow === 0) {
+//       consola.warn('not find matched mainRowId in editorData');
+//     }
+//     timeLineStateContext.hasMainRow.value = findMainRow === 1;
+//   },
+//   { immediate: true }
+// );
+const sortEditorDataByRowSortTypes = () => {
+  if (rowSortTypes?.value?.length && editorData?.value?.length) {
+    const sortedEditorData = sortTimeLineByType(unref(editorData), unref(rowSortTypes)!);
+    unref(editorData).splice(0, unref(editorData).length);
+    unref(editorData).push(...sortedEditorData);
+  }
+};
+watchArray(
+  rowSortTypes,
+  (newList, oldList) => {
+    // // 主时间轴排序
+    // if (mainRowId?.value) {
+    //   const mainRowIds = unref(editorData).filter(item => item.type === mainRowId!.value);
+    //   if (mainRowIds.length) {
+    //     const mainRowIndex = unref(editorData).findIndex(item => item.type === mainRowId!.value);
+    //     unref(editorData).push(unref(editorData)[mainRowIndex]);
+    //     unref(editorData).splice(mainRowIndex, 1);
+    //   }
+    // }
+    if (!isEqual(newList, oldList)) {
+      sortEditorDataByRowSortTypes();
     }
   },
   {
     immediate: true
   }
 );
-watchEffect(() => {
-  timeLineStateContext.engineRef.value.effects = actionEffects.value;
-});
-watchEffect(() => {
-  timeLineStateContext.engineRef.value.data = editorData.value;
-  unref(timeLineStateContext.engineRef).reRender();
-});
+watch(
+  () => unref(editorData).length,
+  () => {
+    if (unref(editorData).length) {
+      sortEditorDataByRowSortTypes();
+    }
+  }
+);
+watch(
+  getTimeLineMaxEndTime,
+  (time: number) => {
+    shareEmits.onMaxEndTimeChange(time);
+  },
+  {
+    immediate: true
+  }
+);
+watch(
+  editorData,
+  () => {
+    timeLineEditorAreaContext.editorData.value = unref(editorData);
+    unref(getEngine).data = editorData.value;
+    unref(getEngine).reRender();
+  },
+  { deep: true, immediate: true }
+);
+watch(
+  () => actionEffects.value,
+  () => {
+    unref(getEngine).effects = actionEffects.value;
+    unref(getEngine).reRender();
+  },
+  { deep: true, immediate: true }
+);
+const handlerPlay = () => {
+  setEngineState({
+    isPlaying: true,
+    isPaused: false
+  });
+};
+const handlerPause = () => {
+  setEngineState({
+    isPlaying: false,
+    isPaused: true
+  });
+};
+const handlerSetTimeByTick = ({ time }) => {
+  let left = time / unref(getScaleUnit);
+  left -= left % unref(getFrameWidth);
+  const curTime = Math.round(left * unref(getScaleUnit));
+  setCursorTime(curTime, false);
+};
 onMounted(() => {
-  unref(timeLineStateContext.engineRef).on('play', () => {
-    timeLineStateContext.isPlaying.value = true;
-  });
-  unref(timeLineStateContext.engineRef).on('paused', () => {
-    timeLineStateContext.isPlaying.value = false;
-  });
-  unref(timeLineStateContext.engineRef).on('setTimeByTick', ({ time }) => {
-    let left = (time * 1000) / timeLineStateContext.scaleUnit.value;
-    left -= left % timeLineStateContext.frameWidth.value;
-    const curTime = Math.round(left * timeLineStateContext.scaleUnit.value);
-    timeLineStateContext.handleSetCursor(curTime, false);
-  });
+  unref(getEngine).on('play', handlerPlay);
+  unref(getEngine).on('paused', handlerPause);
+  unref(getEngine).on('setTimeByTick', handlerSetTimeByTick);
+  setShareProps(props);
+  setSharePropsToScale(props);
+  setShareEmits(shareEmits);
+  setTimeLineEditorData(editorData.value);
 });
+onBeforeUnmount(() => {
+  enginePause();
+  unref(getEngine).off('play', handlerPlay);
+  unref(getEngine).off('paused', handlerPause);
+  unref(getEngine).off('setTimeByTick', handlerSetTimeByTick);
+});
+
 defineExpose<TimelineExpose>({
   get targetEl() {
     return timeLineContainerRef.value!;
   },
   get listener() {
-    return unref(timeLineStateContext.engineRef);
+    return unref(getEngine);
   },
   get isPlaying() {
-    return unref(timeLineStateContext.engineRef).isPlaying;
+    return unref(getEngine).isPlaying;
   },
   get isPaused() {
-    return unref(timeLineStateContext.engineRef).isPaused;
+    return unref(getEngine).isPaused;
   },
-  setPlayRate: unref(timeLineStateContext.engineRef).setPlayRate.bind(unref(timeLineStateContext.engineRef)),
-  getPlayRate: unref(timeLineStateContext.engineRef).getPlayRate.bind(unref(timeLineStateContext.engineRef)),
-  reRender: unref(timeLineStateContext.engineRef).reRender.bind(unref(timeLineStateContext.engineRef)),
+  setPlayRate: unref(getEngine).setPlayRate.bind(unref(getEngine)),
+  getPlayRate: unref(getEngine).getPlayRate.bind(unref(getEngine)),
+  reRender: unref(getEngine).reRender.bind(unref(getEngine)),
   setTime: time => {
-    timeLineStateContext.handleSetCursor(time);
+    setCursorTime(time);
   },
-  getTime: unref(timeLineStateContext.engineRef).getTime.bind(unref(timeLineStateContext.engineRef)),
-  play: (param: Parameters<TimelineExpose['play']>[0]) => unref(timeLineStateContext.engineRef).play({ ...param }),
-  pause: unref(timeLineStateContext.engineRef).pause.bind(unref(timeLineStateContext.engineRef)),
-  setScrollLeft: timeLineStateContext.setDeltaScrollLeft
+  getTime: unref(getEngine).getTime.bind(unref(getEngine)),
+  play: (param?: Parameters<TimelineExpose['play']>[0]): boolean => {
+    return enginePlay({ ...param });
+  },
+  pause: enginePause.bind(unref(getEngine)),
+  scrollTo
 });
 </script>
 <style lang="scss" scoped>
@@ -212,24 +288,28 @@ defineExpose<TimelineExpose>({
   background-color: v-bind('background');
   width: 100%;
   height: 100%;
+  user-select: none;
+  touch-action: none;
 
   .timeLine-inner-wrap {
     width: 100%;
     height: 100%;
     display: flex;
     position: relative;
-
     .timeLine-divider {
       height: 100%;
       width: 1px;
-      background-color: #000;
     }
 
-    .timeLine-editor-wrap {
+    .timeLine-editor-emitter-layer {
       height: 100%;
-      width: 100%;
-      position: relative;
       overflow: hidden;
+      .timeLine-editor-wrap {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        z-index: auto;
+      }
     }
   }
 }

@@ -3,8 +3,8 @@
     ref="blankPlaceholderRef"
     class="blank-placeholder-container"
     :style="{
-      paddingLeft: `${leftOffset}px`,
-      rowGap: `${rowSpacing}px`
+      paddingLeft: `${Number(getShareProps.leftOffset)}px`,
+      rowGap: `${Number(getShareProps.rowSpacing)}px`
     }"
   >
     <!-- <div class="top-cover">
@@ -19,11 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { toReactive } from '@vueuse/core';
-import { useTimeLineContext } from '../../../contexts';
-const { injectTimeLineContext } = useTimeLineContext();
-const timeLineContext = injectTimeLineContext();
-const { rowHeight, rowSpacing, rowBackground, rowActiveBackground, leftOffset } = toReactive(timeLineContext);
+import { useTimeLineStore } from '../../../store';
+const { getShareProps } = useTimeLineStore();
 const blankPlaceholderRef = ref<HTMLElement>();
 </script>
 
@@ -45,7 +42,7 @@ const blankPlaceholderRef = ref<HTMLElement>();
     overflow: hidden;
     color: #f5f5f5;
     &:hover {
-      background-color: v-bind('rowActiveBackground');
+      background-color: v-bind('getShareProps.rowActiveBackground');
     }
   }
 
@@ -53,9 +50,9 @@ const blankPlaceholderRef = ref<HTMLElement>();
     flex: 1;
   }
   .center-box {
-    height: v-bind("rowHeight + 'px'");
+    height: v-bind("getShareProps.rowHeight + 'px'");
     flex-shrink: 0;
-    background-color: v-bind('rowBackground');
+    background-color: v-bind('getShareProps.rowBackground');
   }
   .bottom-cover {
     flex: 1;
@@ -74,7 +71,7 @@ const blankPlaceholderRef = ref<HTMLElement>();
   .top-cover:hover,
   .bottom-cover:hover,
   .center-box:hover {
-    background-color: v-bind('rowActiveBackground');
+    background-color: v-bind('getShareProps.rowActiveBackground');
   }
 }
 </style>

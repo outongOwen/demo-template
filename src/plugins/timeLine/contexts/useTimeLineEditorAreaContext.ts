@@ -10,11 +10,19 @@ export interface DropzoneInfo {
   top: number;
   direction: 'center' | 'top' | 'bottom';
 }
+export interface ActionDragState {
+  isMoving: boolean;
+  isResizing: boolean;
+  rowId: string;
+  actionId: string;
+}
 export interface TimeLineEditorAreaContextProps {
   /**
    * @description: 时间线数据
    */
   editorData: Ref<TimelineRow[] | undefined>;
+  /** */
+  actionDragState: ActionDragState;
   /**
    * @description: 当前选中actionsRef集合(支持多选)
    * @default: []
@@ -38,6 +46,17 @@ export interface TimeLineEditorAreaContextProps {
    * @type {DropzoneInfo}
    */
   dropzoneInfo: ShallowReactive<DropzoneInfo>;
+  /**
+   * @description: 设置拖动状态
+   * @param {ActionDragState} state
+   * @returns {void}
+   */
+  setActionDragState: (state: ActionDragState) => void;
+  /**
+   * @description: 清除拖动状态
+   * @returns {void}
+   */
+  clearActionDragState: () => void;
   /**
    * @description: 释放
    * @returns {void}
@@ -76,6 +95,13 @@ const { useInject, useProvide } = useContext<TimeLineEditorAreaContextProps>('Ti
 export default function useTimeLineEditorAreaContext() {
   // 时间线数据
   const editorData = ref<TimelineRow[]>([]);
+  // 拖动状态
+  const actionDragState = reactive<ActionDragState>({
+    isResizing: false,
+    isMoving: false,
+    rowId: '',
+    actionId: ''
+  });
   // 当前选中actionsId数组(支持多选)
   const selectedActionIds = shallowRef<Array<string>>([]);
   // 当前选中actionsRef(支持多选)
@@ -98,7 +124,21 @@ export default function useTimeLineEditorAreaContext() {
     isMoving: false,
     dragId: ''
   });
-
+  // 设置拖动状态
+  const setActionDragState = (state: ActionDragState) => {
+    const { isMoving, isResizing, rowId, actionId } = state;
+    actionDragState.isResizing = isResizing;
+    actionDragState.isMoving = isMoving;
+    actionDragState.rowId = rowId;
+    actionDragState.actionId = actionId;
+  };
+  // 清除拖动状态
+  const clearActionDragState = () => {
+    actionDragState.isResizing = false;
+    actionDragState.isMoving = false;
+    actionDragState.rowId = '';
+    actionDragState.actionId = '';
+  };
   //  设置选中action的id
   const setSelectedActionId = (selectId, push = false) => {
     if (!selectId) {
@@ -151,6 +191,7 @@ export default function useTimeLineEditorAreaContext() {
   };
   const timeLineEditorAreaContextProps: TimeLineEditorAreaContextProps = {
     editorData,
+    actionDragState,
     selectedActionIds,
     clearSelected,
     selectedActionRefs,
@@ -159,11 +200,12 @@ export default function useTimeLineEditorAreaContext() {
     disposeDraggable,
     setSelectedActionId,
     setDropzoneInfo,
-    disposeDropzoneInfo
+    disposeDropzoneInfo,
+    setActionDragState,
+    clearActionDragState
   };
-  const provideTimeLineEditorAreaContext = ({ editorData: timelineData }: Partial<TimeLineEditorAreaContextProps>) => {
-    if (timelineData?.value) editorData.value = timelineData.value;
-    return useProvide(timeLineEditorAreaContextProps);
+  const provideTimeLineEditorAreaContext = (context?: Partial<TimeLineEditorAreaContextProps>) => {
+    return useProvide(Object.assign(timeLineEditorAreaContextProps, context || {}));
   };
   const injectTimeLineEditorAreaContext = () => {
     return useInject();

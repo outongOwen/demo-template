@@ -5,8 +5,12 @@ const serviceEnv: ServiceEnv = {
   dev: [
     // 测试环境
     {
-      urlPrefix: '^/mock',
-      target: 'http://localhost:8200'
+      urlPrefix: '^/openapi',
+      target: 'http://36.155.98.104:18901/openapi'
+    },
+    {
+      urlPrefix: '^/api',
+      target: 'http://36.155.98.104:18901/api',
     }
   ],
   test: [

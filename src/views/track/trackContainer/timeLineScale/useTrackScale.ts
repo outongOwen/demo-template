@@ -1,28 +1,20 @@
-import { useResizeObserver } from '@vueuse/core';
-import type { MaybeElementRef } from '@vueuse/core';
-import { isNumber } from 'lodash';
-import { useTimeLineStore } from '@/store';
 import { mockData } from '../mock';
 // 约定：带cell单词的代表小格子，grid代表一大格子。
 import { fpsRules, DURATION_BOUNDARY, MAX_WIDTH_PER_BIG_GRID, MIN_WIDTH_PER_BIG_GRID } from './const';
-export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, sideBarWidth: number, fps: number): void {
-  // 需要通过刻度尺宽度和时长来计算
-  const timeLineStore = useTimeLineStore();
-  const { getScaleInfo } = timeLineStore;
-
+interface StateType {
+  curFpsRule: Array<object>;
+  currentRule: { gridValue: number; cellCount: number; unit: string; msPerCell: number }; // 当前匹配的刻度尺渲染的刻度规则----动态
+  ruleScope: Array<object>; // 刻度范围列表。 // 动态
+  scaleCount: number; // 动态
+  scaleStep: number; // 得到slider两侧加减的步长。
+  pxPerMsInBaseRule: number;
+  preScaleSmallCellWidth: number; // 缓存的最小格宽度
+  scaleSmallCellWidth: number;
+  scaleLargeCellWidth: number;
+  scaleSmallCellMs: number;
+}
+export default function useTrackScale(fps: number) {
   const scaleWidth = ref(1000); // 刻度尺宽度
-  interface StateType {
-    curFpsRule: Array<object>;
-    currentRule: { gridValue: number; cellCount: number; unit: string; msPerCell: number }; // 当前匹配的刻度尺渲染的刻度规则----动态
-    ruleScope: Array<object>; // 刻度范围列表。 // 动态
-    scaleCount: number; // 动态
-    scaleStep: number; // 得到slider两侧加减的步长。
-    pxPerMsInBaseRule: number;
-    preScaleSmallCellWidth: number; // 缓存的最小格宽度
-    scaleSmallCellWidth: number;
-    scaleLargeCellWidth: number;
-    scaleSmallCellMs: number;
-  }
   const state: StateType = reactive({
     curFpsRule: [],
     currentRule: { gridValue: 15, cellCount: 10, unit: 'f', msPerCell: 1 }, // 当前匹配的刻度尺渲染的刻度规则----动态
@@ -35,7 +27,6 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
     scaleLargeCellWidth: 50,
     scaleSmallCellMs: 20
   });
-
   const curScale = ref(0);
   const baseRule: any = ref({
     // 参考刻度尺，缩放到最大的时候的刻度尺，基于此时的刻度进行缩放变化。
@@ -154,15 +145,8 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
     state.scaleSmallCellMs = ruleLists[index].msPerCell;
     // eslint-disable-next-line prettier/prettier
     state.currentRule = ruleLists[index];
-    // console.log(
-    //   'state.scaleSmallCellWidth: ',
-    //   state.scaleSmallCellWidth,
-    //   state.scaleLargeCellWidth,
-    //   state.scaleSmallCellMs,
-    //   state.currentRule
-    // );
   };
-  const updateScale = () => {
+  const updateScale = callback => {
     let index = ruleLists.findIndex((item: any) => {
       return item.gridValue === state.currentRule.gridValue && item.unit === state.currentRule.unit;
     });
@@ -178,14 +162,7 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
       val = 0;
     }
     curScale.value = val;
-    timeLineStore.setScaleInfo({ scale: unref(curScale), scaleStep: state.scaleStep });
-  };
-  const caclScale = () => {
-    state.ruleScope = [];
-    getCurFpsRule();
-    caclInitRule(); // 轨道时长变化，影响绘制
-    getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
-    getRuleScope(); // 得到刻度列表对应的缩放范围
+    callback && callback(val, state);
   };
   const updateTimeRule = () => {
     ruleLists.splice(0, ruleLists.length);
@@ -194,43 +171,25 @@ export default function useTrackScale(timeLineMainWrapRef: MaybeElementRef, side
     getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
     getRuleScope(); // 得到刻度列表对应的缩放范围
   };
-  watch(
-    () => getScaleInfo.scale,
-    val => {
-      if (val === curScale.value) return;
-      if (isNumber(val)) {
-        curScale.value = val;
-        changeScale(val);
-      }
-      timeLineStore.setScaleInfo({
-        scaleSmallCellWidth: state.scaleSmallCellWidth,
-        scaleLargeCellWidth: state.scaleLargeCellWidth,
-        scaleSmallCellMs: state.scaleSmallCellMs
-      });
-    }
-  );
-  const isFirst = ref(true);
-  useResizeObserver(timeLineMainWrapRef, entries => {
-    const entry = entries[0];
-    const { width } = entry.contentRect;
-    // console.log('width, height: ', width, height);
-    scaleWidth.value = width - sideBarWidth;
-    // console.error('state.scaleWidth:------++++ ', scaleWidth.value);
-    if (isFirst.value) {
-      isFirst.value = false;
-      caclScale();
-      changeScale(0);
-      // slider需要使用的数据：marks, curScale; 刻度尺需要的数据，当前规则下，小格子宽度、大格子宽度、msPerPx(scaleUnit); slider缩放的时候，能更新以上信息。
-      state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
-      timeLineStore.setScaleInfo({
-        scaleStep: state.scaleStep,
-        scaleSmallCellWidth: state.scaleSmallCellWidth,
-        scaleLargeCellWidth: state.scaleLargeCellWidth,
-        scaleSmallCellMs: state.scaleSmallCellMs
-      });
-      return;
-    }
+  const initScale = () => {
+    state.ruleScope = [];
+    state.preScaleSmallCellWidth = state.scaleSmallCellWidth;
+    getCurFpsRule();
+    caclInitRule(); // 轨道时长变化，影响绘制
+    getRuleListAndSlideKey(); // 根据最新的轨道尺寸及轨道时长，得到最新的刻度列表及关键缩放点列表。
+    getRuleScope(); // 得到刻度列表对应的缩放范围
+    changeScale(0);
+  };
+  const changeUpdateScale = callback => {
     updateTimeRule();
-    updateScale();
-  });
+    updateScale(callback);
+  };
+  return {
+    scaleWidth,
+    curScale,
+    state,
+    initScale,
+    changeScale,
+    changeUpdateScale
+  };
 }

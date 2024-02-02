@@ -1,6 +1,6 @@
 <template>
   <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item" />
-  <main-form ref="formRef"></main-form>
+  <!-- <main-form ref="formRef"></main-form> -->
 </template>
 
 <script setup lang="ts">
@@ -8,15 +8,15 @@ import { storeToRefs } from 'pinia';
 import { useTimeLineStore } from '@/store';
 import { useIconRender } from '@/hooks';
 import ActionBar from '../actionBar/index.vue';
-import MainForm from './distributeForm/index.vue';
+// import MainForm from './distributeForm/index.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
-const { getScaleInfo } = storeToRefs(timeLineStore);
-const formRef = ref();
-const barItemOptions: Track.ActionBarItem[] = [
+const { getScaleInfo, previewCurrentState, autoAdsorptionState } = storeToRefs(timeLineStore);
+// const formRef = ref();
+const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
     icon: 'mdi-magnet',
-    label: '轨道磁吸',
+    label: '主轨道磁吸',
     btnType: 'Button',
     key: 'mainTrackMagnet',
     checked: true,
@@ -61,8 +61,8 @@ const barItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'autoAlign',
     checked: true,
-    change: key => {
-      console.log(key);
+    change: (_key, state: boolean) => {
+      autoAdsorptionState.value = state;
     }
   },
   {
@@ -71,8 +71,8 @@ const barItemOptions: Track.ActionBarItem[] = [
     btnType: 'Button',
     key: 'previewAxis',
     checked: true,
-    change: key => {
-      console.log(key);
+    change: (_key, state: boolean) => {
+      previewCurrentState.value = state;
     }
   },
   {
@@ -84,7 +84,14 @@ const barItemOptions: Track.ActionBarItem[] = [
       const scale = getScaleInfo.value.scaleStep ? getScaleInfo.value.scaleStep - 0.01 : 0;
       barItemOptions[barItemOptions.length - 1].defaultValue = scale;
       timeLineStore.setScaleInfo({ scale });
-      timeLineStore.timeLineRef && timeLineStore.timeLineRef.setScrollLeft(0); // 滚动到0的位置
+      nextTick(() => {
+        // consol
+      }).then(() => {
+        timeLineStore.timeLineRef &&
+          timeLineStore.timeLineRef.scrollTo({
+            left: 0
+          }); // 滚动到0的位置
+      });
     }
   },
   {
@@ -101,7 +108,7 @@ const barItemOptions: Track.ActionBarItem[] = [
       timeLineStore.setScaleInfo({ scale: key });
     }
   }
-];
+]);
 watch(
   () => getScaleInfo.value && getScaleInfo.value.scaleStep,
   val => {
