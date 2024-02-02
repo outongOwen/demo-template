@@ -7,6 +7,7 @@
 -->
 <template>
   <div ref="timeLineContainerRef" class="timeLine-container">
+    <TestPanel />
     <div class="timeLine-inner-wrap">
       <TimeLineSideBar v-if="showSideBar" />
       <div
@@ -24,8 +25,9 @@
           @mouseenter="handleMouseEnter"
           @mouseleave="handleMouseLeave"
         >
-          <TimeLineTimeArea />
-          <TimeLineEditorArea />
+          <!-- <TimeLineTimeArea /> -->
+          <TimeLineScaleArea />
+          <TimeLineClipArea />
           <TimeLineCursor v-if="editorData.length && !hideCursor" />
           <TimeLinePreviewCursor v-if="getPreviewCursorState.state" />
         </div>
@@ -38,14 +40,16 @@
 import { isEqual } from 'lodash';
 import { watchArray } from '@vueuse/core';
 import { useTimeLineEditorAreaContext } from '../../contexts';
-import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
-import TimeLineEditorArea from '../timeLineEditorArea/index.vue';
+// import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
+import TimeLineScaleArea from '../timeLineScaleArea/index.vue';
+import TimeLineClipArea from '../timeLineClipArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
 import TimeLineSideBar from '../timeLineSideBar/index.vue';
 import TimeLinePreviewCursor from '../timeLinePreviewCursor/index.vue';
 import { useActionGuideLine } from '../../hooks';
 import type { TimelineExpose } from '../../types';
-import { useTimeLineStore } from '../../store';
+import { useTimeLineStore, useTimeLineScaleStore } from '../../store';
+import TestPanel from './testPanel.vue';
 import { timeLineProps } from './props';
 import { useDefineEmits } from './emits';
 import type { TimelineEditorEmits } from './emits';
@@ -78,6 +82,7 @@ const {
   getInteractState,
   getEngineState
 } = useTimeLineStore();
+const { setSharePropsToScale } = useTimeLineScaleStore();
 const shareEmits = useDefineEmits(emits);
 const timeLineContainerRef = ref<HTMLElement>();
 const timeLineEditorAreaContext = provideTimeLineEditorAreaContext();
@@ -240,6 +245,7 @@ onMounted(() => {
   unref(getEngine).on('paused', handlerPause);
   unref(getEngine).on('setTimeByTick', handlerSetTimeByTick);
   setShareProps(props);
+  setSharePropsToScale(props);
   setShareEmits(shareEmits);
   setTimeLineEditorData(editorData.value);
 });

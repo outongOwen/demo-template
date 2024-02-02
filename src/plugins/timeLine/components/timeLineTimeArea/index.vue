@@ -23,7 +23,7 @@ import { useTimeLineStore } from '../../store';
 defineOptions({
   name: 'TimeLineTimeArea'
 });
-const { getScaleUnit, getShareProps, scrollInfo } = useTimeLineStore();
+const { getScaleUnit, getShareProps, getScrollInfo } = useTimeLineStore();
 const ruleRef = ref(); // canvasDom
 const timeLineRuleRef = ref(); // 刻度尺容器ref
 const ctx = ref(); // canvas上下文对象
@@ -32,8 +32,8 @@ const state: any = reactive({
   pxPerFullScreen: 900 // px
 });
 const offsetLeft = computed(() => {
-  return Number(getShareProps.leftOffset) - scrollInfo.x.value > 0
-    ? Number(getShareProps.leftOffset) - scrollInfo.x.value
+  return Number(getShareProps.leftOffset) - getScrollInfo.x > 0
+    ? Number(getShareProps.leftOffset) - getScrollInfo.x
     : 0;
 });
 const drawRule = () => {
@@ -94,7 +94,7 @@ const calcCanvasSize = () => {
 watch(
   () => {
     const scrollLeft =
-      scrollInfo.x.value > Number(getShareProps.leftOffset) ? scrollInfo.x.value - Number(getShareProps.leftOffset) : 0;
+      getScrollInfo.x > Number(getShareProps.leftOffset) ? getScrollInfo.x - Number(getShareProps.leftOffset) : 0;
     return scrollLeft;
   },
   scrollLeft => {
@@ -116,7 +116,7 @@ onMounted(() => {
   drawRule();
 });
 </script>
-<style scoped>
+<style scoped lang="scss">
 .timeLine-rule-container {
   position: relative;
   top: 0;

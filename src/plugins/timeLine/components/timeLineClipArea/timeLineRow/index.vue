@@ -28,17 +28,15 @@
 
 <script setup lang="ts">
 import interact from 'interactjs';
+import { useResizeObserver, unrefElement } from '@vueuse/core';
 import type { Interactable } from '@interactjs/types';
 import { useTimeLineEditorAreaContext } from '../../../contexts';
 import type { TimelineRow } from '../../../types';
 import TimeLineAction from '../timeLineAction/index.vue';
 import { getRowById, checkIntersectionTime, parserTransformToTime } from '../../../utils';
-import { useTimeLineStore } from '../../../store';
+import { useTimeLineStore, useTimeLineClipStore } from '../../../store';
 interface Props {
   rowItem: TimelineRow;
-}
-interface Expose {
-  rowRef: Ref<HTMLElement | undefined>;
 }
 defineOptions({
   name: 'TimeLineRow'
@@ -47,8 +45,20 @@ const props = defineProps<Props>();
 const { rowItem } = toRefs(props);
 const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
-const { timeLineEditorViewSize, getScaleUnit, getShareProps, getTimeLineEditorData } = useTimeLineStore();
+const { getTimeLineClipViewSize, getScaleUnit, getShareProps, getTimeLineEditorData, getTimeLineClipDomRef } =
+  useTimeLineStore();
+const { setRowY, deleteRowY } = useTimeLineClipStore();
 const rowRef = ref<HTMLElement>();
+useResizeObserver(getTimeLineClipDomRef, () => {
+  const target = unrefElement(rowRef);
+  if (!target) return;
+  const { top, bottom, height } = target.getBoundingClientRect();
+  setRowY(rowItem.value.id, {
+    top,
+    center: top + height / 2,
+    bottom
+  });
+});
 // 右键菜单
 const handleContextMenu = (event: MouseEvent) => {
   event.preventDefault();
@@ -58,7 +68,7 @@ const handleContextMenu = (event: MouseEvent) => {
 const dragJudge = event => {
   const dropzoneElement = event.target;
   const draggableEvent = event.dragEvent;
-  const { top: cTop } = timeLineEditorViewSize;
+  const { top: cTop } = getTimeLineClipViewSize;
   const { top: rTop, bottom: rBottom, height: rHeight } = dropzoneElement.getBoundingClientRect();
   const ty = rTop - unref(cTop);
   const cy = rTop - unref(cTop) + rHeight / 2;
@@ -91,9 +101,7 @@ const dragJudge = event => {
     timeLineEditorAreaContext.setDropzoneInfo(dropzoneId, cy, 'center');
   }
 };
-onBeforeUnmount(() => {
-  interact(rowRef.value!).unset();
-});
+// 初始化dropzone
 const initInteractDropzone = () => {
   interact(rowRef.value!).dropzone({
     accept: ({ dropzone, draggableElement }: { dropzone: Interactable; draggableElement: Element }) => {
@@ -120,8 +128,9 @@ const initInteractDropzone = () => {
 onMounted(() => {
   initInteractDropzone();
 });
-defineExpose<Expose>({
-  rowRef
+onBeforeUnmount(() => {
+  interact(rowRef.value!).unset();
+  deleteRowY(rowItem.value.id);
 });
 </script>
 

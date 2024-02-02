@@ -1,6 +1,6 @@
 import { parserActionsToPositions, parserTimeToTransform } from '../utils';
 import type { TimelineAction, TimelineRow } from '../types';
-import type { DragActionGuideLine, TargetType } from '../components/timeLineEditorArea/dragGuideLine/index';
+import type { DragActionGuideLine, TargetType } from '../components/timeLineClipArea/dragGuideLine/index';
 const dragLineActionLine = reactive<DragActionGuideLine>({
   isMoving: false,
   targetType: 'action',

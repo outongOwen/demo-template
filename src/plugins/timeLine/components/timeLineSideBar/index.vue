@@ -5,15 +5,7 @@
  * index.vue
 -->
 <template>
-  <div
-    class="timeLine-sideBar-container"
-    :style="{ width: getShareProps.sideBarWidth + 'px' }"
-    @wheel="
-      e => {
-        e.preventDefault();
-      }
-    "
-  >
+  <div class="timeLine-sideBar-container" :style="{ width: getShareProps.sideBarWidth + 'px' }">
     <div
       class="top-cover"
       :style="{
@@ -23,7 +15,7 @@
     <div
       class="sideBar-list"
       :style="{
-        top: -scrollInfo.y.value + Number(getShareProps.scaleHeight) + 'px',
+        top: -getScrollInfo.y + Number(getShareProps.scaleHeight) + 'px',
         minHeight: `calc(100% - ${Number(getShareProps.scaleHeight)}px)`
       }"
     >
@@ -51,7 +43,6 @@
       </ul>
     </div>
     <div class="bottom-cover" />
-    <div class="timeLine-divider" />
   </div>
 </template>
 <script setup lang="ts">
@@ -69,7 +60,7 @@ defineOptions({
   name: 'TimeLineBar'
 });
 // const mainRowRef = ref<HTMLElement | null>();
-const { getShareProps, getTimeLineEditorData, scrollInfo } = useTimeLineStore();
+const { getShareProps, getTimeLineEditorData, getScrollInfo } = useTimeLineStore();
 // 获取当前组件实例
 const currentInstance = getCurrentInstance();
 // 删除行
@@ -120,13 +111,12 @@ defineExpose<Expose>({
   top: 0;
   left: 0;
   box-shadow: 0 0 5px #000;
-  z-index: 11;
   .top-cover {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 99;
+    z-index: 9;
     background-color: v-bind('getShareProps.background');
   }
   .bottom-cover {

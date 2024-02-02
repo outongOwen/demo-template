@@ -1,13 +1,9 @@
-// @ts-nocheck
-/* eslint-disable */
-import type { TimelineAction, TimelineRow } from '../../../types';
-import type { DropzoneInfo } from '../../../contexts/useTimeLineEditorAreaContext';
-import { getRowById, getRowIndexByRowId, createNewRow, insertRowByIndex } from '../../../utils';
+import type { TimelineAction, TimelineRow } from '../types';
+import { getRowById, getRowIndexByRowId, createNewRow } from '../utils';
 /**
  * @description: 根据action拖拽掉落的位置判断数据操作方式
  * @param params
  * @param {TimelineAction} action
- * @type {DropzoneInfo}
  * @returns {void}
  */
 interface DropActionParams {
@@ -17,7 +13,7 @@ interface DropActionParams {
   action: TimelineAction;
   editorData: TimelineRow[];
 }
-export const useDropAction = ({ direction, targetRowId, fromRowId, action, editorData }: DropActionParams) => {
+export default function useDropAction({ direction, targetRowId, fromRowId, action, editorData }: DropActionParams) {
   if (direction === 'center') {
     if (targetRowId === fromRowId) return;
     const targetRow = getRowById(targetRowId, editorData);
@@ -44,4 +40,4 @@ export const useDropAction = ({ direction, targetRowId, fromRowId, action, edito
     editorData.splice(rowIndex + 1, 0, newRow);
   }
   fromRow.actions.length === 0 && editorData.splice(editorData.indexOf(fromRow), 1);
-};
+}

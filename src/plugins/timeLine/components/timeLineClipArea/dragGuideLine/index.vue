@@ -6,14 +6,14 @@
 -->
 <template>
   <div class="drag-guide-line-container">
-    <template v-if="dragLineActionLine.isMoving">
+    <template v-if="dragLineActionLine.isMoving && getShareProps.guideLine">
       <div
         v-for="(item, index) in lineList"
         :key="index"
         class="drag-column-line"
         :style="{
           left: `${item + Number(getShareProps.leftOffset)}px`,
-          top: `${scrollInfo.y.value}px`
+          top: `${getScrollInfo.y}px`
         }"
       />
     </template>
@@ -22,7 +22,7 @@
       class="drag-row-line"
       :style="{
         top: `${timeLineEditorAreaContext.dropzoneInfo.top - 0.5}px`,
-        left: `${scrollInfo.x.value}px`
+        left: `${getScrollInfo.x}px`
       }"
     />
   </div>
@@ -37,7 +37,7 @@ defineOptions({
 });
 const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
-const { getCursorTime, getScaleUnit, getShareProps, scrollInfo } = useTimeLineStore();
+const { getCursorTime, getScaleUnit, getShareProps, getScrollInfo } = useTimeLineStore();
 const { dragLineActionLine } = useActionGuideLine();
 const lineList = computed(() => {
   return dragLineActionLine.movePositions.filter(mItem => {

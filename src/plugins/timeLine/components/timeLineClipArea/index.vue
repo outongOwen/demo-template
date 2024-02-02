@@ -30,27 +30,41 @@
       </div>
     </div>
     <!-- <blank-placeholder v-else /> -->
-    <DragGuideLine v-if="getShareProps.guideLine" />
+    <DragGuideLine />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useElementSize } from '@vueuse/core';
-import { useTimeLineStore } from '../../store';
+import { useTimeLineStore, useTimeLineScaleStore } from '../../store';
 import DragGuideLine from './dragGuideLine/index.vue';
 import TimeLineRow from './timeLineRow/index.vue';
 // import BlankPlaceholder from './blankPlaceholder/index.vue';
 defineOptions({
-  name: 'TimeLineEditorArea'
+  name: 'TimeLineClipArea'
 });
 const timeLineRef = ref<HTMLElement>();
 const timeLineInnerRef = ref<HTMLElement>();
-// const minRowRef = ref<HTMLElement | null>();
-const { width: timeLineRefWidth } = useElementSize(timeLineRef);
-const { setTimeLineEditorDomRef, getShareProps, getTimeLineEditorData, getScaleUnit, getTimeLineMaxEndTime } =
-  useTimeLineStore();
+const {
+  setTimeLineClipDomRef,
+  getShareProps,
+  getTimeLineEditorData,
+  getScaleUnit,
+  getTimeLineMaxEndTime,
+  getTimeLineClipDomSize
+} = useTimeLineStore();
+const { setTimeLineClipDomRefToScale, setTimeLineClipInnerSize } = useTimeLineScaleStore();
 const timeLineInnerWidth = computed(() => {
-  return unref(timeLineRefWidth) + unref(getTimeLineMaxEndTime) / unref(getScaleUnit) - unref(timeLineRefWidth) / 4;
+  return (
+    unref(getTimeLineClipDomSize.width) +
+    unref(getTimeLineMaxEndTime) / unref(getScaleUnit) -
+    unref(getTimeLineClipDomSize.width) / 4
+  );
+});
+watchEffect(() => {
+  setTimeLineClipInnerSize({
+    width: timeLineInnerWidth.value,
+    height: unref(getTimeLineClipDomSize.height)
+  });
 });
 // 右键菜单
 const handleContextMenu = (event: MouseEvent) => {
@@ -58,7 +72,8 @@ const handleContextMenu = (event: MouseEvent) => {
 };
 
 onMounted(() => {
-  setTimeLineEditorDomRef(timeLineRef.value);
+  setTimeLineClipDomRef(timeLineRef.value);
+  setTimeLineClipDomRefToScale(timeLineRef.value!);
 });
 </script>
 

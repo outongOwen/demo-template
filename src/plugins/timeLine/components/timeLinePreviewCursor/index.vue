@@ -4,7 +4,7 @@
     ref="previewCursorRef"
     class="timeLine-preview-cursor-line"
     :style="{
-      transform: `translateX(${translateX - scrollInfo.x.value}px)`,
+      transform: `translateX(${translateX - getScrollInfo.x}px)`,
       left: `${Number(getShareProps.leftOffset) - 1}px`,
       top: `${Number(getShareProps.scaleHeight) / 2}px`,
       height: `calc(100% - ${Number(getShareProps.scaleHeight) / 2 + getScrollDomSize.height}px)`
@@ -22,14 +22,14 @@ defineOptions({
 const {
   getShareProps,
   getScrollDomSize,
-  timeLineEditorViewSize,
+  getTimeLineClipViewSize,
   getFrameWidth,
   getScaleUnit,
   setPreviewCursorState,
   getTimeLineMaxEndTime,
   getCursorTime,
   getTimeLineEditorData,
-  scrollInfo
+  getScrollInfo
 } = useTimeLineStore();
 const { dragLineActionLine, defaultGetAllAssistPosition, initDragLine, disposeDragLine } = useActionGuideLine();
 const isShowPreviewCursor = ref(true);
@@ -84,19 +84,18 @@ watchEffect(() => {
   isShowPreviewCursor.value = state;
 });
 // watch(
-//   () => scrollInfo.x.value,
+//   () => getScrollInfo.x,
 //   (newValue, oldValue) => {
 //     scrollDelta.value = newValue - oldValue;
 //   }
 // );
 useEventListener(parentElement, 'mousemove', (event: MouseEvent) => {
   // scrollDelta.value = 0;
-  const realClientX =
-    event.clientX - Number(getShareProps.leftOffset) - timeLineEditorViewSize.left.value + scrollInfo.x.value;
+  const realClientX = event.clientX - Number(getShareProps.leftOffset) - getTimeLineClipViewSize.left + getScrollInfo.x;
   updateTranslateX(realClientX);
   getShareProps.autoAdsorption && handleAdsorption();
 });
-// useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
+// useEventListener(getTimeLineClipDomRef, 'scroll', () => {
 //   const curTranslateX = translateX.value + scrollDelta.value;
 //   updateTranslateX(curTranslateX);
 // });
@@ -105,9 +104,9 @@ onMounted(() => {
   handleInitGuideLine();
   translateX.value = unref(getCursorTime) / unref(getScaleUnit);
 });
-// onBeforeUnmount(() => {
-//   disposeDragLine();
-// });
+onBeforeUnmount(() => {
+  setPreviewCursorState({ time: unref(getCursorTime) });
+});
 </script>
 
 <style scoped lang="scss">

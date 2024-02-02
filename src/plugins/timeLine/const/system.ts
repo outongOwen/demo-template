@@ -27,6 +27,9 @@ export const DEFAULT_GRID_X = 1;
 /** 默认吸附像素 */
 export const DEFAULT_ADSORPTION_DISTANCE = 6;
 /** 默认帧数 */
-export const DEFAULT_FPS = 25;
+export const DEFAULT_FPS = 30;
+/** 默认帧宽度 */
+export const DEFAULT_FRAME_WIDTH = 0.033;
 /** 默认可接受的帧率列表 */
-export const DEFAULT_FPS_LIST = [25, 30, 40, 60];
+export const DEFAULT_FPS_LIST = [24, 25, 30, 50, 60];
+export type DEFAULT_FPS_TYPE = 24 | 25 | 30 | 50 | 60;

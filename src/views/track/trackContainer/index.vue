@@ -60,7 +60,7 @@ const editorData = ref(mockData);
 const timeLineRef = ref<TimelineExpose>();
 const timeLineStore = useTimeLineStore();
 const sideBarWidth = ref(150);
-const fps = ref(25);
+const fps = ref(30);
 const { getScaleInfo, previewCurrentState, autoAdsorptionState } = storeToRefs(timeLineStore);
 const getScaleRender = (time: number, unit: 'f' | 's') => {
   return formatTime(time, fps.value, unit);
@@ -112,6 +112,7 @@ onMounted(() => {
   setTimeout(() => {
     // sideBarWidth.value = 0;
     // autoScrollOptions.enabled = false;
+    fps.value = 25;
   }, 3000);
 });
 </script>

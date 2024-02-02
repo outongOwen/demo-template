@@ -2,6 +2,7 @@
   <div
     ref="actionRef"
     class="timeLine-editor-action"
+    :class="{ 'active-action': isSelected }"
     :data-type="actionItem.type"
     :data-id="actionItem.id"
     :data-rowId="rowItem.id"
@@ -16,39 +17,28 @@
     @mouseup.stop="handleMouseUp"
     @contextmenu.stop="handleContextMenu"
   >
-    <div v-show="isSelected" class="action-action-box">
-      <div ref="actionLeftStretchRef" class="action-left-stretch" />
-      <div ref="actionRightStretchRef" class="action-right-stretch" />
-    </div>
-    <div class="wh-full">
+    <div v-show="isSelected" ref="actionLeftStretchRef" class="action-left-stretch" />
+    <div v-show="isSelected" ref="actionRightStretchRef" class="action-right-stretch" />
+    <div class="wh-full flex-center">
       <!-- 随机背景色  -->
-      <p class="of-hidden wh-full">
+      <div class="of-hidden wh-full">
         {{ actionItem.start }}
         {{ actionItem.end }}
         {{ actionItem.end - actionItem.start }}
-        {{ getCursorTime }}
-        <!-- {{ frameWidth }} -->
-      </p>
-
-      <!-- <n-slider /> -->
-      <!-- <img
-        src="https://dao-library.54traveler.com/dcr-our/video/gaojiasuo.jpeg"
-        class="wh-full object-cover overflow-hidden border-rd-2px"
-      /> -->
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import interact from 'interactjs';
-import { reactiveComputed, unrefElement, useEventListener, useElementSize } from '@vueuse/core';
+import { reactiveComputed, unrefElement, useEventListener, useElementSize, useElementBounding } from '@vueuse/core';
 import type { DragEvent, ResizeEvent, Interactable } from '@interactjs/types';
-import { useActionGuideLine } from '../../../hooks';
+import { useActionGuideLine, useDropAction } from '../../../hooks';
 import type { TimelineAction, TimelineRow } from '../../../types';
 import { useTimeLineEditorAreaContext } from '../../../contexts';
 import { parserTimeToTransform, parserTransformToTime } from '../../../utils';
-import { useTimeLineStore } from '../../../store';
-import { useDropAction } from './index';
+import { useTimeLineStore, useTimeLineClipStore } from '../../../store';
 // import { isActionCollision } from './helper';
 type Direction = 'left' | 'right';
 interface Props {
@@ -67,15 +57,17 @@ const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
 const {
   enginePause,
   getScaleUnit,
-  getTimeLineEditorDomRef,
+  getTimeLineClipDomRef,
   getFrameWidth,
   getCursorTime,
   getShareProps,
   getShareEmits,
   getTimeLineEditorData,
-  scrollInfo,
+  getScrollInfo,
   setInteractState
 } = useTimeLineStore();
+const { setActionX, deleteActionX } = useTimeLineClipStore();
+
 // 辅助线hook
 const {
   dragLineActionLine,
@@ -103,6 +95,15 @@ const isSelected = computed(() => {
   return Boolean(timeLineEditorAreaContext.selectedActionIds.value.includes(unref(actionItem).id));
 });
 const { width: timeLineEditorWrapWidth, height: timeLineEditorWrapHeight } = useElementSize(timeLineEditorInnerRef);
+const { left: actionLeft, right: actionRight } = useElementBounding(actionRef, {
+  immediate: true
+});
+watch([actionLeft, actionRight], () => {
+  setActionX(actionItem.value.id, rowItem.value.id, {
+    left: actionLeft.value,
+    right: actionRight.value
+  });
+});
 const actionItemSize = reactiveComputed(() => {
   return parserTimeToTransform(
     {
@@ -491,10 +492,10 @@ const initDraggable = (interactInst: Interactable) => {
     onmove: handleMove,
     onend: handleMoveEnd,
     enabled: !actionItem.value.disable,
-    autoScroll: {
-      container: unrefElement(getTimeLineEditorDomRef),
-      ...toRaw(getShareProps.autoScroll),
-      ...{ enabled: Boolean(getShareProps.autoScroll?.enabled) }
+    ignoreFrom: '.n-slider',
+    autoScroll: Boolean(getShareProps.autoScroll?.enabled) && {
+      container: unrefElement(getTimeLineClipDomRef),
+      ...toRaw(getShareProps.autoScroll)
     }
   });
 };
@@ -513,19 +514,17 @@ const initDragResize = (interactInst: Interactable) => {
     onmove: handleResize,
     onend: handleResizeEnd,
     enabled: !actionItem.value.disable,
-    autoScroll: {
-      container: unrefElement(getTimeLineEditorDomRef),
-      ...toRaw(getShareProps.autoScroll),
-      ...{ enabled: Boolean(getShareProps.autoScroll?.enabled) }
+    autoScroll: Boolean(getShareProps.autoScroll?.enabled) && {
+      container: unrefElement(getTimeLineClipDomRef),
+      ...toRaw(getShareProps.autoScroll)
     }
   });
 };
 // 初始化自动滚动监听事件
 const initAutoScroll = (interactInst: Interactable) => {
   interactInst &&
-    interactInst.on('autoscroll', event => {
-      if (targetDragEvent.value!.type === 'resizemove' && Boolean(getShareProps.autoScroll?.enabled)) {
-        scrollOffset.x += event.delta.x;
+    interactInst.on('autoscroll', () => {
+      if (targetDragEvent.value!.type === 'resizemove') {
         targetDragEvent.value!.interaction?.move();
       }
     });
@@ -540,34 +539,33 @@ const initInteractable = () => {
   interactable.value = interactInst;
   initDraggable(interactInst);
   initDragResize(interactInst);
-  initAutoScroll(interactInst);
+  Boolean(getShareProps.autoScroll?.enabled) && initAutoScroll(interactInst);
 };
 watch(isSelected, state => {
   state
     ? timeLineEditorAreaContext.selectedActionRefs.set(actionItem.value.id, actionRef.value!)
     : timeLineEditorAreaContext.selectedActionRefs.delete(actionItem.value.id);
 });
-watch([() => scrollInfo.x.value, () => scrollInfo.y.value], ([newXValue, newYValue], [preXValue, preYValue]) => {
+watch([() => getScrollInfo.x, () => getScrollInfo.y], ([newXValue, newYValue], [preXValue, preYValue]) => {
   if (targetDragEvent.value) {
     scrollOffset.x += newXValue - preXValue;
     scrollOffset.y += newYValue - preYValue;
   }
 });
-useEventListener(getTimeLineEditorDomRef, 'scroll', () => {
+useEventListener(getTimeLineClipDomRef, 'scroll', () => {
   if (targetDragEvent.value && targetDragEvent.value.type === 'dragmove') {
-    nextTick(() => {
-      targetDragEvent.value!.interaction?.move();
-    });
+    targetDragEvent.value!.interaction?.move();
   }
 });
 onMounted(() => {
-  if (!unrefElement(getTimeLineEditorDomRef)) return;
+  if (!unrefElement(getTimeLineClipDomRef)) return;
   interactable.value?.unset();
-  timeLineEditorInnerRef.value = unrefElement(getTimeLineEditorDomRef)!.firstChild as HTMLElement;
+  timeLineEditorInnerRef.value = unrefElement(getTimeLineClipDomRef)!.firstChild as HTMLElement;
   initInteractable();
 });
 onBeforeUnmount(() => {
   interactable.value?.unset();
+  deleteActionX(actionItem.value.id);
 });
 </script>
 
@@ -579,56 +577,57 @@ onBeforeUnmount(() => {
   border-radius: 2px;
   height: 100%;
   z-index: auto;
-  .action-action-box {
+  overflow: hidden;
+  // 上部分
+  .action-left-stretch,
+  .action-right-stretch {
     position: absolute;
-    left: 0;
-    right: 0;
+    width: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     top: 0;
     bottom: 0;
-    border-radius: 2px;
-    overflow: hidden;
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      height: 2px;
-      background-color: rgba(255, 255, 255, 0.5);
-    }
-    &::before {
-      top: 0;
-    }
-    &::after {
-      bottom: 0;
-    }
-    // 上部分
-    .action-left-stretch,
-    .action-right-stretch {
-      position: absolute;
-      width: 10px;
-      background-color: rgba(255, 255, 255, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      top: 0;
-      bottom: 0;
-      z-index: 99999;
-    }
-    .action-left-stretch {
-      left: 0px;
-    }
-    .action-right-stretch {
-      right: 0px;
-    }
-    .action-left-stretch::before,
-    .action-right-stretch::before {
-      background-color: #000;
-      content: '';
-      display: block;
-      height: 10px;
-      width: 2px;
-    }
+    z-index: 99999;
   }
+  .action-left-stretch {
+    left: 0px;
+  }
+  .action-right-stretch {
+    right: 0px;
+  }
+  .action-left-stretch::before,
+  .action-right-stretch::before {
+    background-color: #000;
+    content: '';
+    display: block;
+    height: 10px;
+    width: 2px;
+  }
+}
+.active-action {
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+  &::before {
+    top: 0;
+  }
+  &::after {
+    bottom: 0;
+  }
+}
+.draggable,
+.resizable,
+.gesturable {
+  -ms-touch-action: none;
+  touch-action: none;
+  user-select: none;
 }
 </style>

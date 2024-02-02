@@ -48,35 +48,38 @@ export const useTimeLineStore = createGlobalState(() => {
   // 当前指针时间
   const cursorTime = ref<number>(0);
   // 时间线编辑区域容器DOM
-  const timeLineEditorDomRef = shallowRef<HTMLElement>();
+  const timeLineClipDomRef = shallowRef<HTMLElement>();
   // 滚动条信息
-  const scrollInfo = useScroll(timeLineEditorDomRef);
+  const scrollInfo = useScroll(timeLineClipDomRef);
   // 剪辑区域尺寸
-  const timeLineEditorDomSize = useElementSize(timeLineEditorDomRef);
+  const timeLineClipDomSize = useElementSize(timeLineClipDomRef);
   // 剪辑区域视图信息
-  const timeLineEditorViewSize = useElementBounding(timeLineEditorDomRef);
+  const timeLineClipViewSize = useElementBounding(timeLineClipDomRef);
   /** *******************getters**************************/
 
   const getters = {
+    getTimeLineClipDomSize: reactiveComputed(() => timeLineClipDomSize),
+    getTimeLineClipViewSize: reactiveComputed(() => timeLineClipViewSize),
+    getScrollInfo: reactiveComputed(() => scrollInfo),
     getShareProps: reactiveComputed(() => shareProps.value),
     getShareEmits: reactiveComputed(() => shareEmits.value),
     getEngine: reactiveComputed(() => engine.value),
     getEngineState: reactiveComputed(() => engineState),
     getTimeLineEditorData: computed(() => timeLineEditorData.value),
-    getTimeLineEditorDomRef: computed(() => timeLineEditorDomRef.value),
+    getTimeLineClipDomRef: computed(() => timeLineClipDomRef.value),
     getScrollDomSize: reactiveComputed(() => {
       return {
-        height: timeLineEditorViewSize.height.value - timeLineEditorDomSize.height.value,
-        width: timeLineEditorViewSize.width.value - timeLineEditorDomSize.width.value
+        height: timeLineClipViewSize.height.value - timeLineClipDomSize.height.value,
+        width: timeLineClipViewSize.width.value - timeLineClipDomSize.width.value
       };
     }),
     // 剪辑区域起始坐标
     getTimeLineEditorOriginCoords: reactiveComputed(() => {
       return {
-        left: timeLineEditorViewSize.left.value + Number(shareProps.value.leftOffset!),
-        top: timeLineEditorViewSize.top.value,
-        right: timeLineEditorViewSize.right.value,
-        bottom: timeLineEditorViewSize.bottom.value
+        left: timeLineClipViewSize.left.value + Number(shareProps.value.leftOffset!),
+        top: timeLineClipViewSize.top.value,
+        right: timeLineClipViewSize.right.value,
+        bottom: timeLineClipViewSize.bottom.value
       };
     }),
     getTimeLineMaxEndTime: computed(() => {
@@ -129,8 +132,8 @@ export const useTimeLineStore = createGlobalState(() => {
     setTimeLineEditorData: data => {
       timeLineEditorData.value = data;
     },
-    setTimeLineEditorDomRef: dom => {
-      timeLineEditorDomRef.value = dom;
+    setTimeLineClipDomRef: dom => {
+      timeLineClipDomRef.value = dom;
     },
     /**
      * @description 设置交互状态
@@ -180,7 +183,7 @@ export const useTimeLineStore = createGlobalState(() => {
      */
     setCursorTimeByPos: (clientX: number): number => {
       const posX =
-        clientX - (timeLineEditorViewSize.left.value + Number(shareProps.value.leftOffset!)) + scrollInfo.x.value;
+        clientX - (timeLineClipViewSize.left.value + Number(shareProps.value.leftOffset!)) + scrollInfo.x.value;
       const curX = Math.round(posX / Number(getters.getFrameWidth.value)) * Number(getters.getFrameWidth.value);
       let time = curX * Number(getters.getScaleUnit.value);
       time = time < 0 ? 0 : time;
@@ -205,7 +208,7 @@ export const useTimeLineStore = createGlobalState(() => {
       engine.value.isPlaying && engine.value.pause();
     },
     scrollTo: (options: ScrollToOptions) => {
-      options && timeLineEditorDomRef.value?.scrollTo(options);
+      options && timeLineClipDomRef.value?.scrollTo(options);
     },
     /**
      *
@@ -213,13 +216,11 @@ export const useTimeLineStore = createGlobalState(() => {
      * @param   deltaY
      */
     scrollBy: (options: ScrollToOptions) => {
-      options && timeLineEditorDomRef.value?.scrollBy(options);
+      options && timeLineClipDomRef.value?.scrollBy(options);
     }
   };
 
   return {
-    timeLineEditorDomSize,
-    timeLineEditorViewSize,
     scrollInfo,
     ...getters,
     ...actions
