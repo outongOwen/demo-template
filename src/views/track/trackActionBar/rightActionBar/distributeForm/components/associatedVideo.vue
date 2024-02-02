@@ -1,6 +1,6 @@
 <template>
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
-    <div class="font-900 c-#1890FF text-16px m-b-10px">视频ID关联选取</div>
+    <div id="AssociatedVideo" class="font-900 c-#1890FF text-16px m-b-10px">视频ID关联选取</div>
     <n-grid x-gap="12" :cols="2">
       <n-form-item-gi label="视频ID：" prop="videoId">
         <n-input v-model:value="formData.videoId" disabled type="text" placeholder="请选择视频ID">
@@ -161,6 +161,13 @@ const setVideoId = () => {
     selVideoModel.value.showModal = true;
   }
 };
+const validate = () => formRef.value.validate();
+const restoreValidation = () => formRef.value.restoreValidation();
+defineExpose({
+  validate,
+  restoreValidation,
+  comName: 'AssociatedVideo'
+});
 </script>
 
 <style></style>

@@ -3,8 +3,11 @@ import pidComponent from '../components/spacialFormItem/pidComponent.vue';
 import copyRightIdComponent from '../components/spacialFormItem/copyRightIdComponent.vue';
 import inputToTag from '../components/spacialFormItem/inputToTag.vue';
 
-// G客&MCN需要的编目信息
+// G客&MCN分发需要的编目信息
 export const MCNShow: Array<string> = [
+  'childValue',
+  'groupId',
+  'taskId',
   'title',
   'keyword',
   'pid',
@@ -14,9 +17,11 @@ export const MCNShow: Array<string> = [
   'descriptionValue',
   'category',
   'secondClassCode',
-  'contentForm'
+  'contentForm',
+  'fps',
+  'bitrate'
 ];
-export const EditHidden: Array<string> = ['keyword', 'fanCircleId'];
+export const EditHidden: Array<string> = ['keyword', 'fanCircleId', 'country'];
 // 不能共存的分发平台值
 export const radioPlatForm: Array<string> = ['-3', '-2', '-1', '0', '1', '2'];
 // 新运编长分发的值
@@ -36,7 +41,9 @@ export const editLongParams: Array<string> = [
   'commitCheck',
   'coverSwitch',
   'mediaType',
-  'miguDefaultLogo'
+  'miguDefaultLogo',
+  'fps',
+  'bitrate'
 ];
 export const queryArrayLeft: any[] = [
   {
@@ -75,13 +82,6 @@ export const queryArrayLeft: any[] = [
     ]
   },
   {
-    type: 'select',
-    label: '圈子：',
-    key: 'fanCircleId',
-    holder: '请输入标题',
-    show: true
-  },
-  {
     type: 'component',
     label: 'PID：',
     key: 'pid',
@@ -90,14 +90,28 @@ export const queryArrayLeft: any[] = [
     component: pidComponent
   },
   {
-    type: 'input',
+    type: 'select',
+    label: '圈子：',
+    key: 'fanCircleId',
+    holder: '请输入标题',
+    show: true
+  },
+  {
+    type: 'inputNumber',
+    label: '比赛ID：',
+    key: 'matchId',
+    holder: '请输入比赛ID',
+    show: true
+  },
+  {
+    type: 'inputNumber',
     label: '来源媒资ID：',
     key: 'initialAssetId',
     holder: '请输入来源媒资ID',
     show: true
   },
   {
-    type: 'textarea',
+    type: 'input',
     label: '副标题：',
     key: 'subheading',
     length: 60,
@@ -142,6 +156,20 @@ export const queryArrayLeft: any[] = [
     ]
   },
   {
+    type: 'component',
+    label: '版权ID：',
+    key: 'copyRightId',
+    component: copyRightIdComponent,
+    show: true,
+    rules: [
+      {
+        required: true,
+        message: '请输入正确的版权ID',
+        trigger: ['change']
+      }
+    ]
+  },
+  {
     type: 'select',
     label: 'CPID：',
     key: 'cpId',
@@ -157,18 +185,12 @@ export const queryArrayLeft: any[] = [
     ]
   },
   {
-    type: 'component',
-    label: '版权ID：',
-    key: 'copyRightId',
-    component: copyRightIdComponent,
-    show: true,
-    rules: [
-      {
-        required: true,
-        message: '请输入正确的版权ID',
-        trigger: ['change']
-      }
-    ]
+    type: 'select',
+    label: '视频内容类型：',
+    key: 'contentType',
+    optName: 'contentTypeList',
+    holder: '请选择视频内容类型',
+    show: true
   },
   {
     type: 'select',

@@ -1,6 +1,6 @@
 <template>
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
-    <div class="font-900 c-#1890FF text-16px m-y-10px">三级标签</div>
+    <div id="LabelSetting" class="font-900 c-#1890FF text-16px m-y-10px">三级标签</div>
     <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1 p-10px">
       <n-form-item-gi label="自定义">
         <inputToTag form-key="customize" :max-length="20" show-reset></inputToTag>
@@ -186,7 +186,10 @@ const setTemplateData = data => {
     setTags(data.recommendation);
   }
 };
-defineExpose({ setTemplateData });
+const validate = callback => formRef.value.validate(flag => callback(flag));
+const restoreValidation = () => formRef.value.restoreValidation();
+
+defineExpose({ setTemplateData, validate, restoreValidation, comName: 'LabelSetting' });
 // 推荐标签一级分类
 watch(
   () => formData.value.recommendation,

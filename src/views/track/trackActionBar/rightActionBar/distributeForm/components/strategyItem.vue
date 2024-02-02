@@ -1,13 +1,23 @@
 <template>
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
-    <div class="font-900 c-#1890FF text-16px m-b-10px">转码设置</div>
+    <div if="StrategyItem" class="font-900 c-#1890FF text-16px m-b-10px">转码设置</div>
     <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1 p-10px">
       <n-gi :span="2">
         <div class="font-900 c-#5ba5e9 text-14px m-y-10px m-l-10px">基础转码设置</div>
       </n-gi>
-      <n-form-item-gi label="转码策略：" path="strategyId">
+      <n-form-item-gi
+        label="转码策略："
+        path="strategyId"
+        :rule="[
+          {
+            required: true,
+            message: '请选择转码策略',
+            trigger: ['change']
+          }
+        ]"
+      >
         <div class="w-100%">
-          <n-select v-model:value="formData.strategyId" class="100%" clearable :options="smallStrategy"></n-select>
+          <n-select v-model:value="formData.strategyId" class="100%" :options="smallStrategy"></n-select>
           <p v-if="smallStrategy.length" v-show="formData.strategyId" style="color: #858585">
             转码后文件编码分类包含 {{ codeRateFilter(formData.strategyId, smallStrategy) }}
           </p>
@@ -37,9 +47,19 @@
       <n-gi :span="2">
         <div class="font-900 c-#5ba5e9 text-14px m-x--10px p-x-20px p-y-10px b-t b-#ccc">大屏转码设置</div>
       </n-gi>
-      <n-form-item-gi label="转码策略：" path="bigStrategyId">
+      <n-form-item-gi
+        label="转码策略："
+        path="bigStrategyId"
+        :rule="[
+          {
+            required: true,
+            message: '请选择转码策略',
+            trigger: ['change']
+          }
+        ]"
+      >
         <div class="w-100%">
-          <n-select v-model:value="formData.bigStrategyId" class="w-100%" clearable :options="bigStrategy"></n-select>
+          <n-select v-model:value="formData.bigStrategyId" class="w-100%" :options="bigStrategy"></n-select>
           <p v-if="bigStrategy.length" v-show="formData.bigStrategyId" style="color: #858585">
             转码后文件编码分类包含 {{ codeRateFilter(formData.bigStrategyId, bigStrategy) }}
           </p>
@@ -158,6 +178,14 @@ watch(
       : [];
   }
 );
+
+const validate = callback => formRef.value.validate(flag => callback(flag));
+const restoreValidation = () => formRef.value.restoreValidation();
+defineExpose({
+  validate,
+  restoreValidation,
+  comName: 'StrategyItem'
+});
 onMounted(async () => {
   formData.value.hasLogo = ref(1);
   await getStratgyEnum(optionsObj);

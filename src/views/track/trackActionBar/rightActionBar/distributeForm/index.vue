@@ -17,13 +17,19 @@
         <div class="w-120px p-r-20px text-right">是否分发：</div>
         <n-switch v-model:value="formData.isDistribution" />
       </div>
-      <platformItem ref="platformRef" @setTemplateData="setTemplateFn"></platformItem>
-      <associatedVideo v-show="isMediaLong" ref="associatedVideoRef"></associatedVideo>
-      <mapInitForm v-show="!isMediaLong && !onlyFtp" ref="mapInitFormRef"></mapInitForm>
-      <strategyItem v-show="!isMCN && !onlyFtp" ref="strategyRef"></strategyItem>
+      <platformItem ref="platformRef" @set-template-data="setTemplateFn"></platformItem>
+      <notSendForm v-show="onlyFtp || !formData.isDistribution"></notSendForm>
+      {{ isMediaLong }}
+      <div v-show="formData.isDistribution && !onlyFtp">
+        <associatedVideo v-show="isMediaLong" ref="associatedVideoRef"></associatedVideo>
+        <mapInitForm v-show="!isMediaLong && !onlyFtp" ref="mapInitFormRef"></mapInitForm>
+        <strategyItem v-show="!isMCN && !onlyFtp" ref="strategyRef"></strategyItem>
+      </div>
       <outputSetting ref="outputRef"></outputSetting>
-      <labelSetting v-show="!isMCN && !onlyFtp && !isMediaLong" ref="labelRef"></labelSetting>
-      <vrSetting v-show="!isMCN && !onlyFtp" ref="vrSettingRef"></vrSetting>
+      <div v-show="formData.isDistribution && !onlyFtp">
+        <labelSetting v-show="!isMCN && !onlyFtp && !isMediaLong" ref="labelRef"></labelSetting>
+        <vrSetting v-if="false" ref="vrSettingRef"></vrSetting>
+      </div>
     </n-scrollbar>
     <template #action>
       <div class="w-100% flex justify-between">
@@ -57,9 +63,11 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
+import { editLongParams, MCNShow } from '@/views/track/trackActionBar/rightActionBar/distributeForm/hooks/formInitMap';
 import { primaryClassifyPri, totalStrategyPri } from './hooks/provide';
 import platformItem from './components/platformItem.vue';
 import associatedVideo from './components/associatedVideo.vue';
+import notSendForm from './components/notSendForm.vue';
 import mapInitForm from './components/mapInitForm.vue';
 import strategyItem from './components/strategyItem.vue';
 import outputSetting from './components/outputSetting.vue';
@@ -101,6 +109,7 @@ const ratioArr = [
   }
 ];
 const formData = ref<{ [key: string]: any }>({
+  isDistribution: true,
   platformListValue: []
 });
 const totalStrategyIdList = ref([]);
@@ -122,15 +131,82 @@ const clearDataChange = () => {
   clearData.value = !clearData.value;
 };
 const setTemplateFn = data => {
+  let refList = [mapInitFormRef, strategyRef, labelRef];
+  if (isMediaLong.value) {
+    refList = [associatedVideoRef, strategyRef];
+  } else if (isMCN.value) {
+    refList = [mapInitFormRef];
+  }
+  refList.forEach(v => {
+    v.value.restoreValidation();
+  });
   setTemplateData(formData, data, labelRef);
 };
-
-const submitForm = () => {
-  const refList = [platformRef, associatedVideoRef, mapInitFormRef, strategyRef, outputRef, labelRef, vrSettingRef];
-  let flag = true;
-  refList.forEach((v: any) => {
-    flag = v.value.validate();
-    if (!flag) throw new Error(`${v.name}ValidateError`);
+const emit = defineEmits(['submitData']);
+const submitForm = async () => {
+  const catalog: any = {};
+  let id = '';
+  if (onlyFtp.value || !formData.value.isDistribution) {
+    catalog.title = formData.value.title;
+    catalog.fps = formData.value.fps;
+    catalog.bitrate = formData.value.bitrate;
+  } else if (isMCN.value) {
+    mapInitFormRef.value.validate((flag: boolean) => {
+      if (flag) {
+        MCNShow.forEach((key: string) => {
+          catalog[key] = formData[key];
+        });
+      } else {
+        id = 'MapInitForm';
+      }
+    });
+  } else if (isMediaLong.value) {
+    const refList = [associatedVideoRef, strategyRef];
+    refList.forEach(v => {
+      v.value.validate(flag => {
+        if (flag) {
+          id = v.value.comName;
+        }
+      });
+    });
+    if (!id) {
+      editLongParams.forEach((key: string) => {
+        catalog[key] = formData.value[key];
+      });
+    }
+  } else {
+    const refList = [mapInitFormRef, strategyRef, labelRef];
+    refList.forEach(v => {
+      v.value.validate(flag => {
+        if (flag) {
+          id = v.value.comName;
+        }
+      });
+    });
+    if (!id) {
+      const list = Object.keys(formData.value);
+      list.forEach(key => {
+        formData.value[key] && (catalog[key] = formData.value[key]);
+      });
+    }
+  }
+  if (id) {
+    const dom = document.getElementById(id);
+    // 定位代码
+    dom &&
+      dom.scrollIntoView({
+        block: 'start',
+        behavior: 'smooth'
+      });
+    return;
+  }
+  emit('submitData', {
+    taskId: '',
+    extend: '',
+    catalog,
+    coverPaths: '',
+    imgIds: '',
+    srtList: ''
   });
 };
 

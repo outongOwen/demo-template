@@ -1,6 +1,4 @@
-import { getQueryString } from '@/utils';
 import { defineHttp } from '@/service/request';
-const accessToken = getQueryString('accessToken');
 
 enum Api {
   GET_CATALOG_ENUM = '/openapi/media-editor/catalog/data',
@@ -8,7 +6,6 @@ enum Api {
   GET_LOGO_MAX = '/fdapi/outer-data/getCopyrightLogoMaxNumber'
 }
 export const getDistributeEnum = (params: any, cancelToken = true) => {
-  params.accessToken = accessToken;
   return defineHttp.get<any>(
     {
       url: Api.GET_CATALOG_ENUM,

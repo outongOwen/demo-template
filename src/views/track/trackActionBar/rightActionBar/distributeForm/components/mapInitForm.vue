@@ -1,6 +1,6 @@
 <template>
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
-    <div class="font-900 c-#1890FF text-16px m-b-10px">分发设置</div>
+    <div id="MapInitForm" class="font-900 c-#1890FF text-16px m-b-10px">分发设置</div>
     <n-grid x-gap="12" :cols="2">
       <n-gi>
         <template v-for="item in queryArrayLeft" :key="item.key">
@@ -12,6 +12,15 @@
                 :maxlength="item.length"
                 :placeholder="item.holder"
               ></n-input>
+            </template>
+            <template v-if="item.type === 'inputNumber'">
+              <n-input-number
+                v-model:value="formData[item.key]"
+                class="w-100%"
+                :keyboard="{ ArrowUp: false, ArrowDown: false }"
+                :placeholder="item.holder"
+                :show-button="false"
+              />
             </template>
             <template v-if="item.type === 'textarea'">
               <n-input
@@ -48,6 +57,15 @@
                 :maxlength="item.length"
                 :placeholder="item.holder"
               ></n-input>
+            </template>
+            <template v-if="item.type === 'inputNumber'">
+              <n-input-number
+                v-model:value="formData[item.key]"
+                class="w-100%"
+                :keyboard="{ ArrowUp: false, ArrowDown: false }"
+                :placeholder="item.holder"
+                :show-button="false"
+              />
             </template>
             <template v-if="item.type === 'textarea'">
               <n-input
@@ -121,22 +139,6 @@ const isInitialAssetId = ref(false);
 const isEditingOrMedia = computed(() => {
   return isEditing.value || isMedia.value;
 });
-const isInitialAssetIdFn = () => {
-  if (isEditingOrMedia || isMixedEdit) {
-    isInitialAssetId.value = true;
-    formInitMap.forEach((item: any) => {
-      item.show = !(item.key === 'country' && isEditing.value);
-    });
-  } else {
-    isInitialAssetId.value = false;
-    formInitMap.forEach((item: any) => {
-      if (item.key !== 'initialAssetId' && item.key !== 'contentForm') {
-        item.show = false;
-      }
-    });
-    banit3v3();
-  }
-};
 interface categoryOptDiff {
   media: SelectOption[];
   normal: SelectOption[];
@@ -148,7 +150,7 @@ const categoryOptObj = reactive<categoryOptDiff>({
 watch(
   () => formData.value.platformListValue,
   async (newVal: string[]) => {
-    isInitialAssetIdFn();
+    banit3v3();
     if (isMixedEdit) {
       isEditing.value = newVal.some((d: any) => d == '11');
       isMedia.value = newVal.some((d: any) => d == '3');
@@ -209,14 +211,6 @@ watch(
   { deep: true }
 );
 watch(
-  () => isMedia.value,
-  (val: boolean) => {
-    const country = formInitMap.find((v: any) => v.key === 'country');
-    country.show = val;
-  },
-  { immediate: true }
-);
-watch(
   () => formData.value.category,
   async (val: string) => {
     enumOptionsList.lablesByCatIdOpt = [];
@@ -268,6 +262,13 @@ const banit3v3 = () => {
     }
   });
 };
+const validate = (callback) => formRef.value.validate((flag=>callback(flag)))
+const restoreValidation = () => formRef.value.restoreValidation()
+defineExpose({
+  validate,
+  restoreValidation,
+  comName: 'MapInitForm'
+});
 onMounted(() => {
   setList();
   getAllEnum({ formData, listObject, enumOptionsList, isMixedEdit, isSportsIntermodal });
@@ -275,4 +276,16 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+::v-deep.n-select{
+  .n-tag{
+    color: #2080f0;
+    .n-tag__close{
+      color: #2080f0!important;
+    }
+    .n-tag__border{
+      border-color: #2080f0;
+    }
+  }
+}
+</style>

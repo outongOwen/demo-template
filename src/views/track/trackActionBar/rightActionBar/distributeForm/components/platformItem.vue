@@ -2,8 +2,8 @@
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
     <div class="font-900 c-#1890FF text-16px m-b-10px">分发设置</div>
     <n-grid x-gap="12" :cols="2">
-      <n-form-item-gi v-show="formData.isDistribution" label="分发平台：">
-        <div>
+      <n-form-item-gi :label="formData.isDistribution ? '分发平台：' : ''">
+        <div v-show="formData.isDistribution">
           <n-button
             v-for="platform in platforms"
             :key="platform.distPlatformCode"
@@ -20,7 +20,7 @@
         <coverImage></coverImage>
       </n-form-item-gi>
     </n-grid>
-    <n-grid v-show="showWork" x-gap="12" :cols="2">
+    <n-grid v-show="formData.isDistribution && showWork" x-gap="12" :cols="2">
       <n-form-item-gi label="内容作者：">
         <n-select
           v-model:value="formData.childValue"
