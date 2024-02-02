@@ -1,7 +1,6 @@
 <template>
   <n-modal
     v-model:show="showModal"
-    :z-index="2500"
     preset="dialog"
     :show-icon="false"
     :mask-closable="false"
@@ -19,7 +18,6 @@
       </div>
       <platformItem ref="platformRef" @set-template-data="setTemplateFn"></platformItem>
       <notSendForm v-show="onlyFtp || !formData.isDistribution"></notSendForm>
-      {{ isMediaLong }}
       <div v-show="formData.isDistribution && !onlyFtp">
         <associatedVideo v-show="isMediaLong" ref="associatedVideoRef"></associatedVideo>
         <mapInitForm v-show="!isMediaLong && !onlyFtp" ref="mapInitFormRef"></mapInitForm>
@@ -146,6 +144,7 @@ const emit = defineEmits(['submitData']);
 const submitForm = async () => {
   const catalog: any = {};
   let id = '';
+  const promises: any[] = [];
   if (onlyFtp.value || !formData.value.isDistribution) {
     catalog.title = formData.value.title;
     catalog.fps = formData.value.fps;
@@ -163,51 +162,58 @@ const submitForm = async () => {
   } else if (isMediaLong.value) {
     const refList = [associatedVideoRef, strategyRef];
     refList.forEach(v => {
-      v.value.validate(flag => {
+      const pro = v.value.validate(flag => {
         if (flag) {
           id = v.value.comName;
         }
       });
+      promises.push(pro);
     });
-    if (!id) {
-      editLongParams.forEach((key: string) => {
-        catalog[key] = formData.value[key];
-      });
-    }
   } else {
     const refList = [mapInitFormRef, strategyRef, labelRef];
     refList.forEach(v => {
-      v.value.validate(flag => {
+      const pro = v.value.validate(flag => {
         if (flag) {
           id = v.value.comName;
         }
       });
+      promises.push(pro);
     });
-    if (!id) {
-      const list = Object.keys(formData.value);
-      list.forEach(key => {
-        formData.value[key] && (catalog[key] = formData.value[key]);
-      });
-    }
   }
-  if (id) {
-    const dom = document.getElementById(id);
-    // 定位代码
-    dom &&
-      dom.scrollIntoView({
-        block: 'start',
-        behavior: 'smooth'
+  Promise.all(promises)
+    .then(res => {
+      if (res.find(v => Boolean(v))) {
+        Promise.reject(new Error('ValidateError'));
+      } else if (isMediaLong.value) {
+        editLongParams.forEach((key: string) => {
+          catalog[key] = formData.value[key];
+        });
+      } else {
+        const list = Object.keys(formData.value);
+        list.forEach(key => {
+          formData.value[key] && (catalog[key] = formData.value[key]);
+        });
+      }
+      emit('submitData', {
+        taskId: '',
+        extend: '',
+        catalog,
+        coverPaths: '',
+        imgIds: '',
+        srtList: ''
       });
-    return;
-  }
-  emit('submitData', {
-    taskId: '',
-    extend: '',
-    catalog,
-    coverPaths: '',
-    imgIds: '',
-    srtList: ''
-  });
+    })
+    .catch(() => {
+      if (id) {
+        const dom = document.getElementById(id);
+        // 定位代码
+        dom &&
+          dom.scrollIntoView({
+            block: 'start',
+            behavior: 'smooth'
+          });
+      }
+    });
 };
 
 // 一级分类

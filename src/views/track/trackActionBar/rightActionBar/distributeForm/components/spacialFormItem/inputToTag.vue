@@ -12,7 +12,7 @@
         :on-blur="setValueToForm"
         placeholder="自定义标签"
       ></n-input>
-      <n-button v-if="props.showReset" type="primary">重置</n-button>
+      <n-button v-if="props.showReset" type="primary" @click="resetValue">重置</n-button>
     </div>
     <p class="w-100% m-t-10px">
       <n-tag
@@ -62,6 +62,12 @@ const handleClose = index => {
     inputRef.value.blur();
   });
 };
+const resetValue = () => {
+  value.value = '';
+  nextTick(() => {
+    valueLabelArr.value = [];
+  });
+};
 const iptHandler = val => {
   const newVal = val.trim().slice(0, props.maxLength);
   return newVal;
@@ -85,11 +91,12 @@ const setValueToForm = (val: Event) => {
     inputRef.value.blur();
   });
 };
-
+const emit = defineEmits(['change']);
 watch(
   valueLabelArr,
   val => {
     formData.value[props.formKey] = val;
+    emit('change', Boolean(val && val.length));
   },
   { deep: true }
 );

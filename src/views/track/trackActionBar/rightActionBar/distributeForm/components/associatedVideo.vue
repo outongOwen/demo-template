@@ -2,7 +2,17 @@
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
     <div id="AssociatedVideo" class="font-900 c-#1890FF text-16px m-b-10px">视频ID关联选取</div>
     <n-grid x-gap="12" :cols="2">
-      <n-form-item-gi label="视频ID：" prop="videoId">
+      <n-form-item-gi
+        label="视频ID："
+        path="videoId"
+        :rule="[
+          {
+            required: true,
+            message: '请选择视频ID',
+            trigger: ['change']
+          }
+        ]"
+      >
         <n-input v-model:value="formData.videoId" disabled type="text" placeholder="请选择视频ID">
           <template #suffix>
             <n-button class="w-65px m-r--12px" type="primary" @click="setVideoId">
@@ -13,7 +23,7 @@
       </n-form-item-gi>
       <n-form-item-gi
         label="优先发布："
-        prop="isUrgency"
+        path="isUrgency"
         :rule="[
           {
             required: true,
@@ -29,7 +39,17 @@
           placeholder="请选择优先发布"
         ></n-select>
       </n-form-item-gi>
-      <n-form-item-gi label="视频标题：">
+      <n-form-item-gi
+        label="视频标题："
+        path="title"
+        :rule="[
+          {
+            required: true,
+            message: '请选择视频标题',
+            trigger: ['change']
+          }
+        ]"
+      >
         <n-tooltip class="item" trigger="hover" placement="top">
           <template #trigger>
             <n-input v-model:value="formData.title" type="text" disabled></n-input>
@@ -40,7 +60,7 @@
       <n-form-item-gi
         v-if="communityEnum && communityEnum.operationFlagList"
         label="运营标识："
-        prop="operationFlag"
+        path="operationFlag"
         :rule="[
           {
             required: true,
@@ -96,7 +116,7 @@
         ></n-select>
       </n-form-item-gi>
     </n-grid>
-    <selectVideoModel ref="selVideoModel" @selectVideo="selectVideo"></selectVideoModel>
+    <selectVideoModel ref="selVideoModel" @select-video="selectVideo"></selectVideoModel>
   </n-form>
 </template>
 
@@ -118,8 +138,11 @@ const { injectFormData } = getProvideFormData();
 const formData: any = injectFormData();
 const lablesByCatIdOpt = ref<SelectOption[]>([]);
 
+const validate = callBack => formRef.value.validate(flag => callBack(flag));
+const restoreValidation = () => formRef.value.restoreValidation();
 const selectVideo = async (obj: any) => {
   // selectVideoObj = JSON.parse(JSON.stringify(obj))
+  restoreValidation();
   formData.value.videoId = String(obj.videoId);
   formData.value.title = obj.videoTitle;
   formData.value.category = obj.firstClassCode;
@@ -149,7 +172,6 @@ const setVideoId = () => {
       content: '将取消选择的视频ID,解除与视频ID的关联。请重新选择视频ID?',
       positiveText: '确定',
       negativeText: '取消',
-      style: 'z-index: 3500',
       onPositiveClick: () => {
         formData.value.title = '';
         formData.value.videoId = '';
@@ -161,8 +183,6 @@ const setVideoId = () => {
     selVideoModel.value.showModal = true;
   }
 };
-const validate = () => formRef.value.validate();
-const restoreValidation = () => formRef.value.restoreValidation();
 defineExpose({
   validate,
   restoreValidation,

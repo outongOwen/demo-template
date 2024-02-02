@@ -1,9 +1,12 @@
 <template>
   <n-form ref="formRef" :model="formData" label-placement="left" label-width="120">
-    <div id="LabelSetting" class="font-900 c-#1890FF text-16px m-y-10px">三级标签</div>
-    <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1 p-10px">
+    <div id="LabelSetting" class="font-900 c-#1890FF text-16px m-y-10px">
+      三级标签
+      <span class="c-red">*</span>
+    </div>
+    <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1 p-10px" :class="{ 'b-red': thirdError }">
       <n-form-item-gi label="自定义">
-        <inputToTag form-key="customize" :max-length="20" show-reset></inputToTag>
+        <inputToTag form-key="customize" :max-length="20" show-reset @change="changeCustomize"></inputToTag>
       </n-form-item-gi>
       <template v-for="item in thirdLabelsList" :key="item.code">
         <n-form-item-gi :label="item.name">
@@ -12,14 +15,18 @@
             clearable
             filterable
             multiple
+            :on-update:value="changeThirdLabels"
             :options="item.options"
             @focus="searchFn(item)"
           ></n-select>
         </n-form-item-gi>
       </template>
     </n-grid>
-    <div class="font-900 c-#1890FF text-16px m-y-10px">推荐标签</div>
-    <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1">
+    <div class="font-900 c-#1890FF text-16px m-y-10px">
+      推荐标签
+      <span class="c-red">*</span>
+    </div>
+    <n-grid x-gap="12" :cols="2" class="b-1 b-#ccc b-rd-1" :class="{ 'b-red': recError }">
       <n-form-item-gi class="p-10px" path="recommendation">
         <div>
           <n-button type="primary" size="small" class="m-b-10px" @click="clearRecommend">
@@ -41,7 +48,7 @@
           </n-checkbox-group>
         </div>
       </n-form-item-gi>
-      <n-gi class="b-l-1">
+      <n-gi class="b-l-1" :class="{ 'b-red': recError }">
         <div class="p-10px">
           已选标签
           <div class="min-h-50px">
@@ -83,6 +90,8 @@ const secHolder = ref<any[]>([]);
 const baseHolder = ref<any[]>([]);
 const selectedTag = ref<any[]>([]);
 
+const thirdError = ref(false);
+const recError = ref(false);
 const customSelValues = ref<Record<string, any>>({});
 const formRef = ref();
 const { injectFormData } = getProvideFormData();
@@ -94,6 +103,9 @@ const selectHolder = tag => {
   const list = tag.type === 'sec' ? secHolder.value : baseHolder.value;
   const index = list.findIndex(v => v.name === tag.name);
   list.splice(index, 1);
+  if (selectedTag.value.length) {
+    recError.value = false;
+  }
   selectedTag.value.push(tag);
 };
 const closeTag = tag => {
@@ -103,6 +115,9 @@ const closeTag = tag => {
     secHolder.value.push(tag);
   } else {
     baseHolder.value.push(tag);
+  }
+  if (!selectedTag.value.length) {
+    recError.value = true;
   }
 };
 const getThirdLabels = async () => {
@@ -182,11 +197,40 @@ const setTemplateData = data => {
       setCustom(v, obj[v]);
     }
   });
+  thirdError.value = false;
   if (data.recommendation) {
     setTags(data.recommendation);
+    recError.value = false;
   }
 };
-const validate = callback => formRef.value.validate(flag => callback(flag));
+const changeCustomize = (flag: boolean) => {
+  thirdError.value = !flag;
+};
+const changeThirdLabels = val => {
+  if (val && val.length) {
+    thirdError.value = true;
+  } else {
+    const list = Object.keys(customSelValues.value);
+    thirdError.value = Boolean(list.find(v => customSelValues.value[v]));
+  }
+};
+const validate = callback =>
+  new Promise((resolve, reject) => {
+    const list = Object.keys(customSelValues.value);
+    const flag = list.find(v => customSelValues.value[v]);
+    if ((formData.value.customize || flag) && formData.value.recommendation && selectedTag.value.length) {
+      callback(undefined);
+      resolve(undefined);
+    } else if (!(formData.value.customize || flag)) {
+      thirdError.value = true;
+      callback(true);
+      reject(new Error('custom'));
+    } else {
+      recError.value = true;
+      callback(true);
+      reject(new Error('recommendation'));
+    }
+  });
 const restoreValidation = () => formRef.value.restoreValidation();
 
 defineExpose({ setTemplateData, validate, restoreValidation, comName: 'LabelSetting' });
