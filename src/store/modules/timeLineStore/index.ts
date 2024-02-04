@@ -21,7 +21,7 @@ export const useTimeLineStore = defineStore('useTimeLineStore', {
       return this.scaleInfo;
     },
     // 获取时间轴最大结束时间
-    getTimeLineMaxEndTime(): number {
+    getTimeLineDuration(): number {
       return this.timeLineMaxEndTime;
     }
   },

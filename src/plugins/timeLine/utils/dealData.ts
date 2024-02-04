@@ -33,8 +33,8 @@ export function parserTransformToTime(
 ): { start: number; end: number } {
   const { left, width } = params;
   return {
-    start: Math.round(left * scaleUnit),
-    end: Math.round((left + width) * scaleUnit)
+    start: left * scaleUnit,
+    end: (left + width) * scaleUnit
   };
 }
 /**

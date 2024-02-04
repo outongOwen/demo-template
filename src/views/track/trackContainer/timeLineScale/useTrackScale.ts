@@ -190,6 +190,7 @@ export default function useTrackScale(fps: number) {
     state,
     initScale,
     changeScale,
-    changeUpdateScale
+    changeUpdateScale,
+    ruleLists
   };
 }

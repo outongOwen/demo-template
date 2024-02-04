@@ -188,21 +188,7 @@
       </n-space>
     </n-popover>
     <n-space v-if="options.btnType === 'Slider'" :wrap-item="false" :size="0" class="!flex-nowrap">
-      <n-popover :to="false" class="px4px! py2px!">
-        <template #trigger>
-          <n-button
-            quaternary
-            size="small"
-            :focusable="false"
-            tag="div"
-            :disabled="options.disabled"
-            @click="handleMinusClick"
-          >
-            <icon-ic:baseline-minus class="text-20px" />
-          </n-button>
-        </template>
-        <n-text class="text-12px!">轨道缩小</n-text>
-      </n-popover>
+      <slot name="slider-minus" />
       <n-element tag="div" class="h100% w130px flex-center scale-70">
         <n-slider
           :value="sliderValue"
@@ -215,21 +201,7 @@
           @update:value="handleSliderChange"
         />
       </n-element>
-      <n-popover :to="false" class="px4px! py2px!">
-        <template #trigger>
-          <n-button
-            quaternary
-            size="small"
-            :focusable="false"
-            tag="div"
-            :disabled="options.disabled"
-            @click="handleAddClick"
-          >
-            <icon-ic:baseline-add class="text-20px" />
-          </n-button>
-        </template>
-        <n-text class="text-12px!">轨道放大</n-text>
-      </n-popover>
+      <slot name="slider-add" />
     </n-space>
   </template>
 </template>
@@ -333,26 +305,26 @@ const handleSliderChange = (value: number) => {
   sliderValue.value = value;
   props.options.change && props.options.change(sliderValue.value);
 };
-const handleMinusClick = () => {
-  if (sliderValue.value === 0) return;
-  if (props.options?.markStep) {
-    (sliderValue.value as number) =
-      sliderValue.value - props.options.markStep < 0
-        ? 0
-        : Math.round((sliderValue.value - props.options.markStep) * 100) / 100;
-  }
-  props.options.change && props.options.change(sliderValue.value);
-};
-const handleAddClick = () => {
-  if (sliderValue.value === props.options.max) return;
-  if (props.options?.markStep) {
-    (sliderValue.value as number) =
-      sliderValue.value + props.options.markStep > 1
-        ? 1
-        : Math.round((sliderValue.value + props.options.markStep) * 100) / 100;
-  }
-  props.options.change && props.options.change(sliderValue.value);
-};
+// const handleMinusClick = () => {
+//   if (sliderValue.value === 0) return;
+//   if (props.options?.markStep) {
+//     (sliderValue.value as number) =
+//       sliderValue.value - props.options.markStep < 0
+//         ? 0
+//         : Math.round((sliderValue.value - props.options.markStep) * 100) / 100;
+//   }
+//   props.options.change && props.options.change(sliderValue.value);
+// };
+// const handleAddClick = () => {
+//   if (sliderValue.value === props.options.max) return;
+//   if (props.options?.markStep) {
+//     (sliderValue.value as number) =
+//       sliderValue.value + props.options.markStep > 1
+//         ? 1
+//         : Math.round((sliderValue.value + props.options.markStep) * 100) / 100;
+//   }
+//   props.options.change && props.options.change(sliderValue.value);
+// };
 </script>
 <style lang="scss" scoped>
 .n-button {

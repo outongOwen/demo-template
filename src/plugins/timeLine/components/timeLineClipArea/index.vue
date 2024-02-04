@@ -48,17 +48,13 @@ const {
   setTimeLineClipDomRef,
   getShareProps,
   getTimeLineEditorData,
-  getScaleUnit,
-  getTimeLineMaxEndTime,
-  getTimeLineClipDomSize
+  getTimeLineDuration,
+  getTimeLineClipDomSize,
+  setTimeLineClipInnerSize
 } = useTimeLineStore();
-const { setTimeLineClipDomRefToScale, setTimeLineClipInnerSize } = useTimeLineScaleStore();
+const { setTimeLineClipDomRefToScale, getScaleUnit } = useTimeLineScaleStore();
 const timeLineInnerWidth = computed(() => {
-  return (
-    unref(getTimeLineClipDomSize.width) +
-    unref(getTimeLineMaxEndTime) / unref(getScaleUnit) -
-    unref(getTimeLineClipDomSize.width) / 4
-  );
+  return unref(getTimeLineDuration) / unref(getScaleUnit) + unref(getTimeLineClipDomSize.width);
 });
 watchEffect(() => {
   setTimeLineClipInnerSize({
@@ -72,8 +68,8 @@ const handleContextMenu = (event: MouseEvent) => {
 };
 
 onMounted(() => {
-  setTimeLineClipDomRef(timeLineRef.value);
-  setTimeLineClipDomRefToScale(timeLineRef.value!);
+  timeLineRef.value && setTimeLineClipDomRef(timeLineRef.value);
+  timeLineRef.value && setTimeLineClipDomRefToScale(timeLineRef.value);
 });
 </script>
 

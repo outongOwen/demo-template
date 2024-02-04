@@ -41,7 +41,7 @@ interface Props {
   time: number;
   totalTime: number;
   style?: CSSProperties;
-  frameRate?: number;
+  fps?: number;
 }
 interface Emits {
   (event: 'update:time', value: number): void;
@@ -49,19 +49,19 @@ interface Emits {
 }
 const props = withDefaults(defineProps<Props>(), {
   style: () => ({}),
-  frameRate: 25
+  fps: 25
 });
 const emits = defineEmits<Emits>();
 const currentTime = useVModel(props, 'time', emits);
-const { totalTime, frameRate } = toRefs(props);
+const { totalTime, fps } = toRefs(props);
 const playerTotalTime = computed(() => {
-  return formatFrameByTime(totalTime.value, frameRate.value);
+  return formatFrameByTime(totalTime.value, fps.value);
 });
 const playerCurrentTime = computed(() => {
-  return formatFrameByTime(currentTime.value, frameRate.value);
+  return formatFrameByTime(currentTime.value, fps.value);
 });
 const progressStep = computed(() => {
-  return Math.round((1000 / frameRate.value) * 100000) / 100000;
+  return Math.round((1000 / fps.value) * 100000) / 100000;
 });
 const handleTimeChange = () => {
   emits('change');

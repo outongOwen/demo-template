@@ -3,7 +3,7 @@ interface DefaultCanvasSettings {
   alignGuidelines: Player.CanvasAlignGuidelinesSetting;
 }
 const defaultPlayerSettings: Player.BaseSetting = {
-  frameRate: 25,
+  fps: 30,
   volume: 1,
   speed: 1,
   resolutionReferenceBase: 720,

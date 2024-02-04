@@ -21,7 +21,7 @@ export interface TimelineExpose {
   /** 设置播放速率 */
   getPlayRate: () => number;
   /** 重新渲染当前时间 */
-  reRender: () => void;
+  resetRenderEngine: () => void;
   /** 播放 */
   play: (param?: {
     /** 默认从头运行到尾, 优先级大于autoEnd */
@@ -33,8 +33,16 @@ export interface TimelineExpose {
   }) => boolean;
   /** 暂停 */
   pause: () => void;
-  // /** 设置scroll left */
+  /** 设置scroll left */
   scrollTo: (options: ScrollToOptions) => void;
+  /** 重置渲染时间线 */
+  resetRenderTimeLine: () => void;
+  /** 时间线放大 */
+  zoomIn: () => void;
+  /** 时间线缩小 */
+  zoomOut: () => void;
+  /** 时间线适应 */
+  zoomFit: () => void;
   // /** 设置scroll top */
   // setScrollTop: (val: number) => void;
 }

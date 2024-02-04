@@ -9,8 +9,8 @@
     <div class="h50px w100%">
       <player-progress-bar
         v-model:time="playerCurrentTime"
-        :total-time="getTimeLineMaxEndTime"
-        :frame-rate="playerSettings.frameRate"
+        :total-time="getTimeLineDuration"
+        :fps="playerSettings.fps"
         @change="handlePlayerTimeChange"
       />
     </div>
@@ -40,7 +40,7 @@ defineOptions({ name: 'PlayerControls' });
 const playerStore = usePlayerStore();
 const timeLineStore = useTimeLineStore();
 const { getIsFullscreenState, getProportion, getSpeed, getPlayerState } = storeToRefs(playerStore);
-const { getTimeLineMaxEndTime } = storeToRefs(timeLineStore);
+const { getTimeLineDuration } = storeToRefs(timeLineStore);
 const playerCurrentTime = ref<number>(0);
 const playerSpeed = computed({
   set: (value: number) => {
@@ -66,7 +66,7 @@ const playerPlaying = computed(() => {
  */
 const playerPlay = () => {
   const result = timeLineStore.timeLineRef?.play({
-    // toTime: unref(getTimeLineMaxEndTime)
+    // toTime: unref(getTimeLineDuration)
     autoEnd: true
   });
   console.log(result);

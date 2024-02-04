@@ -37,7 +37,7 @@ declare namespace Player {
   /** 播放器配置 */
   interface BaseSetting {
     /** 帧率 */
-    frameRate: number;
+    fps: number;
     /** 音量 */
     volume: number;
     /** 倍速 */

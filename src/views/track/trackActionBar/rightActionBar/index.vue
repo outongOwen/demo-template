@@ -1,5 +1,40 @@
 <template>
-  <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item" />
+  <ActionBar v-for="(item, index) in barItemOptions" :key="index" :options="item">
+    <template #slider-minus>
+      <n-popover :to="false" class="px4px! py2px!">
+        <template #trigger>
+          <n-button
+            quaternary
+            size="small"
+            :focusable="false"
+            tag="div"
+            :disabled="zoomInDisabled"
+            @click="timeLineRef?.zoomOut()"
+          >
+            <icon-ic:baseline-minus class="text-20px" />
+          </n-button>
+        </template>
+        <n-text class="text-12px!">轨道缩小</n-text>
+      </n-popover>
+    </template>
+    <template #slider-add>
+      <n-popover :to="false" class="px4px! py2px!">
+        <template #trigger>
+          <n-button
+            quaternary
+            size="small"
+            :focusable="false"
+            tag="div"
+            :disabled="zoomOutDisabled"
+            @click="timeLineRef?.zoomIn()"
+          >
+            <icon-ic:baseline-add class="text-20px" />
+          </n-button>
+        </template>
+        <n-text class="text-12px!">轨道放大</n-text>
+      </n-popover>
+    </template>
+  </ActionBar>
   <!-- <main-form ref="formRef"></main-form> -->
 </template>
 
@@ -11,7 +46,9 @@ import ActionBar from '../actionBar/index.vue';
 // import MainForm from './distributeForm/index.vue';
 const { iconRender } = useIconRender();
 const timeLineStore = useTimeLineStore();
-const { getScaleInfo, previewCurrentState, autoAdsorptionState } = storeToRefs(timeLineStore);
+const { getScaleInfo, previewCurrentState, autoAdsorptionState, timeLineRef } = storeToRefs(timeLineStore);
+const zoomInDisabled = ref(false);
+const zoomOutDisabled = ref(false);
 // const formRef = ref();
 const barItemOptions = reactive<Track.ActionBarItem[]>([
   {
@@ -81,17 +118,7 @@ const barItemOptions = reactive<Track.ActionBarItem[]>([
     label: '轨道自适应',
     btnType: 'Button',
     change: () => {
-      const scale = getScaleInfo.value.scaleStep ? getScaleInfo.value.scaleStep - 0.01 : 0;
-      barItemOptions[barItemOptions.length - 1].defaultValue = scale;
-      timeLineStore.setScaleInfo({ scale });
-      nextTick(() => {
-        // consol
-      }).then(() => {
-        timeLineStore.timeLineRef &&
-          timeLineStore.timeLineRef.scrollTo({
-            left: 0
-          }); // 滚动到0的位置
-      });
+      timeLineRef?.value?.zoomFit();
     }
   },
   {

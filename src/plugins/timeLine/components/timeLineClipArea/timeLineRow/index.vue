@@ -16,13 +16,15 @@
     }"
     @contextmenu.stop="handleContextMenu"
   >
-    <TimeLineAction
-      v-for="item in rowItem.actions"
-      :key="item.id"
-      :action-item="item"
-      :row-item="rowItem"
-      :action-height="rowItem?.rowHeight ? rowItem.rowHeight : getShareProps.rowHeight!"
-    />
+    <template v-if="rowItem?.actions?.length">
+      <TimeLineAction
+        v-for="item in rowItem.actions"
+        :key="item.id"
+        :action-item="item"
+        :row-item="rowItem"
+        :action-height="rowItem?.rowHeight ? rowItem.rowHeight : getShareProps.rowHeight!"
+      />
+    </template>
   </div>
 </template>
 
@@ -34,7 +36,7 @@ import { useTimeLineEditorAreaContext } from '../../../contexts';
 import type { TimelineRow } from '../../../types';
 import TimeLineAction from '../timeLineAction/index.vue';
 import { getRowById, checkIntersectionTime, parserTransformToTime } from '../../../utils';
-import { useTimeLineStore, useTimeLineClipStore } from '../../../store';
+import { useTimeLineStore, useTimeLineClipStore, useTimeLineScaleStore } from '../../../store';
 interface Props {
   rowItem: TimelineRow;
 }
@@ -45,8 +47,8 @@ const props = defineProps<Props>();
 const { rowItem } = toRefs(props);
 const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
-const { getTimeLineClipViewSize, getScaleUnit, getShareProps, getTimeLineEditorData, getTimeLineClipDomRef } =
-  useTimeLineStore();
+const { getTimeLineClipViewSize, getShareProps, getTimeLineEditorData, getTimeLineClipDomRef } = useTimeLineStore();
+const { getScaleUnit } = useTimeLineScaleStore();
 const { setRowY, deleteRowY } = useTimeLineClipStore();
 const rowRef = ref<HTMLElement>();
 useResizeObserver(getTimeLineClipDomRef, () => {

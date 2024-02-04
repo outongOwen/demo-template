@@ -17,7 +17,7 @@ export interface ITimelineEngine extends Emitter<EventTypes> {
   /** 获取播放速率 */
   getPlayRate(): number;
   /** 重新渲染当前时间 */
-  reRender(): void;
+  resetRenderEngine(): void;
   /** 设置播放时间 */
   setTime(time: number, isTick?: boolean): boolean;
   /** 获取播放时间 */
@@ -127,7 +127,7 @@ export class TimelineEngine extends Emitter<EventTypes> implements ITimelineEngi
    * @return {*}
    * @memberof TimelineEngine
    */
-  reRender() {
+  resetRenderEngine() {
     if (this.isPlaying) return;
     this._tickAction(this._currentTime);
   }

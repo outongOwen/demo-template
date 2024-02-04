@@ -11,9 +11,6 @@ import {
   ROW_HEIGHT,
   ROW_SPACING,
   SCALE_HEIGHT,
-  SCALE_LARGE_CELL_WIDTH,
-  SCALE_SMALL_CELL_WIDTH,
-  SCALE_SMALL_CELL_MS,
   DEFAULT_ADSORPTION_DISTANCE,
   DEFAULT_FPS,
   DEFAULT_FPS_LIST
@@ -184,36 +181,6 @@ export const timeLineProps = {
   scaleHeight: {
     type: [String, Number] as PropType<string | number>,
     default: SCALE_HEIGHT,
-    validator: (val): boolean => Number(val) > 0
-  },
-  /**
-   * @description 小格宽度
-   * @default 10
-   * @type {number}
-   */
-  scaleSmallCellWidth: {
-    type: [String, Number] as PropType<string | number>,
-    default: SCALE_SMALL_CELL_WIDTH,
-    validator: (val): boolean => Number(val) > 0
-  },
-  /**
-   * @description 大格宽度
-   * @default 100
-   * @type {number}
-   */
-  scaleLargeCellWidth: {
-    type: [String, Number] as PropType<string | number>,
-    default: SCALE_LARGE_CELL_WIDTH,
-    validator: (val): boolean => Number(val) > 0
-  },
-  /**
-   * @description 小格刻度单位 （ms)
-   * @default 1
-   * @type {number}
-   */
-  scaleSmallCellMs: {
-    type: [String, Number] as PropType<string | number>,
-    default: SCALE_SMALL_CELL_MS,
     validator: (val): boolean => Number(val) > 0
   },
   /**

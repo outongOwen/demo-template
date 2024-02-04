@@ -1,3 +1,5 @@
+export type DEFAULT_FPS_TYPE = 24 | 25 | 30 | 50 | 60;
+
 /** 默认时间线背景颜色 */
 export const BACKGROUND = 'rgba(40,40,40,1)';
 /** 默认侧边width */
@@ -16,12 +18,6 @@ export const ROW_HEIGHT = 50;
 export const ROW_SPACING = 10;
 /** 默认刻度高度 */
 export const SCALE_HEIGHT = 20;
-/** 默认刻度最大格宽度 */
-export const SCALE_LARGE_CELL_WIDTH = 100;
-/** 默认刻度最小格宽度 */
-export const SCALE_SMALL_CELL_WIDTH = 10;
-/** 默认刻度单位 */
-export const SCALE_SMALL_CELL_MS = 1;
 /** 默认网格X轴距离 */
 export const DEFAULT_GRID_X = 1;
 /** 默认吸附像素 */
@@ -30,6 +26,7 @@ export const DEFAULT_ADSORPTION_DISTANCE = 6;
 export const DEFAULT_FPS = 30;
 /** 默认帧宽度 */
 export const DEFAULT_FRAME_WIDTH = 0.033;
+/** 默认最大帧宽度 */
+export const DEFAULT_MAX_FRAME_WIDTH = 200;
 /** 默认可接受的帧率列表 */
 export const DEFAULT_FPS_LIST = [24, 25, 30, 50, 60];
-export type DEFAULT_FPS_TYPE = 24 | 25 | 30 | 50 | 60;

@@ -1,4 +1,5 @@
 import { ref, shallowRef } from 'vue';
+import { isArray, isUndefined } from 'lodash';
 import { createGlobalState, useScroll, useElementSize, useElementBounding, reactiveComputed } from '@vueuse/core';
 import type { ITimelineEngine } from '../core';
 import { TimelineEngine } from '../core';
@@ -43,12 +44,15 @@ export const useTimeLineStore = createGlobalState(() => {
     state: false,
     time: 0
   });
-  // 时间线数据
-  const timeLineEditorData = ref<TimelineRow[]>([]);
   // 当前指针时间
   const cursorTime = ref<number>(0);
   // 时间线编辑区域容器DOM
   const timeLineClipDomRef = shallowRef<HTMLElement>();
+  // 剪辑区内部尺寸
+  const timeLineClipInnerSize = reactive({
+    height: 0,
+    width: 0
+  });
   // 滚动条信息
   const scrollInfo = useScroll(timeLineClipDomRef);
   // 剪辑区域尺寸
@@ -60,12 +64,15 @@ export const useTimeLineStore = createGlobalState(() => {
   const getters = {
     getTimeLineClipDomSize: reactiveComputed(() => timeLineClipDomSize),
     getTimeLineClipViewSize: reactiveComputed(() => timeLineClipViewSize),
+    getTimeLineClipInnerSize: reactiveComputed(() => timeLineClipInnerSize),
     getScrollInfo: reactiveComputed(() => scrollInfo),
     getShareProps: reactiveComputed(() => shareProps.value),
     getShareEmits: reactiveComputed(() => shareEmits.value),
     getEngine: reactiveComputed(() => engine.value),
     getEngineState: reactiveComputed(() => engineState),
-    getTimeLineEditorData: computed(() => timeLineEditorData.value),
+    getTimeLineEditorData: computed((): Array<TimelineRow> => {
+      return isArray(shareProps.value.editorData) ? shareProps.value.editorData : [];
+    }),
     getTimeLineClipDomRef: computed(() => timeLineClipDomRef.value),
     getScrollDomSize: reactiveComputed(() => {
       return {
@@ -82,8 +89,9 @@ export const useTimeLineStore = createGlobalState(() => {
         bottom: timeLineClipViewSize.bottom.value
       };
     }),
-    getTimeLineMaxEndTime: computed(() => {
-      return unref(timeLineEditorData).reduce((prev, cur) => {
+    getTimeLineDuration: computed(() => {
+      if (!isArray(unref(shareProps).editorData)) return 0;
+      return unref(shareProps).editorData!.reduce((prev, cur) => {
         // 通过actions中最大end值计算最大宽度
         const maxTime = cur.actions.reduce((aPrev: number, aCur: TimelineAction) => {
           return Math.max(aPrev, aCur.end);
@@ -92,16 +100,6 @@ export const useTimeLineStore = createGlobalState(() => {
       }, 0);
     }),
     getCursorTime: computed(() => cursorTime.value),
-    getFrameWidth: computed(() => {
-      return (
-        1000 /
-        Number(shareProps.value.fps) /
-        (Number(shareProps.value.scaleSmallCellMs) / Number(shareProps.value.scaleSmallCellWidth))
-      );
-    }),
-    getScaleUnit: computed(() => {
-      return Number(shareProps.value.scaleSmallCellMs) / Number(shareProps.value.scaleSmallCellWidth);
-    }),
     getPreviewCursorState: reactiveComputed(() => {
       return {
         state:
@@ -129,11 +127,13 @@ export const useTimeLineStore = createGlobalState(() => {
       engineState.isPlaying = isPlaying ?? engineState.isPlaying;
       engineState.isPaused = isPaused ?? engineState.isPaused;
     },
-    setTimeLineEditorData: data => {
-      timeLineEditorData.value = data;
-    },
     setTimeLineClipDomRef: dom => {
       timeLineClipDomRef.value = dom;
+    },
+    setTimeLineClipInnerSize: (size: { height: number; width: number }) => {
+      const { height, width } = size;
+      timeLineClipInnerSize.height = height ?? timeLineClipInnerSize.height;
+      timeLineClipInnerSize.width = width ?? timeLineClipInnerSize.width;
     },
     /**
      * @description 设置交互状态
@@ -151,13 +151,13 @@ export const useTimeLineStore = createGlobalState(() => {
     /**
      * @description 设置预览指针状态
      */
-    setPreviewCursorState: (state: Partial<PreviewCursorState>) => {
+    setPreviewCursorState: (state: Partial<PreviewCursorState>, update = true) => {
       const { state: cursorSate, time } = state;
       previewCursorState.state = cursorSate ?? previewCursorState.state;
-      if (time !== undefined) {
+      if (!isUndefined(time) && update) {
         previewCursorState.time = time;
         const result = engine.value.setTime(time);
-        result && engine.value.reRender();
+        result && engine.value.resetRenderEngine();
       }
     },
     /**
@@ -170,7 +170,7 @@ export const useTimeLineStore = createGlobalState(() => {
       let result = true;
       if (updateTime) {
         result = engine.value.setTime(time);
-        engine.value.reRender();
+        engine.value.resetRenderEngine();
       }
       result && (cursorTime.value = time);
       return result;
@@ -181,15 +181,23 @@ export const useTimeLineStore = createGlobalState(() => {
      * @type {number}
      * @returns {number} 当前时间
      */
-    setCursorTimeByPos: (clientX: number): number => {
+    setCursorTimeByPos: (clientX: number, scaleUnit: number, frameWidth: number): number => {
       const posX =
         clientX - (timeLineClipViewSize.left.value + Number(shareProps.value.leftOffset!)) + scrollInfo.x.value;
-      const curX = Math.round(posX / Number(getters.getFrameWidth.value)) * Number(getters.getFrameWidth.value);
-      let time = curX * Number(getters.getScaleUnit.value);
+      const curX = Math.round(posX / frameWidth) * frameWidth;
+      let time = curX * Number(scaleUnit);
       time = time < 0 ? 0 : time;
-      time = time > getters.getTimeLineMaxEndTime.value ? getters.getTimeLineMaxEndTime.value : time; //  限制0-duration;
-      actions.setCursorTime(Math.round(time)); // seek时间
-      return Math.round(time);
+      time = time > getters.getTimeLineDuration.value ? getters.getTimeLineDuration.value : time; //  限制0-duration;
+      actions.setCursorTime(time); // seek时间
+      return time;
+    },
+    syncViewScrollByCursorTime: (unit: number) => {
+      const offset = unref(cursorTime) / unit;
+      console.log(offset, 'offset');
+      console.log(unit, 'unit');
+      // timeLineClipDomRef.value?.scrollTo({
+      //   left: offset - timeLineClipDomSize.width.value
+      // });
     },
     /**
      * @description 引擎播放
@@ -221,7 +229,6 @@ export const useTimeLineStore = createGlobalState(() => {
   };
 
   return {
-    scrollInfo,
     ...getters,
     ...actions
   };

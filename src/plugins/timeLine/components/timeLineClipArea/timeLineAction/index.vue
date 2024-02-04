@@ -38,7 +38,7 @@ import { useActionGuideLine, useDropAction } from '../../../hooks';
 import type { TimelineAction, TimelineRow } from '../../../types';
 import { useTimeLineEditorAreaContext } from '../../../contexts';
 import { parserTimeToTransform, parserTransformToTime } from '../../../utils';
-import { useTimeLineStore, useTimeLineClipStore } from '../../../store';
+import { useTimeLineStore, useTimeLineClipStore, useTimeLineScaleStore } from '../../../store';
 // import { isActionCollision } from './helper';
 type Direction = 'left' | 'right';
 interface Props {
@@ -56,9 +56,7 @@ const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
 const {
   enginePause,
-  getScaleUnit,
   getTimeLineClipDomRef,
-  getFrameWidth,
   getCursorTime,
   getShareProps,
   getShareEmits,
@@ -66,6 +64,7 @@ const {
   getScrollInfo,
   setInteractState
 } = useTimeLineStore();
+const { getScaleUnit, getFrameWidth } = useTimeLineScaleStore();
 const { setActionX, deleteActionX } = useTimeLineClipStore();
 
 // 辅助线hook
@@ -557,7 +556,7 @@ useEventListener(getTimeLineClipDomRef, 'scroll', () => {
     targetDragEvent.value!.interaction?.move();
   }
 });
-onMounted(() => {
+watchSyncEffect(() => {
   if (!unrefElement(getTimeLineClipDomRef)) return;
   interactable.value?.unset();
   timeLineEditorInnerRef.value = unrefElement(getTimeLineClipDomRef)!.firstChild as HTMLElement;

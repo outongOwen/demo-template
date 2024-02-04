@@ -31,13 +31,14 @@
 <script setup lang="ts">
 import { useTimeLineEditorAreaContext } from '../../../contexts';
 import { useActionGuideLine } from '../../../hooks';
-import { useTimeLineStore } from '../../../store';
+import { useTimeLineStore, useTimeLineScaleStore } from '../../../store';
 defineOptions({
   name: 'DragGuideLine'
 });
 const { injectTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
 const timeLineEditorAreaContext = injectTimeLineEditorAreaContext();
-const { getCursorTime, getScaleUnit, getShareProps, getScrollInfo } = useTimeLineStore();
+const { getCursorTime, getShareProps, getScrollInfo } = useTimeLineStore();
+const { getScaleUnit } = useTimeLineScaleStore();
 const { dragLineActionLine } = useActionGuideLine();
 const lineList = computed(() => {
   return dragLineActionLine.movePositions.filter(mItem => {

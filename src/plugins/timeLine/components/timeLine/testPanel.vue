@@ -7,10 +7,18 @@
 <template>
   <div ref="testPanelRef" class="container" :style="style">
     <div class="bg-[rgba(0,0,0,0.6)] absolute-center filter-blur-10px" />
-    <n-space vertical :size="1" class="overflow-scroll absolute-lt wh-full absolute z-99">
+    <n-space vertical class="overflow-scroll absolute-lt wh-full absolute z-99">
+      <n-text>
+        <n-text class="title">getTimeLineDuration:</n-text>
+        {{ getTimeLineDuration }}
+      </n-text>
       <n-text>
         <n-text class="title">getCursorTime:</n-text>
         {{ getCursorTime }}
+      </n-text>
+      <n-text>
+        <n-text class="title">fps:</n-text>
+        {{ getShareProps.fps }}
       </n-text>
       <n-text>
         <n-text class="title">getFrameWidth:</n-text>
@@ -29,15 +37,39 @@
         {{ getGridInfo }}
       </n-text>
       <n-text>
+        <n-text class="title">getScrollInfo:</n-text>
+        {{ getScrollInfo }}
+      </n-text>
+      <n-text>
+        <n-text class="title">getMaxFrameNumber:</n-text>
+        {{ getMaxFrameNumber }}
+      </n-text>
+      <n-text>
         <n-text class="title">getTimeLineClipInnerSize:</n-text>
         {{ getTimeLineClipInnerSize }}
       </n-text>
       <n-text>
+        <n-text class="title">getMaxFrameWidth:</n-text>
+        {{ getMaxFrameWidth }}
+      </n-text>
+      <n-text>
+        <n-text class="title">getMinFrameWidth:</n-text>
+        {{ getMinFrameWidth }}
+      </n-text>
+      <n-text>
+        <n-text class="title">getFitFrameWidth:</n-text>
+        {{ getFitFrameWidth }}
+      </n-text>
+      <n-text>
+        <n-text class="title">getScaleUnit:</n-text>
+        {{ getScaleUnit }}
+      </n-text>
+      <!-- <n-text>
         <n-text class="title">getGridBufferList:</n-text>
         <n-list v-for="(item, index) in getGridBufferList" :key="index" class="bg-transparent flex flex-wrap">
           {{ item }}
         </n-list>
-      </n-text>
+      </n-text> -->
       <!-- <n-text>
         <n-text class="title">getActionX:</n-text>
         {{ Array.from(getActionX) }}
@@ -57,8 +89,24 @@
 <script setup lang="ts">
 import { useDraggable } from '@vueuse/core';
 import { useTimeLineStore, useTimeLineScaleStore } from '../../store';
-const { getCursorTime, getInteractState, getPreviewCursorState } = useTimeLineStore();
-const { getFrameWidth, getGridInfo, getTimeLineClipInnerSize, getGridBufferList } = useTimeLineScaleStore();
+const {
+  getCursorTime,
+  getInteractState,
+  getPreviewCursorState,
+  getScrollInfo,
+  getTimeLineClipInnerSize,
+  getShareProps,
+  getTimeLineDuration
+} = useTimeLineStore();
+const {
+  getFrameWidth,
+  getGridInfo,
+  getMaxFrameNumber,
+  getMaxFrameWidth,
+  getMinFrameWidth,
+  getFitFrameWidth,
+  getScaleUnit
+} = useTimeLineScaleStore();
 // const { getActionX, getRowY, getPos } = useTimeLineClipStore();
 const testPanelRef = ref<HTMLElement | null>(null);
 // `style` will be a helper computed for `left: ?px; top: ?px;`

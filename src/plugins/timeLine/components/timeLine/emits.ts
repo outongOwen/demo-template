@@ -1,6 +1,11 @@
 import type { TimelineRow, TimelineAction } from '../../types';
 export interface TimelineEditorEmits {
-  (event: 'maxEndTimeChange', payload: { time: number }): void;
+  (event: 'timeLineDurationChange', payload: { time: number }): void;
+  (
+    event: 'timeLineScaleMarksRangeChange',
+    marks: Array<number>,
+    payload: { maxFrameWidth: number; minFrameWidth: number }
+  ): void;
   (event: 'actionMoveStart', params: { action: TimelineAction; row: TimelineRow }): void;
   (
     event: 'actionMoving',
@@ -37,13 +42,27 @@ export interface TimelineEditorEmits {
 }
 export const useDefineEmits = (emits: TimelineEditorEmits) => {
   /**
-   * @description 时间轴最大时间改变
+   * @description 时间线最大时长改变
    * @param  time
    * @type {time:number}
    * @returns {void}
    */
-  const onMaxEndTimeChange = (time: number): void => {
-    emits('maxEndTimeChange', { time });
+  const onTimeLineDurationChange = (time: number): void => {
+    emits('timeLineDurationChange', { time });
+  };
+  /**
+   * @description 时间线可用缩放标记
+   * @type {Array<number>}
+   * @returns {void}
+   */
+  const onTimeLineScaleMarksRangeChange = (
+    marks: Array<number>,
+    { maxFrameWidth, minFrameWidth }: { maxFrameWidth: number; minFrameWidth: number }
+  ): void => {
+    emits('timeLineScaleMarksRangeChange', marks, {
+      maxFrameWidth,
+      minFrameWidth
+    });
   };
   /**
    * @description 动作移动开始
@@ -218,7 +237,8 @@ export const useDefineEmits = (emits: TimelineEditorEmits) => {
   };
 
   return {
-    onMaxEndTimeChange,
+    onTimeLineDurationChange,
+    onTimeLineScaleMarksRangeChange,
     onActionMoveStart,
     onActionMoving,
     onActionMoveEnd,

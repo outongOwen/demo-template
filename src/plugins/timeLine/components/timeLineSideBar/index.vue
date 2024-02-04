@@ -111,6 +111,7 @@ defineExpose<Expose>({
   top: 0;
   left: 0;
   box-shadow: 0 0 5px #000;
+  z-index: 99;
   .top-cover {
     position: absolute;
     top: 0;

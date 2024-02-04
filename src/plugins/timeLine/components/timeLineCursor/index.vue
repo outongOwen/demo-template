@@ -11,7 +11,7 @@
     :data-x="translateX"
     :style="{
       transform: `translateX(${translateX - getScrollInfo.x}px)`,
-      left: `${Number(getShareProps.leftOffset!) - 1}px`,
+      left: `${Number(getShareProps.leftOffset) - 1}px`,
       top: `${Number(getShareProps.scaleHeight) / 2}px`,
       height: `calc(100% - ${Number(getShareProps.scaleHeight) / 2 + getScrollDomSize.height}px)`
     }"
@@ -32,26 +32,25 @@ import interact from 'interactjs';
 import { reactiveComputed, useEventListener, unrefElement } from '@vueuse/core';
 import type { DragEvent, Interactable } from '@interactjs/types';
 import { useActionGuideLine } from '../../hooks';
-import { useTimeLineStore } from '../../store';
+import { useTimeLineStore, useTimeLineScaleStore } from '../../store';
 defineOptions({
   name: 'TimeLineCursor'
 });
 const {
   getShareProps,
   getTimeLineEditorData,
-  getScaleUnit,
-  getFrameWidth,
   getScrollInfo,
   getCursorTime,
   getTimeLineClipDomSize,
   scrollTo,
   getTimeLineClipDomRef,
   setCursorTime,
-  getTimeLineMaxEndTime,
+  getTimeLineDuration,
   enginePause,
   getScrollDomSize,
   setInteractState
 } = useTimeLineStore();
+const { getScaleUnit, getFrameWidth } = useTimeLineScaleStore();
 const { dragLineActionLine, defaultGetAllAssistPosition, initDragLine, disposeDragLine } = useActionGuideLine();
 const cursorLineRef = ref<HTMLElement>();
 const timeLineEditorInnerRef = ref<HTMLElement | null>();
@@ -89,7 +88,7 @@ const guideSnapModifier = reactiveComputed(() => {
         y: 1,
         limits: {
           left: 0,
-          right: unref(getTimeLineMaxEndTime) / unref(getScaleUnit),
+          right: unref(getTimeLineDuration) / unref(getScaleUnit),
           bottom: Infinity,
           top: -Infinity
         }
@@ -186,7 +185,7 @@ const handleMove = (event: DragEvent) => {
   const { x = '0' } = target.dataset;
   let curLeft = parseFloat(x) + event.dx;
   curLeft = Math.round(curLeft / unref(getFrameWidth)) * unref(getFrameWidth);
-  setCursorTime(Math.round(curLeft * unref(getScaleUnit)));
+  setCursorTime(curLeft * unref(getScaleUnit));
 };
 // 拖拽结束
 const handleMoveEnd = () => {
@@ -218,12 +217,10 @@ const initInteract = () => {
     cursorChecker: () => 'ew-resize'
   });
 };
-// 监听刻度尺缩放
+// // 监听刻度尺缩放
 watch(getScaleUnit, unit => {
   translateX.value = unref(getCursorTime) / unit;
-  nextTick(() => {
-    scrollTo({ left: translateX.value - getTimeLineClipDomSize.width / 2 });
-  });
+  scrollTo({ left: translateX.value - getTimeLineClipDomSize.width / 2 });
 });
 // 监听当前指针时间
 watch(
@@ -236,8 +233,8 @@ watch(
   }
 );
 watchEffect(() => {
-  if (getCursorTime.value > getTimeLineMaxEndTime.value) {
-    setCursorTime(getTimeLineMaxEndTime.value);
+  if (getCursorTime.value > getTimeLineDuration.value) {
+    setCursorTime(getTimeLineDuration.value);
   }
 });
 watch(

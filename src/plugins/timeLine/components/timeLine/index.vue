@@ -25,7 +25,8 @@
           @mouseenter="handleMouseEnter"
           @mouseleave="handleMouseLeave"
         >
-          <!-- <TimeLineTimeArea /> -->
+          {{ getPreviewCursorState }}
+          {{ getEngineState }}
           <TimeLineScaleArea />
           <TimeLineClipArea />
           <TimeLineCursor v-if="editorData.length && !hideCursor" />
@@ -40,7 +41,6 @@
 import { isEqual } from 'lodash';
 import { watchArray } from '@vueuse/core';
 import { useTimeLineEditorAreaContext } from '../../contexts';
-// import TimeLineTimeArea from '../timeLineTimeArea/index.vue';
 import TimeLineScaleArea from '../timeLineScaleArea/index.vue';
 import TimeLineClipArea from '../timeLineClipArea/index.vue';
 import TimeLineCursor from '../timeLineCursor/index.vue';
@@ -60,9 +60,18 @@ defineOptions({
 const props = defineProps(timeLineProps);
 const emits = defineEmits<TimelineEditorEmits>();
 const { provideTimeLineEditorAreaContext } = useTimeLineEditorAreaContext();
-const { showSideBar, sideBarWidth, editorData, actionEffects, background, rowSortTypes, hideCursor } = toRefs(props);
 const {
-  setTimeLineEditorData,
+  showSideBar,
+  sideBarWidth,
+  editorData,
+  actionEffects,
+  background,
+  rowSortTypes,
+  hideCursor,
+  fps,
+  previewCursor
+} = toRefs(props);
+const {
   setShareProps,
   setShareEmits,
   setCursorTime,
@@ -70,19 +79,17 @@ const {
   enginePause,
   getEngine,
   enginePlay,
-  getTimeLineMaxEndTime,
+  getTimeLineDuration,
   scrollBy,
   scrollTo,
   setEngineState,
-  getFrameWidth,
-  getScaleUnit,
   setPreviewCursorState,
   getPreviewCursorState,
   getCursorTime,
   getInteractState,
   getEngineState
 } = useTimeLineStore();
-const { setSharePropsToScale } = useTimeLineScaleStore();
+const { setSharePropsToScale, zoomFit, zoomIn, zoomOut, getFrameWidth, getScaleUnit } = useTimeLineScaleStore();
 const shareEmits = useDefineEmits(emits);
 const timeLineContainerRef = ref<HTMLElement>();
 const timeLineEditorAreaContext = provideTimeLineEditorAreaContext();
@@ -100,12 +107,13 @@ const handlerMouseUp = () => {
 const handleClick = (event: MouseEvent) => {
   if (isMousedown.value && isMouseup.value) {
     if (getPreviewCursorState.state && getEngineState.isPaused) {
+      enginePause();
       setCursorTime(getPreviewCursorState.time);
     } else {
-      const curTime = setCursorTimeByPos(event.clientX);
-      setPreviewCursorState({ time: curTime });
+      enginePause();
+      const curTime = setCursorTimeByPos(event.clientX, getScaleUnit.value, getFrameWidth.value);
+      previewCursor.value && setPreviewCursorState({ time: curTime });
     }
-    enginePause();
     timeLineEditorAreaContext.clearSelected();
   }
   isMousedown.value = false;
@@ -139,8 +147,14 @@ const handleMouseEnter = () => {
 // 鼠标移出事件
 const handleMouseLeave = () => {
   if (!getInteractState.active) {
-    setPreviewCursorState({ state: false, time: unref(getCursorTime) });
+    setPreviewCursorState({ state: false, time: unref(getCursorTime) }, false);
   }
+};
+// 重置渲染时间线
+const resetRenderTimeLine = () => {
+  unref(getEngine).pause();
+  setCursorTime(0);
+  zoomFit();
 };
 // watch(
 //   [mainRow, mainRowId],
@@ -196,21 +210,13 @@ watch(
     }
   }
 );
-watch(
-  getTimeLineMaxEndTime,
-  (time: number) => {
-    shareEmits.onMaxEndTimeChange(time);
-  },
-  {
-    immediate: true
-  }
-);
+
 watch(
   editorData,
   () => {
     timeLineEditorAreaContext.editorData.value = unref(editorData);
     unref(getEngine).data = editorData.value;
-    unref(getEngine).reRender();
+    unref(getEngine).resetRenderEngine();
   },
   { deep: true, immediate: true }
 );
@@ -218,10 +224,16 @@ watch(
   () => actionEffects.value,
   () => {
     unref(getEngine).effects = actionEffects.value;
-    unref(getEngine).reRender();
+    unref(getEngine).resetRenderEngine();
   },
   { deep: true, immediate: true }
 );
+watchEffect(() => {
+  shareEmits.onTimeLineDurationChange(unref(getTimeLineDuration));
+});
+watch(fps, () => {
+  resetRenderTimeLine();
+});
 const handlerPlay = () => {
   setEngineState({
     isPlaying: true,
@@ -241,21 +253,20 @@ const handlerSetTimeByTick = ({ time }) => {
   setCursorTime(curTime, false);
 };
 onMounted(() => {
-  unref(getEngine).on('play', handlerPlay);
-  unref(getEngine).on('paused', handlerPause);
-  unref(getEngine).on('setTimeByTick', handlerSetTimeByTick);
   setShareProps(props);
   setSharePropsToScale(props);
   setShareEmits(shareEmits);
-  setTimeLineEditorData(editorData.value);
+  unref(getEngine).on('play', handlerPlay);
+  unref(getEngine).on('paused', handlerPause);
+  unref(getEngine).on('setTimeByTick', handlerSetTimeByTick);
 });
 onBeforeUnmount(() => {
   enginePause();
   unref(getEngine).off('play', handlerPlay);
   unref(getEngine).off('paused', handlerPause);
   unref(getEngine).off('setTimeByTick', handlerSetTimeByTick);
+  resetRenderTimeLine();
 });
-
 defineExpose<TimelineExpose>({
   get targetEl() {
     return timeLineContainerRef.value!;
@@ -271,7 +282,7 @@ defineExpose<TimelineExpose>({
   },
   setPlayRate: unref(getEngine).setPlayRate.bind(unref(getEngine)),
   getPlayRate: unref(getEngine).getPlayRate.bind(unref(getEngine)),
-  reRender: unref(getEngine).reRender.bind(unref(getEngine)),
+  resetRenderEngine: unref(getEngine).resetRenderEngine.bind(unref(getEngine)),
   setTime: time => {
     setCursorTime(time);
   },
@@ -280,7 +291,16 @@ defineExpose<TimelineExpose>({
     return enginePlay({ ...param });
   },
   pause: enginePause.bind(unref(getEngine)),
-  scrollTo
+  scrollTo,
+  resetRenderTimeLine,
+  zoomFit: () => {
+    zoomFit();
+    nextTick(() => {
+      scrollTo({ left: 0, behavior: 'smooth' });
+    });
+  },
+  zoomIn,
+  zoomOut
 });
 </script>
 <style lang="scss" scoped>
@@ -290,7 +310,7 @@ defineExpose<TimelineExpose>({
   height: 100%;
   user-select: none;
   touch-action: none;
-
+  position: relative;
   .timeLine-inner-wrap {
     width: 100%;
     height: 100%;

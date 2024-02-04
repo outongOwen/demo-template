@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { useParentElement, useEventListener } from '@vueuse/core';
-import { useTimeLineStore } from '../../store';
+import { useTimeLineStore, useTimeLineScaleStore } from '../../store';
 import { useActionGuideLine } from '../../hooks';
 defineOptions({
   name: 'TimeLinePreviewCursor'
@@ -23,14 +23,13 @@ const {
   getShareProps,
   getScrollDomSize,
   getTimeLineClipViewSize,
-  getFrameWidth,
-  getScaleUnit,
   setPreviewCursorState,
-  getTimeLineMaxEndTime,
+  getTimeLineDuration,
   getCursorTime,
   getTimeLineEditorData,
   getScrollInfo
 } = useTimeLineStore();
+const { getFrameWidth, getScaleUnit } = useTimeLineScaleStore();
 const { dragLineActionLine, defaultGetAllAssistPosition, initDragLine, disposeDragLine } = useActionGuideLine();
 const isShowPreviewCursor = ref(true);
 const translateX = ref(0);
@@ -39,7 +38,7 @@ const previewCursorRef = ref<HTMLElement>();
 // 滚动增量
 // const scrollDelta = ref(0);
 const previewTime = computed(() => {
-  return Math.round(translateX.value * unref(getScaleUnit));
+  return translateX.value * unref(getScaleUnit);
 });
 // 初始化辅助线
 const handleInitGuideLine = () => {
@@ -57,10 +56,10 @@ const updateTranslateX = realClientX => {
   let curMouseX = realClientX;
   curMouseX = Math.round(curMouseX / getFrameWidth.value) * getFrameWidth.value;
   translateX.value = Math.max(0, curMouseX);
-  if (previewTime.value <= unref(getTimeLineMaxEndTime)) {
+  if (previewTime.value <= unref(getTimeLineDuration)) {
     setPreviewCursorState({ time: unref(previewTime) });
   } else {
-    setPreviewCursorState({ time: unref(getTimeLineMaxEndTime) });
+    setPreviewCursorState({ time: unref(getTimeLineDuration) });
   }
 };
 // 吸附功能
