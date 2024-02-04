@@ -121,8 +121,8 @@ useResizeObserver(timeLineScaleRef, () => {
   drawScale();
 });
 onMounted(() => {
+  createHDCanvas(scaleCanvasRef.value);
   nextTick(() => {
-    createHDCanvas(scaleCanvasRef.value);
     zoomFit();
   });
 });

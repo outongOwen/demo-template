@@ -222,7 +222,7 @@ const SCALE_GRID_SEGMENT_50 = [
   {
     maxWidth: 25,
     minWidth: 13,
-    gridFrame: 2,
+    gridFrame: 1,
     groupGridFrame: 10
   },
   // level4
@@ -233,7 +233,51 @@ const SCALE_GRID_SEGMENT_50 = [
     groupGridFrame: 25
   }
 ];
-const SCALE_GRID_SEGMENT_60 = [];
+const SCALE_GRID_SEGMENT_60 = [
+  // level1
+  {
+    maxWidth: 200,
+    minWidth: 150,
+    gridFrame: 1,
+    groupGridFrame: 2
+  },
+  {
+    maxWidth: 150,
+    minWidth: 100,
+    gridFrame: 1,
+    groupGridFrame: 3
+  },
+  {
+    maxWidth: 100,
+    minWidth: 50,
+    gridFrame: 1,
+    groupGridFrame: 5
+  },
+  {
+    maxWidth: 50,
+    minWidth: 33,
+    gridFrame: 1,
+    groupGridFrame: 10
+  },
+  {
+    maxWidth: 33,
+    minWidth: 27,
+    gridFrame: 3,
+    groupGridFrame: 15
+  },
+  {
+    maxWidth: 27,
+    minWidth: 20,
+    gridFrame: 2,
+    groupGridFrame: 20
+  },
+  {
+    maxWidth: 20,
+    minWidth: 10,
+    gridFrame: 3,
+    groupGridFrame: 30
+  }
+];
 export const GET_SCALE_GRID_SEGMENT: Map<number, Array<SCALE_GRID_SEGMENT_ITEM>> = (() => {
   const scaleGridSegment = new Map<number, Array<SCALE_GRID_SEGMENT_ITEM>>();
   DEFAULT_FPS_LIST.forEach(fps => {
